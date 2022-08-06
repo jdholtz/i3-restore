@@ -5,7 +5,7 @@ import time
 
 import utils
 
-from config import TERMINAL_EDITORS, WEB_BROWSERS
+from config import SUBPROCESS_PROGRAMS, WEB_BROWSERS
 
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
 HOME = os.getenv("HOME")
@@ -80,20 +80,20 @@ class Container:
 
                 WEB_BROWSERS_DICT[web_browser] = True
 
-        # Then, handle any terminal text editors
-        for editor in TERMINAL_EDITORS:
-            if editor["name"] == self.command[0]:
-                command = self.handle_terminal_editor(editor)
+        # Then, handle any programs that run as subprocesses
+        for program in SUBPROCESS_PROGRAMS:
+            if program["name"] == self.command[0]:
+                command = self.handle_subprocesses(program)
 
         subprocess.run(["i3-msg", f"exec cd \"{self.working_directory}\" && {command}"])
 
-    def handle_terminal_editor(self, editor):
+    def handle_subprocesses(self, subprocess):
         # First, replace all spaces in args with backslashes because the process doesn't save backslashes
         for i, arg in enumerate(self.command[1:], start=1):
             self.command[i] = arg.replace(" ", "\ ")
 
         command = " ".join(self.command)
-        full_command = editor["launch_command"].replace("{command}", command) # Replace placeholder with actual command
+        full_command = subprocess["launch_command"].replace("{command}", command) # Replace placeholder with actual command
 
         return full_command
 

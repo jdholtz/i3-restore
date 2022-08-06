@@ -13,19 +13,24 @@ TERMINALS = [
 ]
 
 
-# A list of terminal editors you use (vim, emacs, neovim, etc.)
+# A list of programs that run as subprocesses of a shell (vim, emacs, cmus, etc.). These are usually
+# programs that run in the same window the command is executed in and, when exited, they return to the shell.
 #
-# 'name' is the command used to launch the editor itself (usually the same as the editor's name)
+# 'name' is the command used to launch the program itself (usually the same as the programs's name)
 
-# 'launch_command' is how you want the editor to be launched upon startup (terminal editors will
-# need to be launched from the terminal itself to maintain the exact structure (exiting doesn't
-# quit the entire session, but it brings you back to the shell). The {command} placeholder is where
-# you actually want the terminal editor launch command to go. The script will replace this placeholder
+# 'launch_command' is how you want the program to be launched upon startup (processes that run in
+# the shell will need to be launched from the terminal itself to maintain the exact structure (exiting
+# doesn't quit the entire session, but it brings you back to the shell). The {command} placeholder is
+# where you actually want the terminal editor launch command to go. The script will replace this placeholder
 # with the actual command at runtime.
-TERMINAL_EDITORS = [
+SUBPROCESS_PROGRAMS = [
     {
         "name": "vim",
         "launch_command": "alacritty -e bash -c \"TERM=xterm-256color && {command} && bash\"",
+    },
+    {
+        "name": "cmus",
+        "launch_command": "alacritty -e bash -c \"{command} && bash\"",
     },
 ]
 

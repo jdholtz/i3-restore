@@ -5,7 +5,7 @@ import subprocess
 
 import psutil
 
-from config import TERMINALS, TERMINAL_EDITORS
+from config import SUBPROCESS_PROGRAMS, TERMINALS
 import utils
 
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
@@ -72,26 +72,26 @@ class Container:
         # First, check if it is a terminal
         for terminal in TERMINALS:
             if properties["window_properties"]["class"] == terminal["class"]:
-                # The terminal command is set here manually so the custom command used to restore the terminal editor
+                # The terminal command is set here manually so the custom command used to restore the subprocess
                 # works as expected and doesn't store "[terminal] -e bash -c ..."
                 self.command = [terminal["command"]]
                 self.working_directory = process.children()[0].cwd()
 
-                self.check_if_terminal_editor(process)
+                self.check_if_subprocess(process)
                 return
 
         self.command = process.cmdline()
         self.working_directory = process.cwd()
 
-    def check_if_terminal_editor(self, process):
+    def check_if_subprocess(self, process):
         # Get terminal editor process. They will all be the grandchild of the current process
         try:
             grandchild = process.children(True)[1]
         except IndexError:
             return
 
-        for editor in TERMINAL_EDITORS:
-            if grandchild.name() == editor["name"]:
+        for program in SUBPROCESS_PROGRAMS:
+            if grandchild.name() == program["name"]:
                 self.command = grandchild.cmdline()
                 return
 
