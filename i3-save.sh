@@ -25,7 +25,10 @@ workspaces=$(echo "${ALLWORKSPACES}" | jq -r '.[] | .name') # Match only the wor
 rm -f "${i3_PATH}"/*.json
 
 for ws in ${workspaces}; do
-    filename=${i3_PATH}/workspace_${ws}_layout.json
+    # Replace slash in workspace name as file names cannot have slashes
+    sanitized_ws_name=${ws//\//\{slash\}}
+
+    file_name=${i3_PATH}/workspace_${sanitized_ws_name}_layout.json
     workspace_tree=$(i3-save-tree --workspace "${ws}")
 
     # If workspace is empty (i.e doesn't contain any actual configuration lines)
@@ -33,10 +36,10 @@ for ws in ${workspaces}; do
         continue
     fi
 
-    echo "$workspace_tree" > "$filename"
+    echo "$workspace_tree" > "$file_name"
 
-	# Automatically edit the file
-    sed -i 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "$filename"
+    # Automatically edit the file
+    sed -i 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "$file_name"
 done
 
 DIR=$(dirname "${0}")

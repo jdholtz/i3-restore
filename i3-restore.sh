@@ -13,6 +13,9 @@ for file in ${FILES}; do
 	workspace_name=${file#*_}
 	workspace_name=${workspace_name%_*}
 
+	# Unsanitize the workspace name
+	workspace_name=${workspace_name//\{slash\}/\/}
+
 	# Append the layout of every saved workspace
 	i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; append_layout ${i3_PATH}/${file}" > /dev/null
 done
