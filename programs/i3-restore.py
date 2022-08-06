@@ -11,14 +11,11 @@ from config import SUBPROCESS_PROGRAMS, WEB_BROWSERS
 HOME = os.getenv("HOME")
 i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
 
-WEB_BROWSERS_DICT = {}
+# Set up the web browsers dictionary to keep track of already running web browsers
+WEB_BROWSERS_DICT = dict.fromkeys(WEB_BROWSERS, False)
 
 
 def main():
-    # Set up the web browsers dictionary to keep track of already running web browsers
-    global WEB_BROWSERS_DICT
-    WEB_BROWSERS_DICT = dict.fromkeys(WEB_BROWSERS, False)
-
     workspaces = utils.get_workspaces()
     for workspace in workspaces:
         Workspace(workspace)
