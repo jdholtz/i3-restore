@@ -11,4 +11,4 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 - A changelog has been added to make it easier for users to upgrade to the newest version and to keep track of past changes
 
 ### Bug Fixes
-- Fix inability to save correctly when there is a `/` in a workspace name (#1)
+- Fix inability to save correctly when there is a `/` in a workspace name ([#1](https://github.com/jdholtz/i3-restore/issues/1))
