@@ -3,6 +3,13 @@
 set -e
 IFS=$'\n\t'
 
+# Check for the version flag in every argument
+if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
+    version=$(cat VERSION)
+    echo "i3-restore version ${version}"
+    exit
+fi
+
 # Set default if not configured
 i3_PATH="${i3_PATH:=${HOME}/.config/i3}"
 

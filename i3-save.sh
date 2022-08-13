@@ -3,6 +3,13 @@
 set -e
 IFS=$'\n\t'
 
+# Check for the version flag in every argument
+if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
+    version=$(cat VERSION)
+    echo "i3-restore version ${version}"
+    exit
+fi
+
 # Check if user has jq installed
 if ! command -v jq >/dev/null 2>&1; then
 	echo "jq is required for i3-restore!"
