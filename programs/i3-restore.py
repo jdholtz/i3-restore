@@ -34,8 +34,10 @@ class Workspace:
         self.restore()
 
     def load_containers(self):
+        sanitized_name = self.name.replace("/", "{slash}")
+
         try:
-            with open(f"{i3_PATH}/workspace_{self.name}_programs.json", "r") as file:
+            with open(f"{i3_PATH}/workspace_{sanitized_name}_programs.json", "r") as file:
                 containers = json.load(file)
 
             for container in containers:

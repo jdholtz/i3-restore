@@ -44,7 +44,8 @@ class Workspace:
         if len(self.containers) == 0:
             return
 
-        file = Path(i3_PATH) / f"workspace_{self.name}_programs.json"
+        sanitized_name = self.name.replace("/", "{slash}")
+        file = Path(i3_PATH) / f"workspace_{sanitized_name}_programs.json"
 
         with file.open("w") as f:
             programs = []
