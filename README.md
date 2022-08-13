@@ -6,6 +6,7 @@ The script can correctly restore terminal editor sessions (such as Vim) and web 
 ## Table of Contents
 - [Getting Started](#getting-started)
     * [Dependencies](#dependencies)
+- [Upgrading](#upgrading)
 - [Configuring](#configuring)
     * [Setting A Custom Save Path](#setting-a-custom-save-path)
     * [Configuring Special Programs To Restore Correctly](#configuring-special-programs-to-restore-correctly)
@@ -36,6 +37,25 @@ $ pip install -r requirements.txt
 ```
 
 Then, verify the script is working
+```shell
+$ ./i3-save.sh
+```
+
+## Upgrading
+When upgrading this script, it is important to follow the [Changelog](CHANGELOG.md) for any actions that need to be performed,
+as many changes will not be made backwards compatible.
+
+Check the version of the script
+```shell
+$ ./i3-save.sh --version
+```
+
+To upgrade, pull the latest changes from the repository
+```shell
+$ git pull
+```
+
+Again, verify the script is working
 ```shell
 $ ./i3-save.sh
 ```
