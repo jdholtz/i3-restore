@@ -84,17 +84,14 @@ class Container:
         self.command = process.cmdline()
         self.working_directory = process.cwd()
 
+    # Get the subprocess recursively. This means the newest subprocess
+    # will be saved and restored
     def check_if_subprocess(self, process):
-        # Get terminal editor process. They will all be the grandchild of the current process
-        try:
-            grandchild = process.children(True)[1]
-        except IndexError:
-            return
-
-        for program in SUBPROCESS_PROGRAMS:
-            if grandchild.name() == program["name"]:
-                self.command = grandchild.cmdline()
-                return
+        for child in reversed(process.children(True)):
+            for program in SUBPROCESS_PROGRAMS:
+                if child.name() == program["name"]:
+                    self.command = child.cmdline()
+                    return
 
 
 if __name__ == "__main__":
