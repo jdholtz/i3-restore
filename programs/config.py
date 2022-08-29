@@ -30,7 +30,7 @@ SUBPROCESS_PROGRAMS = [
     },
     {
         "name": "cmus",
-        "launch_command": "alacritty -t cmus -e bash -c \"{command} && bash\"",
+        "launch_command": "alacritty -e bash -c \"{command} && bash\"",
     },
 ]
 
