@@ -1,6 +1,6 @@
 # i3-restore
 
-A simple Python script to restore your [i3][0] session. It works very similar to how Firefox restores a previous session. 
+A simple Python script to restore your [i3][0] session. It works very similar to how Firefox restores a previous session.
 The script can correctly restore terminal editor sessions (such as Vim) and web browser instances exactly how they were before.
 
 ## Table of Contents
@@ -60,6 +60,9 @@ Again, verify the script is working
 $ ./i3-save.sh
 ```
 
+If you want the latest cutting edge features, you can use the `develop` branch. However, keep in mind that changes to this branch
+do not guarantee reliability nor are changes documented in the Changelog.
+
 ## Configuring
 
 ### Setting A Custom Save Path
@@ -69,7 +72,7 @@ the desired location.
 ### Configuring Special Programs To Restore Correctly
 The configuration file the script uses to restore "special" programs (terminal editors, web browsers) is in `programs/config.py`.
 If you want to add another program (or change an existing one) to the configuration file, follow the documentation in the file
-to enter the correct information. 
+to enter the correct information.
 
 **Note**: Pull requests are always welcome, especially if you want to add a new program to the configuration file
 
@@ -106,7 +109,7 @@ the [assign][5] function in i3 and add it to your i3 configuration file.
 
 
 ## Known Issues
-There are a few cases where the script might not restore the session the exact way. 
+There are a few cases where the script might not restore the session the exact way.
 
 The first case is when a web browser has a 'New tab' open and focused. This is usually because of how i3 swallowing works. Because the 'New tab' window
 title typically matches every web browser title (For example, "Firefox" is in every web browser window title), the 'New tab' window would get swallowed
@@ -116,7 +119,7 @@ The next case is that, sometimes, terminals (i.e Alacritty) don't always restore
 depending on the terminal itself (it isn't really an issue with the script).
 
 ## Contributing
-If you run into any issues, please file an issue. 
+If you run into any issues, please file an issue.
 
 Pull requests are always welcome, whether that be to fix any bugs or add new features.
 
