@@ -4,6 +4,9 @@ set -e
 IFS=$'\n\t'
 CURR_DIR=$(dirname "${0}")
 
+# Handle errors
+source "${CURR_DIR}/utils/error_handling.sh"
+
 # Check for the version flag in every argument
 if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
     version=$(cat VERSION)
@@ -36,6 +39,7 @@ for file in ${FILES}; do
 done
 
 # Now run the python script to restore the programs in the containers
-python "${CURR_DIR}/programs/i3-restore.py"
+error_message=$(python "${CURR_DIR}/programs/i3-restore.py")
+[[ ! -z "${error_message}" ]] && error "An error occured restoring the session's programs. View the logs for more details" 1
 
 log "Finished restoring current i3wm session\n"

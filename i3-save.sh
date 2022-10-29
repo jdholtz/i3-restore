@@ -4,6 +4,9 @@ set -e
 IFS=$'\n\t'
 CURR_DIR=$(dirname "${0}")
 
+# Handle errors
+source "${CURR_DIR}/utils/error_handling.sh"
+
 # Check for the version flag in every argument
 if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
     version=$(cat VERSION)
@@ -13,13 +16,13 @@ fi
 
 # Check if user has jq installed
 if ! command -v jq >/dev/null 2>&1; then
-	echo "jq is required for i3-restore!"
+	error "jq is required for i3-restore!"
 	exit
 fi
 
 # Check for perl-anyevent-i3 by seeing if i3-save-tree fails
 if [[ $(i3-save-tree 2>&1) == "Can't locate AnyEvent/I3.pm"* ]]; then
-	echo "perl-anyevent-i3 is required for i3-restore!"
+	error "perl-anyevent-i3 is required for i3-restore!"
 	exit
 fi
 
@@ -58,7 +61,8 @@ for ws in ${workspaces}; do
     sed -i 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "$file_name"
 done
 
-python "${CURR_DIR}/programs/i3-save.py"
+error_message=$(python "${CURR_DIR}/programs/i3-save.py")
+[[ ! -z "${error_message}" ]] && error "An error occured saving the session's programs. View the logs for more details" 1
 
 log "Finished saving current i3wm session"
 

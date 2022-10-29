@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import subprocess
 import time
@@ -14,9 +13,6 @@ i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
 
 # Set up the web browsers dictionary to keep track of already running web browsers
 WEB_BROWSERS_DICT = dict.fromkeys(WEB_BROWSERS, False)
-
-project_dir = os.path.dirname(os.path.dirname(__file__))
-LOG_FILE = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/logs/i3-restore.log")
 
 
 def main():
@@ -114,7 +110,9 @@ class Container:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=LOG_FILE, filemode="a", level=logging.DEBUG, format="")
-    logger = logging.getLogger()
+    logger = utils.get_logger()
 
-    main()
+    try:
+        main()
+    except Exception as err:
+        logger.exception(err)

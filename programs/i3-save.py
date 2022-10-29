@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from pathlib import Path
 import subprocess
@@ -12,9 +11,6 @@ import utils
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
 HOME = os.getenv("HOME")
 i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
-
-project_dir = os.path.dirname(os.path.dirname(__file__))
-LOG_FILE = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/logs/i3-restore.log")
 
 
 def main():
@@ -112,7 +108,9 @@ class Container:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=LOG_FILE, filemode="a", level=logging.DEBUG, format="")
-    logger = logging.getLogger()
+    logger = utils.get_logger()
 
-    main()
+    try:
+        main()
+    except Exception as err:
+        logger.exception(err)
