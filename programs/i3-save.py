@@ -23,6 +23,8 @@ class Workspace:
     def __init__(self, properties):
         self.name = properties["name"]
         self.containers = []
+
+        logger.debug("Saving programs for Workspace %s", self.name)
         self.get_containers(properties)
         self.save()
 
@@ -42,8 +44,10 @@ class Workspace:
     def save(self):
         # Don't save if there are no containers in the workspace
         if len(self.containers) == 0:
+            logger.debug("No containers found for Workspace %s. Skipping...", self.name)
             return
 
+        logger.debug("Number of containers: %s", len(self.containers))
         sanitized_name = self.name.replace("/", "{slash}")
         file = Path(i3_PATH) / f"workspace_{sanitized_name}_programs.json"
 
@@ -55,11 +59,16 @@ class Workspace:
                     "working_directory": container.working_directory,
                 })
 
+            logger.debug("Saving container programs: %s", programs)
             f.write(json.dumps(programs, indent=2))
 
 
 class Container:
     def __init__(self, properties):
+        self.pid = None
+        self.command = None
+        self.working_directory = None
+
         self.get_pid(properties)
         self.get_cmdline_options(properties)
 
@@ -73,6 +82,8 @@ class Container:
         # First, check if it is a terminal
         for terminal in TERMINALS:
             if properties["window_properties"]["class"] == terminal["class"]:
+                logger.debug("Main process of container is a terminal")
+
                 # The terminal command is set here manually so the custom command used to restore the subprocess
                 # works as expected and doesn't store "[terminal] -e bash -c ..."
                 self.command = [terminal["command"]]
@@ -84,18 +95,22 @@ class Container:
         self.command = process.cmdline()
         self.working_directory = process.cwd()
 
+    # Get the subprocess recursively. This means the newest subprocess
+    # will be saved and restored
     def check_if_subprocess(self, process):
-        # Get terminal editor process. They will all be the grandchild of the current process
-        try:
-            grandchild = process.children(True)[1]
-        except IndexError:
-            return
-
-        for program in SUBPROCESS_PROGRAMS:
-            if grandchild.name() == program["name"]:
-                self.command = grandchild.cmdline()
-                return
+        for child in reversed(process.children(True)):
+            child_name = child.name()
+            for program in SUBPROCESS_PROGRAMS:
+                if child_name == program["name"]:
+                    logger.debug("Subprocess '%s' found in main process '%s'", child_name, process.name())
+                    self.command = child.cmdline()
+                    return
 
 
 if __name__ == "__main__":
-    main()
+    logger = utils.get_logger()
+
+    try:
+        main()
+    except Exception as err:
+        logger.exception(err)
