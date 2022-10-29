@@ -2,6 +2,7 @@
 
 set -e
 IFS=$'\n\t'
+CURR_DIR=$(dirname "${0}")
 
 # Check for the version flag in every argument
 if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
@@ -11,7 +12,7 @@ if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
 fi
 
 # Start logger and import log function
-source utils/logs.sh
+source "${CURR_DIR}/utils/logs.sh"
 
 # Set default if not configured
 i3_PATH="${i3_PATH:=${HOME}/.config/i3}"
@@ -35,7 +36,6 @@ for file in ${FILES}; do
 done
 
 # Now run the python script to restore the programs in the containers
-DIR=$(dirname $0)
-python $DIR/programs/i3-restore.py
+python "${CURR_DIR}/programs/i3-restore.py"
 
 log "Finished restoring current i3wm session\n"

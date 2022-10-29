@@ -2,6 +2,7 @@
 
 set -e
 IFS=$'\n\t'
+CURR_DIR=$(dirname "${0}")
 
 # Check for the version flag in every argument
 if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
@@ -23,7 +24,7 @@ if [[ $(i3-save-tree 2>&1) == "Can't locate AnyEvent/I3.pm"* ]]; then
 fi
 
 # Start logger and import log function
-source utils/logs.sh
+source "${CURR_DIR}/utils/logs.sh"
 rotate_log
 
 # Set default if not configured
@@ -57,8 +58,7 @@ for ws in ${workspaces}; do
     sed -i 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "$file_name"
 done
 
-DIR=$(dirname "${0}")
-python "${DIR}"/programs/i3-save.py
+python "${CURR_DIR}/programs/i3-save.py"
 
 log "Finished saving current i3wm session"
 

@@ -13,7 +13,8 @@ import utils
 HOME = os.getenv("HOME")
 i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
 
-LOG_FILE = os.getenv("LOG_FILE", "logs/i3-restore.log")
+project_dir = os.path.dirname(os.path.dirname(__file__))
+LOG_FILE = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/logs/i3-restore.log")
 
 
 def main():
