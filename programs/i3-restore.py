@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import subprocess
 import time
@@ -14,6 +15,8 @@ i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
 # Set up the web browsers dictionary to keep track of already running web browsers
 WEB_BROWSERS_DICT = dict.fromkeys(WEB_BROWSERS, False)
 
+LOG_FILE = os.getenv("LOG_FILE", "logs/i3-restore.log")
+
 
 def main():
     workspaces = utils.get_workspaces()
@@ -23,6 +26,7 @@ def main():
     # Finally, make sure to reload to fix any graphical errors (specifically with firefox)
     # But first wait until all programs are loaded
     time.sleep(7)
+    logger.debug("Restarting session to fix graphical errors")
     subprocess.run(["i3-msg", "restart"])
 
 
@@ -30,6 +34,8 @@ class Workspace:
     def __init__(self, properties):
         self.name = properties["name"]
         self.containers = []
+
+        logger.debug("Restoring programs for Workspace %s", self.name)
         self.load_containers()
         self.restore()
 
@@ -44,11 +50,13 @@ class Workspace:
                 self.containers.append(Container(container))
         except FileNotFoundError:
             # No programs were running on this workspace when saved
-            pass
+            logger.debug("Programs file not found for Workspace %s. Skipping", self.name)
 
     def restore(self):
         # First, focus on the workspace
         subprocess.run(["i3-msg", f"workspace --no-auto-back-and-forth {self.name}"])
+
+        logger.debug("Number of containers: %s", len(self.containers))
 
         # Then, restore each container
         for container in self.containers:
@@ -67,6 +75,8 @@ class Container:
         self.working_directory = properties["working_directory"]
 
     def restore(self):
+        logger.debug("Restoring container with command %s and working directory %s",
+                     self.command, self.working_directory)
         command = " ".join(self.command)
 
         # First, handle web browsers
@@ -75,21 +85,26 @@ class Container:
                 # The web browser has already been called, so don't execute it again
                 # Browsers restore all tabs in one go, even multiple windows
                 if WEB_BROWSERS_DICT.get(web_browser):
+                    logger.debug("Container detected as a web browser, but the web browser has"
+                                 "already been restored. Skipping...")
                     return
 
+                logger.debug("Restoring container as a web browser")
                 WEB_BROWSERS_DICT[web_browser] = True
 
         # Then, handle any programs that run as subprocesses
         for program in SUBPROCESS_PROGRAMS:
             if program["name"] == self.command[0]:
+                logger.debug("Container detected as a subprocess")
                 command = self.handle_subprocesses(program)
 
+        logger.debug("New command for container: %s", command)
         subprocess.run(["i3-msg", f"exec cd \"{self.working_directory}\" && {command}"])
 
     def handle_subprocesses(self, subprocess):
         # First, replace all spaces in args with backslashes because the process doesn't save backslashes
         for i, arg in enumerate(self.command[1:], start=1):
-            self.command[i] = arg.replace(" ", "\ ")
+            self.command[i] = arg.replace(" ", r"\ ")
 
         command = " ".join(self.command)
         full_command = subprocess["launch_command"].replace("{command}", command) # Replace placeholder with actual command
@@ -98,4 +113,7 @@ class Container:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename=LOG_FILE, filemode="a", level=logging.DEBUG, format="")
+    logger = logging.getLogger()
+
     main()
