@@ -61,8 +61,8 @@ for ws in ${workspaces}; do
     sed -i 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "$file_name"
 done
 
-error_message=$(python "${CURR_DIR}/programs/i3-save.py")
-[[ ! -z "${error_message}" ]] && error "An error occured saving the session's programs. View the logs for more details" 1
+python "${CURR_DIR}/programs/i3-save.py"
+[[ ! $? -eq 0 ]] && error "An error occured saving the session's programs. View the logs for more details" 1
 
 log "Finished saving current i3wm session"
 

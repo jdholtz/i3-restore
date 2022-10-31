@@ -39,7 +39,7 @@ for file in ${FILES}; do
 done
 
 # Now run the python script to restore the programs in the containers
-error_message=$(python "${CURR_DIR}/programs/i3-restore.py")
-[[ ! -z "${error_message}" ]] && error "An error occured restoring the session's programs. View the logs for more details" 1
+python "${CURR_DIR}/programs/i3-restore.py"
+[[ ! $? -eq 0 ]] && error "An error occured restoring the session's programs. View the logs for more details" 1
 
 log "Finished restoring current i3wm session\n"

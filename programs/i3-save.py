@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 import psutil
 
@@ -114,3 +115,4 @@ if __name__ == "__main__":
         main()
     except Exception as err:
         logger.exception(err)
+        sys.exit(1)

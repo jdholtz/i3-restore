@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 import time
 
 import utils
@@ -116,3 +117,4 @@ if __name__ == "__main__":
         main()
     except Exception as err:
         logger.exception(err)
+        sys.exit(1)
