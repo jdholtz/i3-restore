@@ -63,6 +63,25 @@ restore_programs() {
     done
 }
 
+kill_empty_containers() {
+    containers=$(i3-msg -t get_tree | jq '.nodes[]')
+
+    # Recursively get all containers that still have swallow criteria (meaning
+    # they never got populated) and kill them
+    while [ -n "${containers}" ]; do
+        empty_containers=$(echo "${containers}" | jq 'select(( .swallows == [] | not ) and ( .type == "con" )) .window')
+
+        if [[ -n "${empty_containers}" ]]; then
+            num_containers=$(echo ${empty_containers} | wc -w)
+            # Kill all containers with 'xkill' using their window IDs
+            log "Killing ${num_containers} empty containers"
+            echo "${empty_containers}" | xargs -d " " -I % xkill -id %
+        fi
+
+        containers=$(echo "${containers}" | jq '.nodes[]')
+    done
+}
+
 for file in ${FILES}; do
     # Get workspace name from file name
     workspace_name=${file#*_}
@@ -79,9 +98,13 @@ for file in ${FILES}; do
     restore_programs ${workspace_name}
 done
 
-# Make sure to reload to fix any graphical errors (specifically with firefox)
-# But first wait until all programs are loaded
+# Wait for the programs to load and the layout windows to get swallowed
 sleep 2
+
+# Clean up any leftover containers that didn't get swallowed
+kill_empty_containers
+
+# Reload i3 to fix any graphical errors (specifically with firefox)
 log "Restarting session to fix graphical errors"
 i3-msg restart
 
