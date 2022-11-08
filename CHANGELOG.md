@@ -2,6 +2,18 @@
 When upgrading to a new version, make sure to follow the directions under the "Upgrading" header of the corresponding version.
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
+## 2.0 (2022-11-08)
+
+### New Features
+- A button was added to the i3-nagbars that allows the user to run the script manually to view the error that occurred
+
+### Improvements
+- Restoring was changed significantly. It is now more efficient and reliable
+
+### Upgrading
+When upgrading to this version, make sure to delete all files in you `i3_Path` that end with `programs.json`, as those files
+will never be removed (the file names changed).
+
 ## 1.2 (2022-10-29)
 
 ### New Features
