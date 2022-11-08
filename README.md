@@ -14,7 +14,6 @@ The script can correctly restore terminal editor sessions (such as Vim) and web 
     * [Saving](#saving)
     * [Restoring](#restoring)
     * [Restoring Programs In Assigned Workspaces](#restoring-programs-in-assigned-workspaces)
-- [Known Issues](#known-issues)
 - [Contributing](#contributing)
 
 ## Getting Started
@@ -102,21 +101,12 @@ Similarly, you can also automatically restore your session upon starting i3. To 
 ```
 exec /path/to/i3-restore/i3-restore.sh
 ```
+**Note**: To restore web browsers correctly, you need to have their "Restore previous session" feature enabled
 
 ### Restoring Programs In Assigned Workspaces
 Some programs that take a few seconds to start (such as Discord) might not restore on the correct workspace. To mitigate this issue, simply use
 the [assign][5] function in i3 and add it to your i3 configuration file.
 
-
-## Known Issues
-There are a few cases where the script might not restore the session the exact way.
-
-The first case is when a web browser has a 'New tab' open and focused. This is usually because of how i3 swallowing works. Because the 'New tab' window
-title typically matches every web browser title (For example, "Firefox" is in every web browser window title), the 'New tab' window would get swallowed
-by any web browser window. In this case, having multiple browser windows open might not restore in the exact same way.
-
-The next case is that, sometimes, terminals (i.e Alacritty) don't always restore the correct working directory. This issue seems to be a hit or miss
-depending on the terminal itself (it isn't really an issue with the script).
 
 ## Contributing
 If you run into any issues, please file an issue.
