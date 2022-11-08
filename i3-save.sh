@@ -37,7 +37,8 @@ ALLWORKSPACES=$(i3-msg -t get_workspaces)
 workspaces=$(echo "${ALLWORKSPACES}" | jq -r '.[] | .name') # Match only the workspaces' names
 
 # Remove previous saved session. -f is there so it doesn't exit if rm fails (file isn't found)
-rm -f "${i3_PATH}"/*.json
+rm -f "${i3_PATH}"/*_layout.json
+rm -f "${i3_PATH}"/*_programs.sh
 
 log "Saving current i3wm session"
 

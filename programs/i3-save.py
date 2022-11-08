@@ -1,4 +1,3 @@
-import json
 import os
 from pathlib import Path
 import subprocess
@@ -6,12 +5,15 @@ import sys
 
 import psutil
 
-from config import SUBPROCESS_PROGRAMS, TERMINALS
+from config import SUBPROCESS_PROGRAMS, TERMINALS, WEB_BROWSERS
 import utils
 
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
 HOME = os.getenv("HOME")
 i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
+
+# Set up the web browsers dictionary to keep track of already running web browsers
+WEB_BROWSERS_DICT = dict.fromkeys(WEB_BROWSERS, False)
 
 
 def main():
@@ -38,7 +40,9 @@ class Workspace:
                 if len(container["swallows"]) != 0:
                     continue
 
-                self.containers.append(Container(container))
+                con = Container(container)
+                if con.command is not None:
+                    self.containers.append(con)
             else:
                 self.get_containers(container)
 
@@ -49,33 +53,40 @@ class Workspace:
             return
 
         logger.debug("Number of containers: %s", len(self.containers))
-        sanitized_name = self.name.replace("/", "{slash}")
-        file = Path(i3_PATH) / f"workspace_{sanitized_name}_programs.json"
+
+        # For some reason, i3 doesn't execute scripts with a space in the name correctly
+        sanitized_name = self.name.replace("/", "{slash}").replace(" ", "{space}")
+        file = Path(i3_PATH) / f"workspace_{sanitized_name}_programs.sh"
+
+        program_commands = ""
+        for i, container in enumerate(self.containers):
+            logger.debug("Saving container with command %s and working directory %s",
+                         container.command, container.working_directory)
+
+            # Each command is prefixed with a selection statement so we have control
+            # to restore only one container at a time. However, this is not an ideal way
+            # to solve this issue. I have thought of other ways, such as saving each command to
+            # its own file or removing the line in the script after restoring the container, but
+            # both of those seemed way worse than this solution.
+            program_commands += f"[[ $1 == {i} ]] && cd \"{container.working_directory}\" " \
+                                f"&& {container.command}\n"
 
         with file.open("w") as f:
-            programs = []
-            for container in self.containers:
-                programs.append({
-                    "command": container.command,
-                    "working_directory": container.working_directory,
-                })
-
-            logger.debug("Saving container programs: %s", programs)
-            f.write(json.dumps(programs, indent=2))
+            f.write(program_commands)
 
 
 class Container:
     def __init__(self, properties):
-        self.pid = None
         self.command = None
         self.working_directory = None
 
-        self.get_pid(properties)
+        self.pid = self.get_pid(properties)
         self.get_cmdline_options(properties)
 
-    def get_pid(self, properties):
+    @staticmethod
+    def get_pid(properties):
         pid_info = subprocess.check_output(["xprop", "_NET_WM_PID", "-id", str(properties["window"])]).decode("utf-8").rstrip()
-        self.pid = int(pid_info.split("= ")[1])
+        return int(pid_info.split("= ")[1])
 
     def get_cmdline_options(self, properties):
         process = psutil.Process(self.pid)
@@ -87,14 +98,20 @@ class Container:
 
                 # The terminal command is set here manually so the custom command used to restore the subprocess
                 # works as expected and doesn't store "[terminal] -e bash -c ..."
-                self.command = [terminal["command"]]
+                self.command = terminal["command"]
                 self.working_directory = process.children()[0].cwd()
 
                 self.check_if_subprocess(process)
                 return
 
-        self.command = process.cmdline()
+        self.command = " ".join(process.cmdline())
         self.working_directory = process.cwd()
+
+        # Next, handle saving web browsers. We only want to save the first
+        # instance -- not every instance -- because the browser will handle
+        # restoring every instance.
+        self.handle_web_browser()
+
 
     # Get the subprocess recursively. This means the newest subprocess
     # will be saved and restored
@@ -104,8 +121,26 @@ class Container:
             for program in SUBPROCESS_PROGRAMS:
                 if child_name == program["name"]:
                     logger.debug("Subprocess '%s' found in main process '%s'", child_name, process.name())
-                    self.command = child.cmdline()
+                    command = child.cmdline()[0]
+                    for arg in child.cmdline()[1:]:
+                        command += " " + arg.replace(" ", r"\ ")
+
+                    self.command = program["launch_command"].replace("{command}", command)
                     return
+
+    def handle_web_browser(self):
+        for web_browser in WEB_BROWSERS:
+            if web_browser in self.command:
+                # The web browser has already been called, so don't save it again
+                # Browsers restore all tabs in one go, even multiple windows
+                if WEB_BROWSERS_DICT.get(web_browser):
+                    logger.debug("Container detected as a web browser, but a web browser instance "
+                                 "has already been saved. Skipping...")
+                    self.command = None
+                    return
+
+                logger.debug("Saving container as a web browser")
+                WEB_BROWSERS_DICT[web_browser] = True
 
 
 if __name__ == "__main__":
