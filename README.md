@@ -84,11 +84,11 @@ To automatically save your session before exiting i3, simply trigger `i3-save.sh
 Example:
 ```
 mode "exit: [l]ogout, [r]eboot, [h]ibernate, [s]leep, [p]oweroff" {
-    bindsym l exec "/path/to/i3-restore/i3-save.sh i3-msg 'exit'"
-    bindsym r exec "/path/to/i3-restore/i3-save.sh systemctl reboot"
+    bindsym l exec "/path/to/i3-restore/i3-save.sh && i3-msg 'exit'"
+    bindsym r exec "/path/to/i3-restore/i3-save.sh && systemctl reboot"
     bindsym h exec systemctl hibernate
     bindsym s exec systemctl suspend
-    bindsym p exec "/path/to/i3-restore/i3-save.sh systemctl poweroff"
+    bindsym p exec "/path/to/i3-restore/i3-save.sh && systemctl poweroff"
     # Fallback if script fails to save
     bindsym Return exec i3-msg exit
     bindsym Escape mode "default"

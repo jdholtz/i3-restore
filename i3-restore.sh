@@ -4,6 +4,9 @@ set -e
 IFS=$'\n\t'
 CURR_DIR=$(dirname "${0}")
 
+# Import common variables and functions
+source "${CURR_DIR}/utils/common.sh"
+
 # Handle errors
 source "${CURR_DIR}/utils/error_handling.sh"
 

@@ -1,7 +1,4 @@
-LOG_DIR="$(dirname "${0}")/logs"
-I3_RESTORE_LOG_FILE="${LOG_DIR}/i3-restore.log"
-LOG_FILE_OLD="i3-restore-old.log"
-LOG_FILE_SIZE=1000
+# Functions can only be called after common.sh is sourced
 
 init_log() {
     # Create the directory and/or file if they don't exist
