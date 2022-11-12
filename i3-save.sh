@@ -22,7 +22,7 @@ rotate_log
 get_workspaces() {
     ALLWORKSPACES=$(i3-msg -t get_workspaces)
     workspaces=$(echo "${ALLWORKSPACES}" | jq -r '.[] | .name') # Match only the workspaces' names
-    echo ${workspaces}
+    echo "${workspaces}"
 }
 
 save_workspace_layout() {
@@ -54,8 +54,6 @@ save_workspace_layouts() {
     rm --force "${i3_PATH}"/*_layout.json
     rm --force "${i3_PATH}"/*_programs.sh
 
-    log "Saving current i3wm session"
-
     for ws in ${workspaces}; do
         save_workspace_layout ${ws}
     done
@@ -65,6 +63,7 @@ save_workspace_programs() {
     python "${I3_RESTORE_SAVE_FILE}" || error "An error occured saving the session's programs. View the logs for more details" 1
 }
 
+log "Saving current i3wm session"
 save_workspace_layouts
 save_workspace_programs
 log "Finished saving current i3wm session"

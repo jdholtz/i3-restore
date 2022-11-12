@@ -10,22 +10,10 @@ source "${CURR_DIR}/utils/common.sh"
 # Handle errors
 source "${CURR_DIR}/utils/error_handling.sh"
 
-# Check for the version flag in every argument
-if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
-    version=$(cat VERSION)
-    echo "i3-restore version ${version}"
-    exit
-fi
+check_version_flag "$@"
 
-# Start logger and import log function
+# Start logger
 source "${CURR_DIR}/utils/logs.sh"
-
-# Set default if not configured
-i3_PATH="${i3_PATH:=${HOME}/.config/i3}"
-
-FILES=$(ls ${i3_PATH} | grep "_layout.json")
-
-log "Restoring current i3wm session"
 
 restore_programs() {
     workspace_name=${1}
@@ -66,6 +54,20 @@ restore_programs() {
     done
 }
 
+restore_workspace() {
+    workspace_name=${1}
+
+    # Unsanitize the workspace name
+    workspace_name=${workspace_name//\{slash\}/\/}
+
+    log "Restoring layout for Workspace ${workspace_name}"
+
+    # Append the layout of every saved workspace
+    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; append_layout ${i3_PATH}/${file}" > /dev/null
+
+    restore_programs ${workspace_name}
+}
+
 kill_empty_containers() {
     containers=$(i3-msg -t get_tree | jq '.nodes[]')
 
@@ -85,30 +87,28 @@ kill_empty_containers() {
     done
 }
 
-for file in ${FILES}; do
-    # Get workspace name from file name
-    workspace_name=${file#*_}
-    workspace_name=${workspace_name%_*}
+restore_workspaces() {
+    FILES=$(ls ${i3_PATH} | grep "_layout.json")
 
-    # Unsanitize the workspace name
-    workspace_name=${workspace_name//\{slash\}/\/}
+    for file in ${FILES}; do
+        # Get workspace name from file name
+        workspace_name=${file#*_}
+        workspace_name=${workspace_name%_*}
 
-    log "Restoring layout for Workspace ${workspace_name}"
+        restore_workspace ${workspace_name}
+    done
 
-    # Append the layout of every saved workspace
-    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; append_layout ${i3_PATH}/${file}" > /dev/null
+    # Wait for the programs to load and the layout windows to get swallowed
+    sleep 2
 
-    restore_programs ${workspace_name}
-done
+    # Clean up any leftover containers that didn't get swallowed
+    kill_empty_containers
 
-# Wait for the programs to load and the layout windows to get swallowed
-sleep 2
+    # Reload i3 to fix any graphical errors (specifically with firefox)
+    log "Restarting session to fix graphical errors"
+    i3-msg restart
+}
 
-# Clean up any leftover containers that didn't get swallowed
-kill_empty_containers
-
-# Reload i3 to fix any graphical errors (specifically with firefox)
-log "Restarting session to fix graphical errors"
-i3-msg restart
-
+log "Restoring current i3wm session"
+restore_workspaces
 log "Finished restoring current i3wm session\n"
