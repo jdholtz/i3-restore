@@ -37,7 +37,7 @@ $ pip install -r requirements.txt
 
 Then, verify the script is working
 ```shell
-$ ./i3-save.sh
+$ ./i3-save
 ```
 
 ## Upgrading
@@ -46,7 +46,7 @@ as many changes will not be made backwards compatible.
 
 Check the version of the script
 ```shell
-$ ./i3-save.sh --version
+$ ./i3-save --version
 ```
 
 To upgrade, pull the latest changes from the repository
@@ -56,7 +56,7 @@ $ git pull
 
 Again, verify the script is working
 ```shell
-$ ./i3-save.sh
+$ ./i3-save
 ```
 
 If you want the latest cutting edge features, you can use the `develop` branch. However, keep in mind that changes to this branch
@@ -80,26 +80,25 @@ i3-restore can be automatically triggered every time i3 stops and starts. This i
 your session after a restart or logging out.
 
 ### Saving
-To automatically save your session before exiting i3, simply trigger `i3-save.sh` to run by putting it in your i3 configuration file.
+To automatically save your session before exiting i3, simply trigger `i3-save` to run by putting it in your i3 configuration file.
 Example:
 ```
 mode "exit: [l]ogout, [r]eboot, [h]ibernate, [s]leep, [p]oweroff" {
-    bindsym l exec "/path/to/i3-restore/i3-save.sh && i3-msg 'exit'"
-    bindsym r exec "/path/to/i3-restore/i3-save.sh && systemctl reboot"
+    bindsym l exec "/path/to/i3-restore/i3-save && i3-msg 'exit'"
+    bindsym r exec "/path/to/i3-restore/i3-save && systemctl reboot"
     bindsym h exec systemctl hibernate
     bindsym s exec systemctl suspend
-    bindsym p exec "/path/to/i3-restore/i3-save.sh && systemctl poweroff"
+    bindsym p exec "/path/to/i3-restore/i3-save && systemctl poweroff"
     # Fallback if script fails to save
     bindsym Return exec i3-msg exit
     bindsym Escape mode "default"
 }
 ```
-Any commands passed after i3-save.sh is run will be triggered automatically.
 
 ### Restoring
 Similarly, you can also automatically restore your session upon starting i3. To do this, simply put this line in your i3 configuration file:
 ```
-exec /path/to/i3-restore/i3-restore.sh
+exec /path/to/i3-restore/i3-restore
 ```
 **Note**: To restore web browsers correctly, you need to have their "Restore previous session" feature enabled
 
