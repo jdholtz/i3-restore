@@ -162,9 +162,9 @@ kill_empty_containers() {
             local num_containers
             num_containers="$(echo "${empty_containers}" | wc --words)"
 
-            # Kill all containers with 'xkill' using their window IDs
+            # Kill all containers by ID
             log "Killing ${num_containers} empty containers"
-            echo "${empty_containers}" | xargs --delimiter " " -I % xkill -id %
+            echo "${empty_containers}" | xargs -I % i3-msg [id=%] kill
         fi
 
         containers="$(echo "${containers}" | jq '.nodes[]')"
