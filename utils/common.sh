@@ -29,11 +29,13 @@ check_version_flag() {
 # Ensure the script's dependencies are installed.
 #####################################
 check_dependencies() {
-    # Check if jq is installed
-    if ! command -v jq >/dev/null 2>&1; then
-        error "jq is required for i3-restore!"
-        exit
-    fi
+    local deps=("jq" "xdotool")
+    for dep in "${deps[@]}"; do
+        if ! command -v "${dep}" >/dev/null 2>&1; then
+            error "${dep} is required for i3-restore!"
+            exit
+        fi
+    done
 
     # Check for perl-anyevent-i3 by seeing if i3-save-tree fails
     if [[ "$(i3-save-tree 2>&1)" == "Can't locate AnyEvent/I3.pm"* ]]; then
