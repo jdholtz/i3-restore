@@ -1,10 +1,12 @@
 #!/bin/bash
+#
+# Save the layout + programs of the current i3 session
 
 set -e
 IFS=$'\n\t'
 
-CURR_DIR=$(dirname "${0}")
-I3_RESTORE_SAVE_FILE="${CURR_DIR}/programs/i3-save.py"
+CURR_DIR="$(dirname "${0}")"
+I3_RESTORE_SAVE_SCRIPT="${CURR_DIR}/programs/i3-save.py"
 
 # Import common variables and functions
 source "${CURR_DIR}/utils/common.sh"
@@ -19,36 +21,60 @@ check_dependencies
 source "${CURR_DIR}/utils/logs.sh"
 rotate_log
 
+#####################################
+# Get the names of all workspaces currently used.
+# Arguments:
+#   None
+# Returns:
+#   An array containing the workspaces' names.
+#####################################
 get_workspaces() {
-    ALLWORKSPACES=$(i3-msg -t get_workspaces)
+    ALLWORKSPACES="$(i3-msg --type get_workspaces)"
     workspaces=$(echo "${ALLWORKSPACES}" | jq -r '.[] | .name') # Match only the workspaces' names
     echo "${workspaces}"
 }
 
+#####################################
+# Save the layout of a workspace
+# Globals:
+#   i3_PATH
+# Arguments:
+#   Workspace name
+# Returns:
+#   0 if either no program file is found or programs
+#   were restored correctly. Non-zero on error.
+#####################################
 save_workspace_layout() {
-    workspace=${1}
+    workspace="${1}"
 
     log "Saving layout for Workspace ${workspace}"
     # Replace slash in workspace name as file names cannot have slashes
-    sanitized_ws_name=${ws//\//\{slash\}}
+    sanitized_ws_name="${ws//\//\{slash\}}"
 
-    file_name=${i3_PATH}/workspace_${sanitized_ws_name}_layout.json
-    workspace_tree=$(i3-save-tree --workspace "${workspace}")
+    file_name="${i3_PATH}/workspace_${sanitized_ws_name}_layout.json"
+    workspace_tree="$(i3-save-tree --workspace "${workspace}")"
 
     # If workspace is empty (i.e doesn't contain any actual configuration lines)
-    if [[ ! $workspace_tree == *"{"* ]]; then
+    if [[ ! "${workspace_tree}" == *"{"* ]]; then
         log "Empty layout for Workspace ${workspace}. Skipping..."
-        return
+        return 0
     fi
 
-    echo "$workspace_tree" > "$file_name"
+    echo "${workspace_tree}" > "${file_name}"
 
     # Automatically edit the file
-    sed -i 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "$file_name"
+    sed --in-place 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "${file_name}"
 }
 
+#####################################
+# Save the layouts of all the currently used workspaces.
+# Globals:
+#   i3_PATH
+# Arguments:
+#   None
+#####################################
 save_workspace_layouts() {
-    workspaces=$(get_workspaces)
+    workspaces="$(get_workspaces)"
 
     # Remove previous saved session. --force is used so it doesn't exit if a file isn't found
     rm --force "${i3_PATH}"/*_layout.json
@@ -59,8 +85,17 @@ save_workspace_layouts() {
     done
 }
 
+#####################################
+# Execute the python save script to save the
+# session's programs.
+# Globals:
+#   I3_RESTORE_SAVE_FILE
+# Arguments:
+#   None
+#####################################
 save_workspace_programs() {
-    python "${I3_RESTORE_SAVE_FILE}" || error "An error occured saving the session's programs. View the logs for more details" 1
+    python "${I3_RESTORE_SAVE_SCRIPT}" ||
+    error "An error occured saving the session's programs. View the logs for more details" 1
 }
 
 log "Saving current i3wm session"
