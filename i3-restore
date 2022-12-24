@@ -55,38 +55,52 @@ restore_programs() {
     num_containers="$(wc --lines < "${file}")"
     log "Number of containers: ${num_containers}"
 
+    # Execute one container at a time to ensure each one is reliably
+    # restored in the correct order
     for (( i=0 ; i<"${num_containers}" ; i++ )); do
         # Execute the command in the script pertaining to 'i'
         i3-msg exec "${file}" "${i}" > /dev/null
         sleep 0.2
     done
 
+    # Return the newly created window IDs so they can be unmapped
     window_ids="$(xdotool search --onlyvisible --class ".*" | tail -n "${num_containers}")"
     echo "${window_ids}"
 }
 
+#####################################
+# Unmap all windows with the corresponding
+# IDs
+# Arguments:
+#   Window IDs
+#####################################
 unmap_windows() {
     window_ids="${1}"
-    log "Window IDS:"
-    log "${window_ids}"
     for id in ${window_ids[@]}; do
-        resp=$(xdotool windowunmap "${id}")
-        log "Response"
-        log "${resp}"
+        xdotool windowunmap "${id}"
     done
 }
 
+#####################################
+# Map all windows with the corresponding
+# IDs
+# Arguments:
+#   Window IDs
+#####################################
 map_windows() {
     window_ids="${1}"
-    log "Window IDS:"
-    log "${window_ids}"
     for id in ${window_ids[@]}; do
-        resp=$(xdotool windowmap "${id}" || echo "Fail")
-        log "Response"
-        log "${resp}"
+        xdotool windowmap "${id}"
     done
 }
 
+#####################################
+# Restore the web browsers if they were
+# saved from the last session
+# Arguments:
+#   Layout file, a path
+#   Workspace name
+#####################################
 restore_layout() {
     local file="${1}"
     local workspace_name="${2}"
@@ -95,7 +109,7 @@ restore_layout() {
 
     # Append the layout of the saved workspace
     i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; \
-        append_layout ${file}" > /dev/null
+        append_layout ${file}"
 }
 
 #####################################
@@ -116,6 +130,7 @@ restore_workspace() {
     workspace_name="${workspace_name//\{slash\}/\/}"
 
     window_ids="$(restore_programs "${workspace_name}")"
+
     log "Unmapping windows for Workspace ${workspace_name}"
     unmap_windows "${window_ids}"
 
@@ -156,11 +171,26 @@ kill_empty_containers() {
     done
 }
 
+#####################################
+# Restore the web browsers if they were
+# saved from the last session
+# Globals:
+#   i3_PATH
+# Arguments:
+#   None
+#####################################
 restore_browsers() {
     local file="${i3_PATH}/web_browsers.sh"
-    chmod +x "${file}"
-    i3-msg exec "${file}"
+    if [[ ! -f "${file}" ]]; then
+        return 0
+    fi
 
+    log "Restoring web browsers"
+
+    # Make the file executable
+    chmod +x "${file}"
+
+    i3-msg exec "${file}"
 }
 
 #####################################

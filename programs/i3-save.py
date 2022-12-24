@@ -64,10 +64,8 @@ class Workspace:
                          container.command, container.working_directory)
 
             # Each command is prefixed with a selection statement so we have control
-            # to restore only one container at a time. However, this is not an ideal way
-            # to solve this issue. I have thought of other ways, such as saving each command to
-            # its own file or removing the line in the script after restoring the container, but
-            # both of those seemed way worse than this solution.
+            # to restore only one container at a time. This ensures the containers restore
+            # reliably in the correct order.
             program_commands += f"[[ $1 == {i} ]] && cd \"{container.working_directory}\" " \
                                 f"&& {container.command}\n"
 
