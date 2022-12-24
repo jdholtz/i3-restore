@@ -26,11 +26,11 @@ TERMINALS = [
 SUBPROCESS_PROGRAMS = [
     {
         "name": "vim",
-        "launch_command": "alacritty -e bash -c \"TERM=xterm-256color && {command} && bash\"",
+        "launch_command": 'alacritty -e bash -c "TERM=xterm-256color && {command} && bash"',
     },
     {
         "name": "cmus",
-        "launch_command": "alacritty -e bash -c \"{command}\"",
+        "launch_command": 'alacritty -e bash -c "{command}"',
     },
 ]
 

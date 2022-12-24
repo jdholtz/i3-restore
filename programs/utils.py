@@ -8,6 +8,10 @@ DEFAULT_LOG_FILE = "logs/i3-restore.log"
 
 
 def get_workspaces():
+    """
+    Retrieve a list of all workspaces currently active along with their
+    trees that contain all the containers on each workspace.
+    """
     all_workspaces = []
 
     tree = get_tree()
@@ -27,6 +31,7 @@ def get_workspaces():
 
 
 def get_tree():
+    """Get the current active i3 tree"""
     tree = subprocess.check_output(["i3-msg", "-t", "get_tree"]).decode("utf-8")
     return json.loads(tree)
 
