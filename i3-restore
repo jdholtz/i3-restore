@@ -1,8 +1,10 @@
 #!/bin/bash
+#
+# Restore the layout + programs from the previous saved i3 session
 
 set -e
-IFS=$'\n\t'
-CURR_DIR=$(dirname "${0}")
+readonly IFS=$'\n\t'
+readonly CURR_DIR="$(dirname "${0}")"
 
 # Import common variables and functions
 source "${CURR_DIR}/utils/common.sh"
@@ -15,13 +17,23 @@ check_version_flag "$@"
 # Start logger
 source "${CURR_DIR}/utils/logs.sh"
 
+#####################################
+# Restore all programs within a workspace.
+# Globals:
+#   i3_PATH
+# Arguments:
+#   Workspace name
+# Returns:
+#   0 if either no program file is found or programs
+#   were restored correctly. Non-zero on error.
+#####################################
 restore_programs() {
-    workspace_name=${1}
+    local workspace_name="${1}"
 
     # Sanitize the workspace name so it matches the file name
-    sanitized_ws_name=${workspace_name// /\{space\}}
-    sanitized_ws_name=${sanitized_ws_name//\//\{slash\}}
-    file="${i3_PATH}/workspace_${sanitized_ws_name}_programs.sh"
+    local sanitized_ws_name="${workspace_name// /\{space\}}"
+    sanitized_ws_name="${sanitized_ws_name//\//\{slash\}}"
+    local file="${i3_PATH}/workspace_${sanitized_ws_name}_programs.sh"
 
     if [[ ! -f "${file}" ]]; then
         log "No programs file found for Workspace ${workspace_name}"
@@ -32,71 +44,143 @@ restore_programs() {
 
     # Focus on the workspace. It should already be foucsed
     # from appending the layout, but this is here as a safety
-    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}"
+    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}" > /dev/null
 
     # Make the file executable
     chmod +x "${file}"
 
     # The number of containers are needed for the script to select
     # which command it wants to execute for every container
-    num_containers=$(wc -l < "${file}")
+    local num_containers
+    num_containers="$(wc --lines < "${file}")"
     log "Number of containers: ${num_containers}"
-    for (( i=0; i<num_containers; i++ )); do
+
+    for (( i=0 ; i<"${num_containers}" ; i++ )); do
         # Execute the command in the script pertaining to 'i'
-        i3-msg exec ${file} $i
-
-        # The script needs a little time to execute, otherwise the programs
-        # won't get restored in the correct place
+        i3-msg exec "${file}" "${i}" > /dev/null
         sleep 0.2
+    done
 
-        # Focus on the next container in the workspace.
-        i3-msg focus next
+    window_ids="$(xdotool search --onlyvisible --class ".*" | tail -n "${num_containers}")"
+    echo "${window_ids}"
+}
+
+unmap_windows() {
+    window_ids="${1}"
+    log "Window IDS:"
+    log "${window_ids}"
+    for id in ${window_ids[@]}; do
+        resp=$(xdotool windowunmap "${id}")
+        log "Response"
+        log "${resp}"
     done
 }
 
-restore_workspace() {
-    workspace_name=${1}
+map_windows() {
+    window_ids="${1}"
+    log "Window IDS:"
+    log "${window_ids}"
+    for id in ${window_ids[@]}; do
+        resp=$(xdotool windowmap "${id}" || echo "Fail")
+        log "Response"
+        log "${resp}"
+    done
+}
 
-    # Unsanitize the workspace name
-    workspace_name=${workspace_name//\{slash\}/\/}
+restore_layout() {
+    local file="${1}"
+    local workspace_name="${2}"
 
     log "Restoring layout for Workspace ${workspace_name}"
 
-    # Append the layout of every saved workspace
-    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; append_layout ${i3_PATH}/${file}" > /dev/null
-
-    restore_programs ${workspace_name}
+    # Append the layout of the saved workspace
+    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; \
+        append_layout ${file}" > /dev/null
 }
 
+#####################################
+# Restore the layout and programs within a workspace.
+# Globals:
+#   i3_PATH
+# Arguments:
+#   Layout file, a path.
+#####################################
+restore_workspace() {
+    local file="${1}"
+
+    # Get workspace name from file name
+    local workspace_name="${file#*_}"
+    workspace_name="${workspace_name%_*}"
+
+    # Unsanitize the workspace name
+    workspace_name="${workspace_name//\{slash\}/\/}"
+
+    window_ids="$(restore_programs "${workspace_name}")"
+    log "Unmapping windows for Workspace ${workspace_name}"
+    unmap_windows "${window_ids}"
+
+    restore_layout "${file}" "${workspace_name}"
+
+    log "Mapping windows for Workspace ${workspace_name}"
+    map_windows "${window_ids}"
+}
+
+#####################################
+# Kills all containers that are empty (i.e. don't have
+# a program running in them. This usually happens because
+# the window did not get swallowed.
+# Arguments:
+#   None
+#####################################
 kill_empty_containers() {
-    containers=$(i3-msg -t get_tree | jq '.nodes[]')
+    local containers
+    containers="$(i3-msg --type get_tree | jq '.nodes[]')"
 
     # Recursively get all containers that still have swallow criteria (meaning
     # they never got populated) and kill them
-    while [ -n "${containers}" ]; do
-        empty_containers=$(echo "${containers}" | jq 'select(( .swallows == [] | not ) and ( .type == "con" )) .window')
+    while [[ -n "${containers}" ]]; do
+        local empty_containers
+        empty_containers="$(echo "${containers}" \
+            | jq 'select(( .swallows == [] | not ) and ( .type == "con" )) .window')"
 
         if [[ -n "${empty_containers}" ]]; then
-            num_containers=$(echo ${empty_containers} | wc -w)
+            local num_containers
+            num_containers="$(echo "${empty_containers}" | wc --words)"
+
             # Kill all containers with 'xkill' using their window IDs
             log "Killing ${num_containers} empty containers"
-            echo "${empty_containers}" | xargs -d " " -I % xkill -id %
+            echo "${empty_containers}" | xargs --delimiter " " -I % xkill -id %
         fi
 
-        containers=$(echo "${containers}" | jq '.nodes[]')
+        containers="$(echo "${containers}" | jq '.nodes[]')"
     done
 }
 
+restore_browsers() {
+    local file="${i3_PATH}/web_browsers.sh"
+    chmod +x "${file}"
+    i3-msg exec "${file}"
+
+}
+
+#####################################
+# Restore the layouts and programs of all workspaces.
+# Also, kill empty containers and restart i3 to fix
+# graphical errors.
+# Globals:
+#   i3_PATH
+# Arguments:
+#   None
+#####################################
 restore_workspaces() {
-    FILES=$(ls ${i3_PATH} | grep "_layout.json")
+    local files file
+    files="$(ls "${i3_PATH}"/*_layout.json)"
 
-    for file in ${FILES}; do
-        # Get workspace name from file name
-        workspace_name=${file#*_}
-        workspace_name=${workspace_name%_*}
-
-        restore_workspace ${workspace_name}
+    for file in ${files}; do
+        restore_workspace "${file}"
     done
+
+    restore_browsers
 
     # Wait for the programs to load and the layout windows to get swallowed
     sleep 2

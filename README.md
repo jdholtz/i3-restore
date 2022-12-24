@@ -23,6 +23,7 @@ The script can correctly restore terminal editor sessions (such as Vim) and web 
 - [Pip][2]
 - [Jq][3]
 - [Perl-anyevent-i3][4]
+- [Xdotool][5]
 
 First, download the script onto your computer
 ```shell
@@ -104,7 +105,7 @@ exec /path/to/i3-restore/i3-restore
 
 ### Restoring Programs In Assigned Workspaces
 Some programs that take a few seconds to start (such as Discord) might not restore on the correct workspace. To mitigate this issue, simply use
-the [assign][5] function in i3 and add it to your i3 configuration file.
+the [assign][6] function in i3 and add it to your i3 configuration file.
 
 
 ## Contributing
@@ -117,4 +118,5 @@ Pull requests are always welcome, whether that be to fix any bugs or add new fea
 [2]: https://pip.pypa.io/en/stable/installation/
 [3]: https://stedolan.github.io/jq/download/
 [4]: https://archlinux.org/packages/community/any/perl-anyevent-i3/
-[5]: https://i3wm.org/docs/userguide.html#assign_workspace
+[5]: https://github.com/jordansissel/xdotool
+[6]: https://i3wm.org/docs/userguide.html#assign_workspace

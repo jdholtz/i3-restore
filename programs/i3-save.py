@@ -112,7 +112,6 @@ class Container:
         # restoring every instance.
         self.handle_web_browser()
 
-
     # Get the subprocess recursively. This means the newest subprocess
     # will be saved and restored
     def check_if_subprocess(self, process):
@@ -128,19 +127,26 @@ class Container:
                     self.command = program["launch_command"].replace("{command}", command)
                     return
 
-    def handle_web_browser(self):
+    def handle_web_browser(self) -> None:
         for web_browser in WEB_BROWSERS:
             if web_browser in self.command:
-                # The web browser has already been called, so don't save it again
-                # Browsers restore all tabs in one go, even multiple windows
-                if WEB_BROWSERS_DICT.get(web_browser):
-                    logger.debug("Container detected as a web browser, but a web browser instance "
-                                 "has already been saved. Skipping...")
-                    self.command = None
-                    return
+                self.save_web_browser(web_browser)
+                self.command = None
+                return
 
-                logger.debug("Saving container as a web browser")
-                WEB_BROWSERS_DICT[web_browser] = True
+    def save_web_browser(self, web_browser: str) -> None:
+        if WEB_BROWSERS_DICT.get(web_browser):
+            # The web browser has already been called, so don't save it again
+            # Browsers restore all tabs in one go, even multiple windows
+            logger.debug("Container detected as a web browser, but a web browser instance "
+                         "has already been saved. Skipping...")
+            return
+
+        logger.debug("Saving container as a web browser")
+        WEB_BROWSERS_DICT[web_browser] = True
+
+        with open(f"{i3_PATH}/web_browsers.sh", "a") as f:
+            f.write(f"{self.command}\n")
 
 
 if __name__ == "__main__":

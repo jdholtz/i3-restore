@@ -79,6 +79,7 @@ save_workspace_layouts() {
     # Remove previous saved session. --force is used so it doesn't exit if a file isn't found
     rm --force "${i3_PATH}"/*_layout.json
     rm --force "${i3_PATH}"/*_programs.sh
+    rm --force "${i3_PATH}"/web_browsers.sh
 
     for ws in ${workspaces}; do
         save_workspace_layout ${ws}
