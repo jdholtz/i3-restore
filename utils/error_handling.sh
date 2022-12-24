@@ -13,12 +13,12 @@ trap 'error "An unknown error occured. Run ${0##*/} manually to see the error" 1
 error() {
     # Add arguments
     local args=()
-    args+=( "-m" "i3-restore: ${1}")
-    args+=( "-t error")
+    args+=("-m" "i3-restore: ${1}")
+    args+=("-t error")
 
-    if [[ -n "${2}" ]]; then
-        args+=( "-b" "View Logs" "i3-sensible-editor ${I3_RESTORE_LOG_FILE}" )
-        args+=( "-b" "Run Manually" "${0}" )
+    if [[ -n ${2} ]]; then
+        args+=("-b" "View Logs" "i3-sensible-editor ${I3_RESTORE_LOG_FILE}")
+        args+=("-b" "Run Manually" "${0}")
     fi
 
     i3-nagbar "${args[@]}" >/dev/null 2>&1

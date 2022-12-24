@@ -55,12 +55,12 @@ save_workspace_layout() {
     workspace_tree="$(i3-save-tree --workspace "${workspace}")"
 
     # If workspace is empty (i.e doesn't contain any actual configuration lines)
-    if [[ ! "${workspace_tree}" == *"{"* ]]; then
+    if [[ ${workspace_tree} != *"{"* ]]; then
         log "Empty layout for Workspace ${workspace}. Skipping..."
         return 0
     fi
 
-    echo "${workspace_tree}" > "${file_name}"
+    echo "${workspace_tree}" >"${file_name}"
 
     # Automatically edit the file
     sed --in-place 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "${file_name}"
@@ -96,7 +96,7 @@ save_workspace_layouts() {
 #####################################
 save_workspace_programs() {
     python "${I3_RESTORE_SAVE_SCRIPT}" ||
-    error "An error occured saving the session's programs. View the logs for more details" 1
+        error "An error occured saving the session's programs. View the logs for more details" 1
 }
 
 log "Saving current i3wm session"

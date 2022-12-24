@@ -35,7 +35,7 @@ restore_programs() {
     sanitized_ws_name="${sanitized_ws_name//\//\{slash\}}"
     local file="${i3_PATH}/workspace_${sanitized_ws_name}_programs.sh"
 
-    if [[ ! -f "${file}" ]]; then
+    if [[ ! -f ${file} ]]; then
         log "No programs file found for Workspace ${workspace_name}"
         return 0
     fi
@@ -44,7 +44,7 @@ restore_programs() {
 
     # Focus on the workspace. It should already be foucsed
     # from appending the layout, but this is here as a safety
-    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}" > /dev/null
+    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}" >/dev/null
 
     # Make the file executable
     chmod +x "${file}"
@@ -52,14 +52,14 @@ restore_programs() {
     # The number of containers are needed for the script to select
     # which command it wants to execute for every container
     local num_containers
-    num_containers="$(wc --lines < "${file}")"
+    num_containers="$(wc --lines <"${file}")"
     log "Number of containers: ${num_containers}"
 
     # Execute one container at a time to ensure each one is reliably
     # restored in the correct order
-    for (( i=0 ; i<"${num_containers}" ; i++ )); do
+    for ((i = 0; i < "${num_containers}"; i++)); do
         # Execute the command in the script pertaining to 'i'
-        i3-msg exec "${file}" "${i}" > /dev/null
+        i3-msg exec "${file}" "${i}" >/dev/null
         sleep 0.2
     done
 
@@ -153,12 +153,12 @@ kill_empty_containers() {
 
     # Recursively get all containers that still have swallow criteria (meaning
     # they never got populated) and kill them
-    while [[ -n "${containers}" ]]; do
+    while [[ -n ${containers} ]]; do
         local empty_containers
-        empty_containers="$(echo "${containers}" \
-            | jq 'select(( .swallows == [] | not ) and ( .type == "con" )) .window')"
+        empty_containers="$(echo "${containers}" |
+            jq 'select(( .swallows == [] | not ) and ( .type == "con" )) .window')"
 
-        if [[ -n "${empty_containers}" ]]; then
+        if [[ -n ${empty_containers} ]]; then
             local num_containers
             num_containers="$(echo "${empty_containers}" | wc --words)"
 
@@ -181,7 +181,7 @@ kill_empty_containers() {
 #####################################
 restore_browsers() {
     local file="${i3_PATH}/web_browsers.sh"
-    if [[ ! -f "${file}" ]]; then
+    if [[ ! -f ${file} ]]; then
         return 0
     fi
 
