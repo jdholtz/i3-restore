@@ -82,7 +82,7 @@ save_workspace_layouts() {
     rm --force "${i3_PATH}"/web_browsers.sh
 
     for ws in ${workspaces}; do
-        save_workspace_layout ${ws}
+        save_workspace_layout "${ws}"
     done
 }
 
