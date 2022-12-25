@@ -112,7 +112,8 @@ the [assign][6] function in i3 and add it to your i3 configuration file.
 If you run into any issues, please file an issue.
 
 Pull requests are always welcome, whether that be to fix any bugs or add new features.
-Use [pre-commit][7] to automatically format your changes.
+Use [pre-commit][7] to automatically format your changes and follow [Google's shell styleguide][8]
+when making changes to shell files.
 
 [0]: https://github.com/i3/i3
 [1]: https://www.python.org/downloads/
@@ -122,3 +123,4 @@ Use [pre-commit][7] to automatically format your changes.
 [5]: https://github.com/jordansissel/xdotool
 [6]: https://i3wm.org/docs/userguide.html#assign_workspace
 [7]: https://pre-commit.com/
+[8]: https://google.github.io/styleguide/shellguide.html
