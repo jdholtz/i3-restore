@@ -2,6 +2,23 @@
 When upgrading to a new version, make sure to follow the directions under the "Upgrading" header of the corresponding version.
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
+
+## 3.0 (2022-12-24)
+
+### New Features
+- New formatting standards were added for Contributors
+
+### Improvements
+- Restoring was once again significantly improved. It now works with restoring subprocesses in
+terminals with different window titles (Vim, Emacs, cmus, etc.)
+
+### Upgrading
+A couple of changes need to be done when upgrading to this version:
+1. [xdotool](https://github.com/jordansissel/xdotool) is now needed as a dependency
+2. `i3-restore.sh` was changed to `i3-restore` and `i3-save.sh` was changed to `i3-save`. Please
+make the necessary changes within your i3 config
+
+
 ## 2.0 (2022-11-08)
 
 ### New Features
@@ -13,6 +30,7 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 ### Upgrading
 When upgrading to this version, make sure to delete all files in you `i3_Path` that end with `programs.json`, as those files
 will never be removed (the file names changed).
+
 
 ## 1.2 (2022-10-29)
 
