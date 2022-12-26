@@ -17,6 +17,8 @@ check_version_flag "$@"
 # Start logger
 source "${CURR_DIR}/utils/logs.sh"
 
+source "${CURR_DIR}/utils/automatic_saving.sh"
+
 #####################################
 # Restore all programs within a workspace.
 # Globals:
@@ -223,6 +225,20 @@ restore_workspaces() {
     i3-msg restart
 }
 
+#####################################
+# If the restore script is invoked with
+# --interval, initialize automatic saving.
+# Arguments:
+#   First two arguments to the script
+#####################################
+start_automatic_saving() {
+    if [[ ${1} == "--interval" ]]; then
+        start_save_interval "${2}"
+    fi
+}
+
 log "Restoring current i3wm session"
 restore_workspaces
 log "Finished restoring current i3wm session\n"
+
+start_automatic_saving "${1}" "${2}"

@@ -1,6 +1,6 @@
 # i3-restore
 
-A simple Python script to restore your [i3][0] session. It works very similar to how Firefox restores a previous session.
+A simple Python and Bash script to restore your [i3][0] session. It works very similar to how Firefox restores a previous session.
 The script can correctly restore terminal editor sessions (such as Vim) and web browser instances exactly how they were before.
 
 ## Table of Contents
@@ -74,11 +74,12 @@ The configuration file the script uses to restore "special" programs (terminal e
 If you want to add another program (or change an existing one) to the configuration file, follow the documentation in the file
 to enter the correct information.
 
-**Note**: Pull requests are always welcome, especially if you want to add a new program to the configuration file
+**Note**: Pull requests are encouraged if you have added and tested a new program in the configuration file
 
 ## Automating The Script
 i3-restore can be automatically triggered every time i3 stops and starts. This is useful if you want to automatically restore
-your session after a restart or logging out.
+your session after a restart or logging out. You can also configure the script to save your session on an interval to ensure
+you don't lose your current session layout if `i3-save` wasn't triggered.
 
 ### Saving
 To automatically save your session before exiting i3, simply trigger `i3-save` to run by putting it in your i3 configuration file.
@@ -100,6 +101,12 @@ mode "exit: [l]ogout, [r]eboot, [h]ibernate, [s]leep, [p]oweroff" {
 Similarly, you can also automatically restore your session upon starting i3. To do this, simply put this line in your i3 configuration file:
 ```
 exec /path/to/i3-restore/i3-restore
+```
+
+To automatically save your session on an interval, pass the `--interval` flag into the script. You can also configure how often
+the save is triggered (it defaults to 10 minutes if no argument is passed in).
+```
+exec /path/to/i3-restore/i3-restore --interval <minutes>
 ```
 **Note**: To restore web browsers correctly, you need to have their "Restore previous session" feature enabled
 
