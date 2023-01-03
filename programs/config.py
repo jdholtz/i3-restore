@@ -13,6 +13,9 @@ TERMINALS = [
 ]
 
 
+# The launch command prefix to use for subprocess programs
+terminal_launch_command = "alacritty -e bash -c "
+
 # A list of programs that run as subprocesses of a shell (vim, emacs, cmus, etc.). These are usually
 # programs that run in the same window the command is executed in and, when exited, they return to the shell.
 #
@@ -26,11 +29,19 @@ TERMINALS = [
 SUBPROCESS_PROGRAMS = [
     {
         "name": "vim",
-        "launch_command": 'alacritty -e bash -c "TERM=xterm-256color && {command} && bash"',
+        "launch_command": terminal_launch_command + '"TERM=xterm-256color && {command} && bash"',
     },
     {
         "name": "cmus",
-        "launch_command": 'alacritty -e bash -c "{command}"',
+        "launch_command": terminal_launch_command + '"{command}"',
+    },
+    {
+        "name": "ssh",
+        "launch_command": terminal_launch_command + '"{command} && bash"',
+    },
+    {
+        "name": "man",
+        "launch_command": terminal_launch_command + '"{command} && bash"',
     },
 ]
 

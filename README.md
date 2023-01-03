@@ -1,7 +1,7 @@
 # i3-restore
 
 A simple Python and Bash script to restore your [i3][0] session. It works very similar to how Firefox restores a previous session.
-The script can correctly restore terminal editor sessions (such as Vim) and web browser instances exactly how they were before.
+The script can correctly restore terminal sessions (such as Vim and ssh) and web browser instances exactly how they were before.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
@@ -40,6 +40,9 @@ Then, verify the script is working
 ```shell
 $ ./i3-save
 ```
+
+Make sure to read the [Configuration](#configuring) section before officially using the script to ensure programs specific
+to you are set up correctly (terminals, web browsers, etc.).
 
 ## Upgrading
 When upgrading this script, it is important to follow the [Changelog](CHANGELOG.md) for any actions that need to be performed,
