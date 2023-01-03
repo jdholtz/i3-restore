@@ -20,6 +20,29 @@ source "${CURR_DIR}/utils/logs.sh"
 source "${CURR_DIR}/utils/automatic_saving.sh"
 
 #####################################
+# Get all the window IDs on a workspace
+# Arguments:
+#   Workspace name
+# Returns:
+#   The IDs of the windows on the workspace
+#####################################
+get_window_ids_on_workspace() {
+    local workspace_name="${1}"
+
+    # First, get the workspace tree from the i3 tree. Then, get the
+    # window IDs that are not null and return those.
+    local window_ids="$(
+        i3-msg -t get_tree |
+        jq --arg ws "${workspace_name}" \
+            'recurse(.nodes[]) |
+             select(.name==$ws) |
+             recurse(.nodes[]).window |
+             select(. != null)'
+    )"
+    echo "${window_ids}"
+}
+
+#####################################
 # Restore all programs within a workspace.
 # Globals:
 #   i3_PATH
@@ -66,7 +89,7 @@ restore_programs() {
     done
 
     # Return the newly created window IDs so they can be unmapped
-    window_ids="$(xdotool search --onlyvisible --class ".*" | tail -n "${num_containers}")"
+    window_ids="$(get_window_ids_on_workspace ${workspace_name})"
     echo "${window_ids}"
 }
 
