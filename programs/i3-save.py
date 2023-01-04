@@ -100,7 +100,15 @@ class Container:
         self.working_directory = None
 
         self.pid = self.get_pid(properties)
-        self.get_cmdline_options(properties)
+
+        try:
+            self.get_cmdline_options(properties)
+        except psutil.AccessDenied:
+            logger.debug(
+                "Access denied while trying to access container command line options. Skipping..."
+            )
+            # Don't save the container if it fails to access all of its attributes
+            self.command = None
 
     @staticmethod
     def get_pid(properties: JSON) -> Optional[int]:
