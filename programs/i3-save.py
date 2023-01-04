@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 import psutil
 
@@ -15,8 +16,11 @@ i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
 # Set up the web browsers dictionary to keep track of already running web browsers
 WEB_BROWSERS_DICT = dict.fromkeys(WEB_BROWSERS, False)
 
+# Type alias for JSON
+JSON = utils.JSON
 
-def main():
+
+def main() -> None:
     workspaces = utils.get_workspaces()
     for workspace in workspaces:
         Workspace(workspace)
@@ -28,7 +32,7 @@ class Workspace:
     startup commands to a file so they can be restored
     """
 
-    def __init__(self, properties):
+    def __init__(self, properties: JSON) -> None:
         self.name = properties["name"]
         self.containers = []
 
@@ -36,7 +40,7 @@ class Workspace:
         self.get_containers(properties)
         self.save()
 
-    def get_containers(self, properties):
+    def get_containers(self, properties: JSON) -> None:
         """Recursive function to get all containers in a workspace"""
         containers = properties["nodes"]
         for container in containers:
@@ -51,7 +55,7 @@ class Workspace:
             else:
                 self.get_containers(container)
 
-    def save(self):
+    def save(self) -> None:
         """Save all the containers' commands in a file"""
 
         # Don't save if there are no containers in the workspace
@@ -91,7 +95,7 @@ class Container:
     of the container.
     """
 
-    def __init__(self, properties):
+    def __init__(self, properties: JSON) -> None:
         self.command = None
         self.working_directory = None
 
@@ -99,7 +103,7 @@ class Container:
         self.get_cmdline_options(properties)
 
     @staticmethod
-    def get_pid(properties):
+    def get_pid(properties: JSON) -> Optional[int]:
         """Get the PID of the current container"""
         try:
             pid_info = subprocess.check_output(
@@ -112,7 +116,7 @@ class Container:
 
         return pid_info
 
-    def get_cmdline_options(self, properties):
+    def get_cmdline_options(self, properties: JSON) -> None:
         """Set the command and working directory of the container"""
         if self.pid is None:
             return
@@ -140,7 +144,7 @@ class Container:
         # restoring every instance.
         self.handle_web_browser()
 
-    def check_if_subprocess(self, process):
+    def check_if_subprocess(self, process: psutil.Process) -> None:
         """
         Checks whether or not the process has any subprocesses that should be
         saved. Examples of subprocesses that run in the terminal include Vim,
