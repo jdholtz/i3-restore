@@ -101,15 +101,22 @@ class Container:
     @staticmethod
     def get_pid(properties):
         """Get the PID of the current container"""
-        pid_info = (
-            subprocess.check_output(["xprop", "_NET_WM_PID", "-id", str(properties["window"])])
-            .decode("utf-8")
-            .rstrip()
-        )
-        return int(pid_info.split("= ")[1])
+        try:
+            pid_info = subprocess.check_output(
+                ["xdotool", "getwindowpid", str(properties["window"])], stderr=subprocess.DEVNULL
+            ).decode("utf-8")
+            pid_info = int(pid_info)
+        except subprocess.CalledProcessError:
+            logger.debug("No PID associated with container. Skipping...")
+            pid_info = None
+
+        return pid_info
 
     def get_cmdline_options(self, properties):
         """Set the command and working directory of the container"""
+        if self.pid is None:
+            return
+
         process = psutil.Process(self.pid)
 
         # First, check if it is a terminal
