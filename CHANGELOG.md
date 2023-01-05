@@ -3,6 +3,20 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
+## 3.1 (2023-01-05)
+
+### New Features
+- An `--interval` flag can now be specified to automatically save your i3 session every X minutes. See more information on
+how to use this in the [Restoring section of the README](README.md#restoring)
+- Natively support restoring `ssh` and `man` in the configuration
+- A [Contributing.md](CONTRIBUTING.md) doc and [License](LICENSE) were added to clarify how to contribute to this project
+- A [GitHub workflow](.github/workflows/lint-format.yml) was added to ensure the integrity of the code
+
+### Bug Fixes
+- Fix restoring not working correctly on setups with multiple outputs/monitors
+- Skip saving containers that don't have valid PIDs or access is denied to information about the programs running on them
+
+
 ## 3.0 (2022-12-24)
 
 ### New Features
