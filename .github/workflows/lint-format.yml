@@ -1,0 +1,65 @@
+name: Lint + Format
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "i3-restore"
+      - "i3-save"
+      - "**.py"
+      - "**.bash"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - ".github/workflows/lint-format.yml"
+  pull_request:
+    paths:
+      - "i3-restore"
+      - "i3-save"
+      - "**.py"
+      - "**.bash"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - ".github/workflows/lint-format.yml"
+
+jobs:
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: isort
+        uses: isort/isort-action@v1.1.0
+        with:
+          requirements-files: "requirements.txt"
+
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: black
+        uses: psf/black@stable
+
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: flake8 lint
+        uses: py-actions/flake8@v2
+
+  sh-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run sh-checker
+        uses: luizm/action-sh-checker@v0.5.0
+        env:
+          SHELLCHECK_OPTS: -x --severity=warning
+          SHFMT_OPTS: -s
