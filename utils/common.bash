@@ -6,8 +6,12 @@ I3_RESTORE_LOG_FILE="${LOG_DIR}/i3-restore.log"
 LOG_FILE_OLD="i3-restore-old.log"
 LOG_FILE_SIZE=1000
 
+# shellcheck disable=SC2034
+readonly LOG_DIR I3_RESTORE_LOG_FILE LOG_FILE_OLD LOG_FILE_SIZE
+
 # Set default if not configured
 i3_PATH="${i3_PATH:=${HOME}/.config/i3}"
+readonly i3_PATH
 
 #####################################
 # Display the script's version if it was
@@ -18,7 +22,7 @@ i3_PATH="${i3_PATH:=${HOME}/.config/i3}"
 #   All arguments passed into either script
 #####################################
 check_version_flag() {
-    if [[ ! "${@#--version}" = "$@" || ! "${@#-v}" = "$@" ]]; then
+    if [[ ${*#--version} != "$*" || ${*#-v} != "$*" ]]; then
         version="$(cat VERSION)"
         echo "i3-restore version ${version}"
         exit

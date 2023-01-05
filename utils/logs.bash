@@ -25,7 +25,8 @@ init_log() {
 #   LOG_FILE_SIZE
 #####################################
 rotate_log() {
-    local current_log_size="$(wc <"${I3_RESTORE_LOG_FILE}" --lines)"
+    local current_log_size
+    current_log_size="$(wc <"${I3_RESTORE_LOG_FILE}" --lines)"
     if [[ ${current_log_size} -gt ${LOG_FILE_SIZE} ]]; then
         cp "${I3_RESTORE_LOG_FILE}" "${LOG_DIR}/${LOG_FILE_OLD}"
         rm "${I3_RESTORE_LOG_FILE}"
@@ -40,7 +41,7 @@ rotate_log() {
 #   I3_RESTORE_LOG_FILE
 #####################################
 log() {
-    echo -e $1 >>"${I3_RESTORE_LOG_FILE}"
+    echo -e "${1}" >>"${I3_RESTORE_LOG_FILE}"
 }
 
 init_log

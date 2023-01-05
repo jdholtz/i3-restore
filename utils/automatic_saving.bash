@@ -57,7 +57,7 @@ check_i3_alive() {
 #   interval time, in minutes
 #####################################
 start_save_interval() {
-    sleep_time="$(get_sleep_time ${1})"
+    sleep_time="$(get_sleep_time "${1}")"
     i3_pid="$(pidof i3)"
 
     log "Starting automatic saving on an interval of ${sleep_time} seconds"

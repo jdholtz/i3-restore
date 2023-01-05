@@ -9,16 +9,16 @@ CURR_DIR="$(dirname "${0}")"
 I3_RESTORE_SAVE_SCRIPT="${CURR_DIR}/programs/i3-save.py"
 
 # Import common variables and functions
-source "${CURR_DIR}/utils/common.sh"
+source "${CURR_DIR}/utils/common.bash"
 
 # Handle errors
-source "${CURR_DIR}/utils/error_handling.sh"
+source "${CURR_DIR}/utils/error_handling.bash"
 
 check_version_flag "$@"
 check_dependencies
 
 # Start logger
-source "${CURR_DIR}/utils/logs.sh"
+source "${CURR_DIR}/utils/logs.bash"
 rotate_log
 
 #####################################
