@@ -77,7 +77,8 @@ The configuration file the script uses to restore "special" programs (terminal e
 If you want to add another program (or change an existing one) to the configuration file, follow the documentation in the file
 to enter the correct information.
 
-**Note**: Pull requests are encouraged if you have added and tested a new program in the configuration file
+**Note**: Pull requests are encouraged if you have added and tested a new program in the configuration file. See [Contributing.md](CONTRIBUTING.md)
+for more information.
 
 ## Automating The Script
 i3-restore can be automatically triggered every time i3 stops and starts. This is useful if you want to automatically restore
@@ -121,9 +122,7 @@ the [assign][6] function in i3 and add it to your i3 configuration file.
 ## Contributing
 If you run into any issues, please file an issue.
 
-Pull requests are always welcome, whether that be to fix any bugs or add new features.
-Use [pre-commit][7] to automatically format your changes and follow [Google's shell styleguide][8]
-when making changes to shell files.
+Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md) if you are considering making contributions.
 
 [0]: https://github.com/i3/i3
 [1]: https://www.python.org/downloads/
@@ -132,5 +131,3 @@ when making changes to shell files.
 [4]: https://archlinux.org/packages/community/any/perl-anyevent-i3/
 [5]: https://github.com/jordansissel/xdotool
 [6]: https://i3wm.org/docs/userguide.html#assign_workspace
-[7]: https://pre-commit.com/
-[8]: https://google.github.io/styleguide/shellguide.html
