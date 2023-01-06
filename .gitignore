@@ -4,5 +4,6 @@
 # Python cache
 __pycache__
 
-# Log files
+# Program files
+config.json
 logs/

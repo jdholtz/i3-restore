@@ -1,0 +1,29 @@
+{
+    "terminals": [
+        {
+            "class": "Alacritty",
+            "command": "alacritty"
+        }
+    ],
+    "subprocesses": [
+        {
+            "name": "vim",
+            "launch_command": "alacritty -e bash -c 'TERM=xterm-256color && {command} && bash'"
+        },
+        {
+            "name": "cmus",
+            "launch_command": "alacritty -e bash -c '{command}'"
+        },
+        {
+            "name": "ssh",
+            "launch_command": "alacritty -e bash -c '{command} && bash'"
+        },
+        {
+            "name": "man",
+            "launch_command": "alacritty -e bash -c '{command} && bash'"
+        }
+    ],
+    "web_browsers": [
+        "firefox"
+    ]
+}

@@ -4,7 +4,7 @@ to contribute to **i3-restore**.
 
 ## Adding To The Configuration
 Adding/modifying the configuration file is highly encouraged to increase i3-restore's compatibility with common software. Simply add
-your desired programs to the [config](programs/config.py), test it, and submit a PR!
+your desired programs to the [config.example.json](config.example.json), test it, and submit a PR!
 
 ## Coding Conventions
 This project follows [Google's Shell Style Guide][0]. Please use your best judgement when

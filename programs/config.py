@@ -1,56 +1,66 @@
-# This config file is used to customize how i3-restore restores select programs.
+import json
+import os
+import sys
+
+import utils
+
+CONFIG_FILE_NAME = "config.json"
+
+# Type alias for JSON
+JSON = utils.JSON
+
+logger = utils.get_logger()
 
 
-# A list of all terminals you use.
-#
-# Include the class of the terminal window as well as the command used to launch the terminal.
-# The class can be found in the WM_CLASS(STRING) variable after running 'xprop' inside of the window.
-TERMINALS = [
-    {
-        "class": "Alacritty",
-        "command": "alacritty",
-    },
-]
+class Config:
+    def __init__(self):
+        # Default values are set
+        self.terminals = []
+        self.subprocesses = []
+        self.web_browsers = []
 
+        config = self._read_config()
 
-# The launch command prefix to use for subprocess programs
-terminal_launch_command = "alacritty -e bash -c "
+        # Set the configuration values if provided
+        try:
+            self._parse_config(config)
+        except TypeError as err:
+            logger.error("Error in configuration file:")
+            logger.error(err)
+            sys.exit(1)
 
-# A list of programs that run as subprocesses of a shell (vim, emacs, cmus, etc.). These are usually
-# programs that run in the same window the command is executed in and, when exited, they return to the shell.
-#
-# 'name' is the command used to launch the program itself (usually the same as the programs's name)
+    def _read_config(self) -> JSON:
+        project_dir = os.path.dirname(os.path.dirname(__file__))
+        config_file = project_dir + "/" + CONFIG_FILE_NAME
 
-# 'launch_command' is how you want the program to be launched upon startup (processes that run in
-# the shell will need to be launched from the terminal itself to maintain the exact structure (exiting
-# doesn't quit the entire session, but it brings you back to the shell). The {command} placeholder is
-# where you actually want the terminal editor launch command to go. The script will replace this placeholder
-# with the actual command at runtime.
-SUBPROCESS_PROGRAMS = [
-    {
-        "name": "vim",
-        "launch_command": terminal_launch_command + '"TERM=xterm-256color && {command} && bash"',
-    },
-    {
-        "name": "cmus",
-        "launch_command": terminal_launch_command + '"{command}"',
-    },
-    {
-        "name": "ssh",
-        "launch_command": terminal_launch_command + '"{command} && bash"',
-    },
-    {
-        "name": "man",
-        "launch_command": terminal_launch_command + '"{command} && bash"',
-    },
-]
+        try:
+            with open(config_file) as file:
+                config = json.load(file)
+            logger.debug("Configuration file found at %s", config_file)
+        except FileNotFoundError:
+            logger.debug("No configuration file found at %s", config_file)
+            config = {}
 
+        return config
 
-# A list of all web browsers you use.
-#
-# This is used to ensure only one instance of each browser pops up
-# because the web browser itself will restore every window, so doing
-# it in the script only creates extra windows.
-WEB_BROWSERS = [
-    "firefox",
-]
+    def _parse_config(self, config: JSON) -> None:
+        if "terminals" in config:
+            self.terminals = config["terminals"]
+
+            if not isinstance(self.terminals, list):
+                raise TypeError("'terminals' must be a list")
+            logger.debug("Terminals configuration: %s", self.terminals)
+
+        if "subprocesses" in config:
+            self.subprocesses = config["subprocesses"]
+
+            if not isinstance(self.subprocesses, list):
+                raise TypeError("'subprocesses' must be a list")
+            logger.debug("Subprocesses configuration: %s", self.subprocesses)
+
+        if "web_browsers" in config:
+            self.web_browsers = config["web_browsers"]
+
+            if not isinstance(self.web_browsers, list):
+                raise TypeError("'web_browsers' must be a list")
+            logger.debug("Web browsers configuration: %s", self.web_browsers)

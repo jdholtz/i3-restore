@@ -8,8 +8,6 @@ The script can correctly restore terminal sessions (such as Vim and ssh) and web
     * [Dependencies](#dependencies)
 - [Upgrading](#upgrading)
 - [Configuring](#configuring)
-    * [Setting A Custom Save Path](#setting-a-custom-save-path)
-    * [Configuring Special Programs To Restore Correctly](#configuring-special-programs-to-restore-correctly)
 - [Automating The Script](#automating-the-script)
     * [Saving](#saving)
     * [Restoring](#restoring)
@@ -41,7 +39,7 @@ Then, verify the script is working
 $ ./i3-save
 ```
 
-Make sure to read the [Configuration](#configuring) section before officially using the script to ensure programs specific
+Make sure to read the [Configuring](#configuring) section before officially using the script to ensure programs specific
 to you are set up correctly (terminals, web browsers, etc.).
 
 ## Upgrading
@@ -67,18 +65,9 @@ If you want the latest cutting edge features, you can use the `develop` branch. 
 do not guarantee reliability nor are changes documented in the Changelog.
 
 ## Configuring
+To use the default configuration file, copy `config.example.json` to `config.json`.
 
-### Setting A Custom Save Path
-By default, the layout and program files are saved under `$HOME/.config/i3`. To change this, set the `i3_PATH` environment variable to
-the desired location.
-
-### Configuring Special Programs To Restore Correctly
-The configuration file the script uses to restore "special" programs (terminal editors, web browsers) is in `programs/config.py`.
-If you want to add another program (or change an existing one) to the configuration file, follow the documentation in the file
-to enter the correct information.
-
-**Note**: Pull requests are encouraged if you have added and tested a new program in the configuration file. See [Contributing.md](CONTRIBUTING.md)
-for more information.
+For information on how to set up the configuration for your needs, see [Configuration.md](CONFIGURATION.md)
 
 ## Automating The Script
 i3-restore can be automatically triggered every time i3 stops and starts. This is useful if you want to automatically restore

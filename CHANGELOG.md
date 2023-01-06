@@ -3,6 +3,18 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
+## Upcoming
+
+### Improvements
+- The configuration file was changed from `programs/config.py` to `config.json`, making it much easier to configure i3-restore.
+Additionally, a [Configuration](CONFIGURATION.md) guide was written to facilitate the script's configuration.
+
+### Upgrading
+- Make sure to transfer your configuration from `programs/config.py` to `config.json`. Make sure to look at the
+[Configuration.md](CONFIGURATION.md) guide to properly set up the configuration. Most of this can be done by copy-pasting your
+old configuration into the new file.
+
+
 ## 3.1 (2023-01-05)
 
 ### New Features

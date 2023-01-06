@@ -6,18 +6,20 @@ from typing import Optional
 
 import psutil
 
+import config
 import utils
-from config import SUBPROCESS_PROGRAMS, TERMINALS, WEB_BROWSERS
 
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
 HOME = os.getenv("HOME")
 i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
 
-# Set up the web browsers dictionary to keep track of already running web browsers
-WEB_BROWSERS_DICT = dict.fromkeys(WEB_BROWSERS, False)
-
 # Type alias for JSON
 JSON = utils.JSON
+
+CONFIG = config.Config()
+
+# Set up the web browsers dictionary to keep track of already running web browsers
+WEB_BROWSERS_DICT = dict.fromkeys(CONFIG.web_browsers, False)
 
 
 def main() -> None:
@@ -132,7 +134,7 @@ class Container:
         process = psutil.Process(self.pid)
 
         # First, check if it is a terminal
-        for terminal in TERMINALS:
+        for terminal in CONFIG.terminals:
             if properties["window_properties"]["class"] == terminal["class"]:
                 logger.debug("Main process of container is a terminal")
 
@@ -163,7 +165,7 @@ class Container:
         """
         for child in reversed(process.children(True)):
             child_name = child.name()
-            for program in SUBPROCESS_PROGRAMS:
+            for program in CONFIG.subprocesses:
                 if child_name == program["name"]:
                     logger.debug(
                         "Subprocess '%s' found in main process '%s'", child_name, process.name()
@@ -178,7 +180,7 @@ class Container:
 
     def handle_web_browser(self) -> None:
         """Checks whether the container's program is a web browser"""
-        for web_browser in WEB_BROWSERS:
+        for web_browser in CONFIG.web_browsers:
             if web_browser in self.command:
                 self.save_web_browser(web_browser)
                 self.command = None
