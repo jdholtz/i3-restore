@@ -25,18 +25,18 @@ The script can correctly restore terminal sessions (such as Vim and ssh) and web
 
 First, download the script onto your computer
 ```shell
-$ git clone https://github.com/jdholtz/i3-restore.git
-$ cd i3-restore
+git clone https://github.com/jdholtz/i3-restore.git
+cd i3-restore
 ```
 
 Next, install the needed packages for the script
 ```shell
-$ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 Then, verify the script is working
 ```shell
-$ ./i3-save
+./i3-save
 ```
 
 Make sure to read the [Configuring](#configuring) section before officially using the script to ensure programs specific
@@ -48,17 +48,17 @@ as many changes will not be made backwards compatible.
 
 Check the version of the script
 ```shell
-$ ./i3-save --version
+./i3-save --version
 ```
 
 To upgrade, pull the latest changes from the repository
 ```shell
-$ git pull
+git pull
 ```
 
 Again, verify the script is working
 ```shell
-$ ./i3-save
+./i3-save
 ```
 
 If you want the latest cutting edge features, you can use the `develop` branch. However, keep in mind that changes to this branch

@@ -1,6 +1,6 @@
 # Contributing to i3-restore
 Welcome! Thanks for considering contributing to the development of **i3-restore**. This guide contains useful tips and guidelines
-to contribute to **i3-restore**.
+to contribute to this project.
 
 ## Adding To The Configuration
 Adding/modifying the configuration file is highly encouraged to increase i3-restore's compatibility with common software. Simply add
