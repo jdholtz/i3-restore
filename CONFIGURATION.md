@@ -10,6 +10,7 @@ for more information.
 - [Subprocesses](#subprocesses)
 - [Web Browsers](#web-browsers)
 - [Setting A Custom Save Path](#setting-a-custom-save-path)
+- [Restoring Vim And Neovim Sessions](#restoring-vim-and-neovim-sessions)
 
 ## Terminals
 Two things are needed to set up terminal configuration:
@@ -82,3 +83,7 @@ contains the configured web browsers
 ## Setting A Custom Save Path
 By default, the layout and program files are saved under `$HOME/.config/i3`. To change this, set the `i3_PATH` environment variable to
 the desired location.
+
+## Restoring Vim And Neovim Sessions
+It is recommended to use [vim-prosession](https://github.com/dhruvasagar/vim-prosession) to manage your vim/neovim sessions, allowing for
+more reliable restores.

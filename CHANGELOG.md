@@ -8,9 +8,11 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 ### Improvements
 - The configuration file was changed from `programs/config.py` to `config.json`, making it much easier to configure i3-restore.
 Additionally, a [Configuration](CONFIGURATION.md) guide was written to facilitate the script's configuration.
+- Added [a note](CONFIGURATION.md#restoring-vim-and-neovim-sessions) in the Configuration Doc about restoring Vim/Neovim sessions
+more reliably
 
 ### Upgrading
-- Make sure to transfer your configuration from `programs/config.py` to `config.json`. Make sure to look at the
+- Make sure to transfer your configuration from `programs/config.py` to `config.json`. Be sure to look at the
 [Configuration.md](CONFIGURATION.md) guide to properly set up the configuration. Most of this can be done by copy-pasting your
 old configuration into the new file.
 
