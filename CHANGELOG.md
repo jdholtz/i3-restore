@@ -3,7 +3,7 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
-## Upcoming
+## 3.2 (2023-01-16)
 
 ### Improvements
 - The configuration file was changed from `programs/config.py` to `config.json`, making it much easier to configure i3-restore.
