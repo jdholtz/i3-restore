@@ -20,9 +20,12 @@ against these linters, use your best judgement to determine whether to fix the i
 [Shfmt][4] is used to format the bash scripts and [Black][5] is used to format the Python scripts. Using a common formatter
 ensures that the code looks the same throughout the project.
 
+It is also highly recommended to use an [EditorConfig][6] plugin for your code editor to maintain a consistent coding style for all project files.
+
 [0]: https://google.github.io/styleguide/shellguide.html
 [1]: https://pre-commit.com
 [2]: https://www.shellcheck.net
 [3]: https://flake8.pycqa.org/en/latest
 [4]: https://github.com/mvdan/sh
 [5]: https://black.readthedocs.io/en/stable
+[6]: https://editorconfig.org/

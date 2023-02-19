@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - develop
     paths:
       - "i3-restore"
       - "i3-save"
