@@ -3,6 +3,17 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
+## Upcoming
+
+### Improvements
+- Restoring subprocesses is now handled better (and works with the kitty terminal!)
+
+### Upgrading
+- Subprocess configuration has changed. Please refer to both the [Subprocess](CONFIGURATION.md#subprocesses) configuration
+section and the [example configuration file](config.example.json) to adjust your configuration correctly
+- Python 3.7+ is now needed as a dependency (previously Python 3+)
+
+
 ## 3.2 (2023-01-16)
 
 ### Improvements

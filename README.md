@@ -18,7 +18,7 @@ The script can correctly restore terminal sessions (such as Vim and ssh) and web
 ## Getting Started
 
 ### Dependencies
-- [Python 3+][1]
+- [Python 3.7+][1]
 - [Pip][2]
 - [Jq][3]
 - [Perl-anyevent-i3][4]

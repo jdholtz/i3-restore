@@ -73,8 +73,9 @@ restore_programs() {
     # from appending the layout, but this is here as a safety
     i3-msg "workspace --no-auto-back-and-forth ${workspace_name}" >/dev/null
 
-    # Make the file executable
+    # Make the file executable and all subprocess programs in the same workspace
     chmod +x "${file}"
+    chmod +x "${i3_PATH}"/workspace_"${sanitized_ws_name}"_subprocess_*.sh
 
     # The number of containers are needed for the script to select
     # which command it wants to execute for every container
@@ -87,7 +88,7 @@ restore_programs() {
     for ((i = 0; i < "${num_containers}"; i++)); do
         # Execute the command in the script pertaining to 'i'
         i3-msg exec "${file}" "${i}" >/dev/null
-        sleep 0.2
+        sleep 0.3
     done
 
     # Return the newly created window IDs so they can be unmapped
