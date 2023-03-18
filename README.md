@@ -12,12 +12,13 @@ The script can correctly restore terminal sessions (such as Vim and ssh) and web
     * [Saving](#saving)
     * [Restoring](#restoring)
     * [Restoring Programs In Assigned Workspaces](#restoring-programs-in-assigned-workspaces)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 
 ## Getting Started
 
 ### Dependencies
-- [Python 3+][1]
+- [Python 3.7+][1]
 - [Pip][2]
 - [Jq][3]
 - [Perl-anyevent-i3][4]
@@ -107,10 +108,15 @@ exec /path/to/i3-restore/i3-restore --interval <minutes>
 Some programs that take a few seconds to start (such as Discord) might not restore on the correct workspace. To mitigate this issue, simply use
 the [assign][6] function in i3 and add it to your i3 configuration file.
 
+## Troubleshooting
+If you run into any issues, please file it via [GitHub Issues][7]. Please attach any relevant logs (can be found in
+`logs/i3-restore.log`) to the issue. The logs may contain sensitive information such as directory names, program
+launch commands, and configuration settings, so make sure to remove any information you don't want to be shared before
+attaching them.
+
+If you have any questions or discussion topics, start a [GitHub Discussion][8].
 
 ## Contributing
-If you run into any issues, please file an issue.
-
 Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md) if you are considering making contributions.
 
 [0]: https://github.com/i3/i3
@@ -120,3 +126,5 @@ Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md)
 [4]: https://archlinux.org/packages/community/any/perl-anyevent-i3/
 [5]: https://github.com/jordansissel/xdotool
 [6]: https://i3wm.org/docs/userguide.html#assign_workspace
+[7]: https://github.com/jdholtz/i3-restore/issues/new/choose
+[8]: https://github.com/jdholtz/i3-restore/discussions/new/choose

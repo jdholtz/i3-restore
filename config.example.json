@@ -3,24 +3,32 @@
         {
             "class": "Alacritty",
             "command": "alacritty"
+        },
+        {
+            "class": "kitty",
+            "command": "kitty"
         }
     ],
     "subprocesses": [
         {
             "name": "vim",
-            "launch_command": "alacritty -e bash -c 'TERM=xterm-256color && {command} && bash'"
+            "launch_command": "{command}"
         },
         {
             "name": "cmus",
-            "launch_command": "alacritty -e bash -c '{command}'"
+            "launch_command": "{command} && i3-msg kill"
         },
         {
             "name": "ssh",
-            "launch_command": "alacritty -e bash -c '{command} && bash'"
+            "launch_command": "{command}"
         },
         {
             "name": "man",
-            "launch_command": "alacritty -e bash -c '{command} && bash'"
+            "launch_command": "{command}"
+        },
+        {
+            "name": "ipython",
+            "launch_command": "{command}"
         }
     ],
     "web_browsers": [

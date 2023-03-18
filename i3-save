@@ -79,6 +79,7 @@ save_workspace_layouts() {
     # Remove previous saved session. --force is used so it doesn't exit if a file isn't found
     rm --force "${i3_PATH}"/*_layout.json
     rm --force "${i3_PATH}"/*_programs.sh
+    rm --force "${i3_PATH}"/*_subprocess_*.sh
     rm --force "${i3_PATH}"/web_browsers.sh
 
     for ws in ${workspaces}; do
@@ -95,7 +96,7 @@ save_workspace_layouts() {
 #   None
 #####################################
 save_workspace_programs() {
-    python "${I3_RESTORE_SAVE_SCRIPT}" ||
+    python3 "${I3_RESTORE_SAVE_SCRIPT}" ||
         error "An error occured saving the session's programs. View the logs for more details" 1
 }
 

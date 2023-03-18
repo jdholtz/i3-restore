@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
@@ -36,6 +38,10 @@ class Workspace:
 
     def __init__(self, properties: JSON) -> None:
         self.name = properties["name"]
+
+        # For some reason, i3 doesn't execute scripts with a space in the name correctly
+        # so this will be used when for script file names
+        self.sanitized_name = self.name.replace("/", "{slash}").replace(" ", "{space}")
         self.containers = []
 
         logger.debug("Saving programs for Workspace %s", self.name)
@@ -67,9 +73,7 @@ class Workspace:
 
         logger.debug("Number of containers: %s", len(self.containers))
 
-        # For some reason, i3 doesn't execute scripts with a space in the name correctly
-        sanitized_name = self.name.replace("/", "{slash}").replace(" ", "{space}")
-        file = Path(i3_PATH) / f"workspace_{sanitized_name}_programs.sh"
+        file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_programs.sh"
 
         program_commands = ""
         for i, container in enumerate(self.containers):
@@ -82,13 +86,29 @@ class Workspace:
             # Each command is prefixed with a selection statement so we have control
             # to restore only one container at a time. This ensures the containers restore
             # reliably in the correct order.
-            program_commands += (
-                f'[[ $1 == {i} ]] && cd "{container.working_directory}" '
-                f"&& {container.command}\n"
-            )
+            program_commands += f'[[ $1 == {i} ]] && cd "{container.working_directory}" && '
+
+            # Containers with subprocess commands need to save where they stored the
+            # subprocess command so it could be executed correctly when restored
+            if container.subprocess_command:
+                subprocess_file = self.save_subprocess(container, i)
+                program_commands += f"I3_RESTORE_SUBPROCESS_SCRIPT={subprocess_file} "
+
+            program_commands += f"{container.command}\n"
 
         with file.open("w") as f:
             f.write(program_commands)
+
+    def save_subprocess(self, container: Container, container_num: int) -> Path:
+        """
+        Write the subprocess command to a separate file. This makes executed commands
+        behave (nearly) identically to how it would be executed in a terminal.
+        """
+        file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_subprocess_{container_num}.sh"
+        with file.open("w") as f:
+            f.write(container.subprocess_command)
+
+        return file
 
 
 class Container:
@@ -99,6 +119,7 @@ class Container:
 
     def __init__(self, properties: JSON) -> None:
         self.command = None
+        self.subprocess_command = None
         self.working_directory = None
 
         self.pid = self.get_pid(properties)
@@ -141,9 +162,13 @@ class Container:
                 # The terminal command is set here manually so the custom command used to restore
                 # the subprocess works as expected and doesn't store "[terminal] -e bash -c ..."
                 self.command = terminal["command"]
-                self.working_directory = process.children()[0].cwd()
 
                 self.check_if_subprocess(process)
+
+                # Get the working directory of the last process because some terminals
+                # store working directories different than others (which is why it can't
+                # just be grabbed from the main process)
+                self.working_directory = process.children()[-1].cwd()
                 return
 
         self.command = " ".join(process.cmdline())
@@ -175,7 +200,9 @@ class Container:
                     for arg in child.cmdline()[1:]:
                         command += " " + arg.replace(" ", r"\ ")
 
-                    self.command = program["launch_command"].replace("{command}", command)
+                    self.subprocess_command = program["launch_command"].replace(
+                        "{command}", command
+                    )
                     return
 
     def handle_web_browser(self) -> None:

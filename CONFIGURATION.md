@@ -41,9 +41,19 @@ a list that contains the configured terminals.
 Subprocesses are programs that run in the same window their command was executed in and return to the shell on exit. Examples
 include vim, emacs, less, man.
 
-Two things are needed to set up subprocess configuration:
-1. The subprocess name
-2. The desired subprocess launch command
+Three things are needed to set up subprocess configuration:
+1. A line in your shell's rcfile to execute the subprocess correctly (only done once)
+2. The subprocess name
+3. The desired subprocess launch command
+
+To restore subprocesses correctly, each subprocess command is saved in a separate script. When i3-restore attempts to restore
+your session, it will set an environment variable (`I3_RESTORE_SUBPROCESS_SCRIPT`) pointing to the path of the script and execute
+the command to launch your terminal. To have the subprocess script execute, you need to add a line in your shell's rcfile to
+correctly execute it. Here is an example of what this line looks like for bash:
+```bash
+trap 'unset I3_RESTORE_SUBPROCESS_SCRIPT' SIGINT # Unset the variable on Ctrl+C as well
+[[ -n $I3_RESTORE_SUBPROCESS_SCRIPT ]] && "${I3_RESTORE_SUBPROCESS_SCRIPT}" && unset I3_RESTORE_SUBPROCESS_SCRIPT
+```
 
 The subprocess is the initial command used to launch the subprocess(e.g. Vim's initial command is `vim`).
 
