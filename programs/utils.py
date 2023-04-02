@@ -44,12 +44,20 @@ def get_logger() -> logging.RootLogger:
     project_dir = os.path.dirname(os.path.dirname(__file__))
     log_file = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/{DEFAULT_LOG_FILE}")
 
-    logging.basicConfig(filename=log_file, filemode="a", level=logging.DEBUG, format="")
-    logger = logging.getLogger()
+    logger = logging.getLogger("i3-restore")
+    logger.handlers = []  # Ensure there are no handlers before adding our own
+    logger.setLevel(logging.DEBUG)  # The minimum level for all handlers
+
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setFormatter("")
+    file_handler.setLevel(logging.DEBUG)
 
     # Print error messages to stdout
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.ERROR)
-    logger.addHandler(handler)
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter("")
+    stream_handler.setLevel(logging.ERROR)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
 
     return logger

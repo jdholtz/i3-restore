@@ -2,8 +2,9 @@
 .idea
 
 # Python cache
-__pycache__
+*.pyc
 
 # Program files
 config.json
+.coverage
 logs/

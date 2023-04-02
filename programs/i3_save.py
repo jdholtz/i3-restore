@@ -23,6 +23,8 @@ CONFIG = config.Config()
 # Set up the web browsers dictionary to keep track of already running web browsers
 WEB_BROWSERS_DICT = dict.fromkeys(CONFIG.web_browsers, False)
 
+logger = utils.get_logger()
+
 
 def main() -> None:
     workspaces = utils.get_workspaces()
@@ -235,8 +237,6 @@ class Container:
 
 
 if __name__ == "__main__":
-    logger = utils.get_logger()
-
     try:
         main()
     except Exception as err:

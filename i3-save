@@ -6,7 +6,7 @@ set -e
 IFS=$'\n\t'
 
 CURR_DIR="$(dirname "${0}")"
-I3_RESTORE_SAVE_SCRIPT="${CURR_DIR}/programs/i3-save.py"
+I3_RESTORE_SAVE_SCRIPT="${CURR_DIR}/programs/i3_save.py"
 
 # Import common variables and functions
 source "${CURR_DIR}/utils/common.bash"
