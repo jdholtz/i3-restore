@@ -1,16 +1,16 @@
 import os
 from typing import Any, Dict
+from unittest import mock
 
 import pytest
 from pytest_mock import MockerFixture
 
-from programs import config
+with mock.patch("utils.get_logger"):
+    # Don't actually log messages to a file
+    from programs import config
 
 # This needs to be accessed to be tested
 # pylint: disable=protected-access
-
-# Don't actually log in the tests
-config.logger.handlers = []
 
 
 # Make sure we don't actually read the config file. The

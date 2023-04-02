@@ -4,7 +4,9 @@ from unittest import mock
 import psutil
 from pytest_mock import MockerFixture
 
-from programs import i3_save
+with mock.patch("utils.get_logger"):
+    # Don't actually log messages to a file
+    from programs import i3_save
 
 
 def test_main_creates_workspaces_correctly(mocker: MockerFixture) -> None:
@@ -182,6 +184,21 @@ class TestContainer:
 
         mock_save_browser.assert_called_once()
         assert container.command is None
+
+    def test_handle_web_browser_does_not_save_non_configured_browsers(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch.object(i3_save.Container, "get_pid")
+        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mock_save_browser = mocker.patch.object(i3_save.Container, "save_web_browser")
+
+        i3_save.CONFIG.web_browsers = ["browser1"]
+        container = i3_save.Container({})
+        container.command = "browser2"
+        container.handle_web_browser()
+
+        mock_save_browser.assert_not_called()
+        assert container.command == "browser2"
 
     def test_save_web_browser_does_not_save_browsers_already_saved(
         self, mocker: MockerFixture
