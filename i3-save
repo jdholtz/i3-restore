@@ -97,7 +97,7 @@ save_workspace_layouts() {
 #####################################
 save_workspace_programs() {
     python3 "${I3_RESTORE_SAVE_SCRIPT}" ||
-        error "An error occured saving the session's programs. View the logs for more details" 1
+        error "An error occurred saving the session's programs. View the logs for more details" 1
 }
 
 log "Saving current i3wm session"

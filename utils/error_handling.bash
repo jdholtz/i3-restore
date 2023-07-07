@@ -2,7 +2,7 @@
 # Must only be used after sourcing common.sh
 
 # Trap all errors. Uses the filename to identify which part of the script was run
-trap 'error "An unknown error occured. Run ${0##*/} manually to see the error" 1' ERR
+trap 'error "An unknown error occurred. Run ${0##*/} manually to see the error" 1' ERR
 
 #####################################
 # Displays an error using i3-nagbar

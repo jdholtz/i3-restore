@@ -14,7 +14,7 @@ with mock.patch("utils.get_logger"):
 
 
 # Make sure we don't actually read the config file. The
-# mocks can still be overriden in each test
+# mocks can still be overridden in each test
 @pytest.fixture(autouse=True)
 def mock_open(mocker: MockerFixture) -> None:
     mocker.patch("builtins.open")
