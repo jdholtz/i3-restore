@@ -39,7 +39,7 @@ a list that contains the configured terminals.
 
 ## Subprocesses
 Subprocesses are programs that run in the same window their command was executed in and return to the shell on exit. Examples
-include vim, emacs, less, man.
+include vim, emacs, less, and man.
 
 Three things are needed to set up subprocess configuration:
 1. A line in your shell's rcfile to execute the subprocess correctly (only done once)
@@ -62,7 +62,7 @@ because they need to be restored in a way that the terminal launches them, and y
 when they exit (exactly what would happen if you were to launch the subprocess in the terminal).
 
 Additionally, `{command}` can be used as a placeholder to inject the actual command used to invoke the subprocess into the
-launch command. You might need to play with this a bit before putting in your configuration file to make sure it performs
+launch command. You might need to play around with this before putting it in your configuration file to make sure it performs
 exactly how you want it to. For examples, refer to the [example configuration file](config.example.json).
 
 Next, input the information into the `subprocesses` section of the configuration. Make sure the `subprocesses` section is

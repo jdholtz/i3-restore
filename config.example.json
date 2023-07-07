@@ -29,6 +29,10 @@
         {
             "name": "ipython",
             "launch_command": "{command}"
+        },
+        {
+            "name": "pipenv",
+            "launch_command": "{command}"
         }
     ],
     "web_browsers": [
