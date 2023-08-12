@@ -140,19 +140,56 @@ class TestContainer:
 
         mock_process = mocker.patch("psutil.Process")
         mock_process2 = mocker.patch("psutil.Process")
-        mock_process.cmdline.return_value = ["test_command", "file name"]
+        mock_process.cmdline.return_value = ["test_command", "--test-arg", "file name"]
         mock_process.name.return_value = "subprocess2"
         mock_process.children.return_value = [mock_process2, mock_process]
 
         i3_save.CONFIG.subprocesses = [
             {"name": "subprocess1"},
-            {"name": "subprocess2", "launch_command": "{command}"},
+            {"name": "subprocess2", "args": ["--test-arg", "-t"]},
+        ]
+        container = i3_save.Container({})
+        container.check_if_subprocess(mock_process)
+
+        assert container.subprocess_command == r"test_command --test-arg file\ name"
+
+    def test_check_if_subprocess_saves_subprocess_with_custom_launch_command(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch.object(i3_save.Container, "get_pid")
+        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+
+        mock_process = mocker.patch("psutil.Process")
+        mock_process.cmdline.return_value = ["test_command"]
+        mock_process.name.return_value = "subprocess"
+        mock_process.children.return_value = [mock_process]
+
+        i3_save.CONFIG.subprocesses = [
+            {"name": "subprocess", "launch_command": "{command} and more!"}
         ]
 
         container = i3_save.Container({})
         container.check_if_subprocess(mock_process)
 
-        assert container.subprocess_command == r"test_command file\ name"
+        assert container.subprocess_command == r"test_command and more!"
+
+    def test_check_if_subprocess_does_not_save_subprocess_without_necessary_args(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch.object(i3_save.Container, "get_pid")
+        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+
+        mock_process = mocker.patch("psutil.Process")
+        mock_process.cmdline.return_value = ["test_command", "--not-test-arg"]
+        mock_process.name.return_value = "subprocess"
+        mock_process.children.return_value = [mock_process]
+
+        i3_save.CONFIG.subprocesses = [{"name": "subprocess", "args": ["--test-arg"]}]
+
+        container = i3_save.Container({})
+        container.check_if_subprocess(mock_process)
+
+        assert container.subprocess_command is None
 
     def test_check_if_subprocess_does_not_save_non_configured_subprocess(
         self, mocker: MockerFixture

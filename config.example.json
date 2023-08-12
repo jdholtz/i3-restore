@@ -11,28 +11,31 @@
     ],
     "subprocesses": [
         {
-            "name": "vim",
-            "launch_command": "{command}"
+            "name": "vim"
         },
         {
             "name": "cmus",
             "launch_command": "{command} && i3-msg kill"
         },
         {
-            "name": "ssh",
-            "launch_command": "{command}"
+            "name": "ssh"
         },
         {
-            "name": "man",
-            "launch_command": "{command}"
+            "name": "man"
         },
         {
-            "name": "ipython",
-            "launch_command": "{command}"
+            "name": "ipython"
         },
         {
             "name": "pipenv",
-            "launch_command": "{command}"
+            "args": ["shell"]
+        },
+        {
+            "name": "su"
+        },
+        {
+            "name": "sudo",
+            "args": ["-i", "--login"]
         }
     ],
     "web_browsers": [

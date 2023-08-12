@@ -6,7 +6,12 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 
 ### New Features
 - This project is now licensed under the GPLv3 license instead of the MIT license
-- Natively support restoring `pipenv` in the configuration
+- Natively support restoring `pipenv`, `sudo`, and `su` in the configuration
+- More specific criteria is now supported for saving subprocesses, allowing you to include `args` that need to be included
+in the subprocess command for it to be restored. See the [subprocess configuration](CONFIGURATION.md#subprocesses) for more
+information
+- The `launch_command` in the subprocess configuration now defaults to `{command}` so there is no need to specify that in your
+configuration file
 
 
 ## 3.3 (2023-03-18)

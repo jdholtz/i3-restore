@@ -199,12 +199,23 @@ class Container:
                     )
 
                     command = child.cmdline()[0]
-                    for arg in child.cmdline()[1:]:
+                    cmd_args = child.cmdline()[1:]
+                    save_args = program.get("args", [])
+
+                    # First, check if the subprocess includes the desired arguments
+                    includes_save_arg = any(arg in cmd_args for arg in save_args)
+                    if save_args and not includes_save_arg:
+                        logger.debug(
+                            "Skipping saving subprocess as it doesn't include desired arguments"
+                        )
+                        return
+
+                    # Next, build the command
+                    for arg in cmd_args:
                         command += " " + arg.replace(" ", r"\ ")
 
-                    self.subprocess_command = program["launch_command"].replace(
-                        "{command}", command
-                    )
+                    launch_command = program.get("launch_command", "{command}")
+                    self.subprocess_command = launch_command.replace("{command}", command)
                     return
 
     def handle_web_browser(self) -> None:

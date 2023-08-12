@@ -41,10 +41,11 @@ a list that contains the configured terminals.
 Subprocesses are programs that run in the same window their command was executed in and return to the shell on exit. Examples
 include vim, emacs, less, and man.
 
-Three things are needed to set up subprocess configuration:
+Four things are needed to set up subprocess configuration:
 1. A line in your shell's rcfile to execute the subprocess correctly (only done once)
 2. The subprocess name
-3. The desired subprocess launch command
+3. Arguments the subprocess has to include to be saved (Optional)
+4. The desired subprocess launch command (Optional. Default: "{command}")
 
 To restore subprocesses correctly, each subprocess command is saved in a separate script. When i3-restore attempts to restore
 your session, it will set an environment variable (`I3_RESTORE_SUBPROCESS_SCRIPT`) pointing to the path of the script and execute
@@ -65,6 +66,10 @@ Additionally, `{command}` can be used as a placeholder to inject the actual comm
 launch command. You might need to play around with this before putting it in your configuration file to make sure it performs
 exactly how you want it to. For examples, refer to the [example configuration file](config.example.json).
 
+To include more specific criteria to save the subprocess, you can use the `args` option in the configuration. Then, the subprocess
+would only be restored if it was launched with one of the arguments specified. For example, including the `"args": ["-i"]` configuration
+for the `sudo` subprocess would only restore the subprocess if it was launched with the `-i` flag.
+
 Next, input the information into the `subprocesses` section of the configuration. Make sure the `subprocesses` section is
 a list that contains the configured terminals.
 ```json
@@ -72,6 +77,7 @@ a list that contains the configured terminals.
   "subprocesses": [
     {
       "name": "<name>",
+      "args": ["<arg>", "<arg>"],
       "launch_command": "<launch command>"
     }
   ]
