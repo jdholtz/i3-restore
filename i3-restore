@@ -75,7 +75,7 @@ restore_programs() {
 
     # Make the file executable and all subprocess programs in the same workspace
     chmod +x "${file}"
-    chmod +x "${i3_PATH}"/workspace_"${sanitized_ws_name}"_subprocess_*.sh
+    chmod +x "${i3_PATH}"/workspace_"${sanitized_ws_name}"_subprocess_*.sh 2>/dev/null
 
     # The number of containers are needed for the script to select
     # which command it wants to execute for every container
@@ -251,6 +251,10 @@ restore_workspaces() {
 
     # Clean up any leftover containers that didn't get swallowed
     kill_empty_containers
+
+    log "Restoring focus from previous session"
+    i3-msg '[con_mark="i3-restore-focus"] focus'
+    i3-msg 'unmark i3-restore-focus'
 
     # Reload i3 to fix any graphical errors (specifically with firefox)
     log "Restarting session to fix graphical errors"

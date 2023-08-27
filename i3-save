@@ -82,9 +82,14 @@ save_workspace_layouts() {
     rm --force "${i3_PATH}"/*_subprocess_*.sh
     rm --force "${i3_PATH}"/web_browsers.sh
 
+    # Save a mark on the focused window so it can be restored later
+    i3-msg 'mark --add i3-restore-focus' >/dev/null
+
     for ws in ${workspaces}; do
         save_workspace_layout "${ws}"
     done
+
+    i3-msg 'unmark i3-restore-focus' >/dev/null
 }
 
 #####################################
