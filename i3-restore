@@ -253,8 +253,8 @@ restore_workspaces() {
     kill_empty_containers
 
     log "Restoring focus from previous session"
-    i3-msg '[con_mark="i3-restore-focus"] focus'
-    i3-msg 'unmark i3-restore-focus'
+    i3-msg '[con_mark="_i3_restore_focus"] focus'
+    i3-msg 'unmark _i3_restore_focus'
 
     # Reload i3 to fix any graphical errors (specifically with firefox)
     log "Restarting session to fix graphical errors"
