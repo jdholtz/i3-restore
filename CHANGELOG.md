@@ -2,7 +2,7 @@
 When upgrading to a new version, make sure to follow the directions under the "Upgrading" header of the corresponding version.
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
-## Upcoming
+## 3.5 (2023-09-23)
 
 ### New Features
 - The currently focused container is now saved and restored next session

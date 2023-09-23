@@ -123,7 +123,7 @@ Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md)
 [1]: https://www.python.org/downloads/
 [2]: https://pip.pypa.io/en/stable/installation/
 [3]: https://stedolan.github.io/jq/download/
-[4]: https://archlinux.org/packages/community/any/perl-anyevent-i3/
+[4]: https://github.com/i3/i3/blob/next/AnyEvent-I3/README
 [5]: https://github.com/jordansissel/xdotool
 [6]: https://i3wm.org/docs/userguide.html#assign_workspace
 [7]: https://github.com/jdholtz/i3-restore/issues/new/choose
