@@ -2,6 +2,7 @@ import subprocess
 from unittest import mock
 
 import psutil
+import pytest
 from pytest_mock import MockerFixture
 
 with mock.patch("utils.get_logger"):
@@ -79,11 +80,12 @@ class TestContainer:
         mock_get_pid.assert_called_once_with({})
         mock_get_cmd_options.assert_called_once_with({})
 
-    def test_container_handles_permission_denied(self, mocker: MockerFixture) -> None:
+    @pytest.mark.parametrize("exception", [psutil.AccessDenied, psutil.ZombieProcess(None)])
+    def test_container_handles_psutil_expcetions(
+        self, mocker: MockerFixture, exception: psutil.Error
+    ) -> None:
         mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(
-            i3_save.Container, "get_cmdline_options", side_effect=psutil.AccessDenied
-        )
+        mocker.patch.object(i3_save.Container, "get_cmdline_options", side_effect=exception)
 
         container = i3_save.Container({})
         assert container.command is None

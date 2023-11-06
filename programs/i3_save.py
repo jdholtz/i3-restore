@@ -128,6 +128,12 @@ class Container:
 
         try:
             self.get_cmdline_options(properties)
+        except psutil.ZombieProcess:
+            # This happens when i3 restore is attempting to save a container that was very recently
+            # killed and the process hasn't been cleaned up yet
+            logger.debug("Container is a zombie process. Skipping...")
+            # Don't save the container since it doesn't actually exist anymore
+            self.command = None
         except psutil.AccessDenied:
             logger.debug(
                 "Access denied while trying to access container command line options. Skipping..."
