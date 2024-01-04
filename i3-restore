@@ -71,7 +71,7 @@ restore_programs() {
 
     # Focus on the workspace. It should already be foucsed
     # from appending the layout, but this is here as a safety
-    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}" >/dev/null
+    i3-msg --quiet "workspace --no-auto-back-and-forth ${workspace_name}"
 
     # Make the file executable and all subprocess programs in the same workspace
     chmod +x "${file}"
@@ -87,7 +87,7 @@ restore_programs() {
     # restored in the correct order
     for ((i = 0; i < "${num_containers}"; i++)); do
         # Execute the command in the script pertaining to 'i'
-        i3-msg exec "${file}" "${i}" >/dev/null
+        i3-msg --quiet exec "${file}" "${i}"
         sleep 0.3
     done
 

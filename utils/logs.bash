@@ -43,7 +43,7 @@ rotate_log() {
 #####################################
 log() {
     echo -e "${1}" >>"${I3_RESTORE_LOG_FILE}"
-    [[ ${I3_RESTORE_VERBOSE} -gt 0 ]] && echo -e "${1}" >&2 || return 0
+    [[ ${I3_RESTORE_VERBOSE} -ge 1 ]] && echo -e "${1}" >&2 || return 0
 }
 
 init_log

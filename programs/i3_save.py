@@ -78,7 +78,7 @@ class Workspace:
 
         file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_programs.sh"
 
-        program_commands = ""
+        program_commands = "#!/usr/bin/env bash\n"
         for i, container in enumerate(self.containers):
             logger.info(
                 "Saving container with command %s and working directory %s",
@@ -110,8 +110,9 @@ class Workspace:
         """
         file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_subprocess_{container_num}.sh"
         logger.debug("File: %s. Subprocess command: %s", file, container.subprocess_command)
+        subprocess_cmd = "#!/usr/bin/env bash\n" + container.subprocess_command
         with file.open("w") as f:
-            f.write(container.subprocess_command)
+            f.write(subprocess_cmd)
 
         return file
 

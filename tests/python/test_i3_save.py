@@ -46,7 +46,7 @@ class TestWorkspace:
         assert len(workspace.containers) == 2
 
         handle = mock_open()
-        assert handle.write.call_args[0][0].count("\n") == 2
+        assert handle.write.call_args[0][0].count("[[ $1 ==") == 2
 
     def test_workspace_does_not_save_with_no_containers(self, mocker: MockerFixture) -> None:
         mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
