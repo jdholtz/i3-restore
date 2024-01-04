@@ -13,7 +13,7 @@ source "${CURR_DIR}/utils/common.bash"
 # Handle errors
 source "${CURR_DIR}/utils/error_handling.bash"
 
-check_version_flag "$@"
+parse_flags "$@"
 
 # Start logger
 source "${CURR_DIR}/utils/logs.bash"
@@ -264,12 +264,12 @@ restore_workspaces() {
 #####################################
 # If the restore script is invoked with
 # --interval, initialize automatic saving.
-# Arguments:
-#   First two arguments to the script
+# Globals:
+#   I3_RESTORE_INTERVAL_MINUTES
 #####################################
 start_automatic_saving() {
-    if [[ ${1} == "--interval" ]]; then
-        start_save_interval "${2}"
+    if [[ ${I3_RESTORE_INTERVAL} == 1 ]]; then
+        start_save_interval
     fi
 }
 
@@ -277,4 +277,4 @@ log "Restoring current i3wm session"
 restore_workspaces
 log "Finished restoring current i3wm session\n"
 
-start_automatic_saving "${1}" "${2}"
+start_automatic_saving

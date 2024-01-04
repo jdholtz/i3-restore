@@ -29,6 +29,7 @@ logger = utils.get_logger()
 def main() -> None:
     workspaces = utils.get_workspaces()
     for workspace in workspaces:
+        logger.debug("Workspace tree: %s", workspace)
         Workspace(workspace)
 
 
@@ -46,7 +47,7 @@ class Workspace:
         self.sanitized_name = self.name.replace("/", "{slash}").replace(" ", "{space}")
         self.containers = []
 
-        logger.debug("Saving programs for Workspace %s", self.name)
+        logger.info("Saving programs for Workspace %s", self.name)
         self.get_containers(properties)
         self.save()
 
@@ -70,16 +71,16 @@ class Workspace:
 
         # Don't save if there are no containers in the workspace
         if len(self.containers) == 0:
-            logger.debug("No containers found for Workspace %s. Skipping...", self.name)
+            logger.info("No containers found for Workspace %s. Skipping...", self.name)
             return
 
-        logger.debug("Number of containers: %s", len(self.containers))
+        logger.info("Number of containers: %s", len(self.containers))
 
         file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_programs.sh"
 
         program_commands = ""
         for i, container in enumerate(self.containers):
-            logger.debug(
+            logger.info(
                 "Saving container with command %s and working directory %s",
                 container.command,
                 container.working_directory,
@@ -98,6 +99,7 @@ class Workspace:
 
             program_commands += f"{container.command}\n"
 
+        logger.debug("File: %s. Program commands: %s", file, program_commands)
         with file.open("w") as f:
             f.write(program_commands)
 
@@ -107,6 +109,7 @@ class Workspace:
         behave (nearly) identically to how it would be executed in a terminal.
         """
         file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_subprocess_{container_num}.sh"
+        logger.debug("File: %s. Subprocess command: %s", file, container.subprocess_command)
         with file.open("w") as f:
             f.write(container.subprocess_command)
 
@@ -131,11 +134,11 @@ class Container:
         except psutil.ZombieProcess:
             # This happens when i3 restore is attempting to save a container that was very recently
             # killed and the process hasn't been cleaned up yet
-            logger.debug("Container is a zombie process. Skipping...")
+            logger.info("Container is a zombie process. Skipping...")
             # Don't save the container since it doesn't actually exist anymore
             self.command = None
         except psutil.AccessDenied:
-            logger.debug(
+            logger.info(
                 "Access denied while trying to access container command line options. Skipping..."
             )
             # Don't save the container if it fails to access all of its attributes
@@ -150,7 +153,7 @@ class Container:
             ).decode("utf-8")
             pid_info = int(pid_info)
         except subprocess.CalledProcessError:
-            logger.debug("No PID associated with container. Skipping...")
+            logger.info("No PID associated with container. Skipping...")
             pid_info = None
 
         return pid_info
@@ -165,7 +168,7 @@ class Container:
         # First, check if it is a terminal
         for terminal in CONFIG.terminals:
             if properties["window_properties"]["class"] == terminal["class"]:
-                logger.debug("Main process of container is a terminal")
+                logger.info("Main process of container is a terminal")
 
                 # The terminal command is set here manually so the custom command used to restore
                 # the subprocess works as expected and doesn't store "[terminal] -e bash -c ..."
@@ -200,18 +203,19 @@ class Container:
             child_name = child.name()
             for program in CONFIG.subprocesses:
                 if child_name == program["name"]:
-                    logger.debug(
+                    logger.info(
                         "Subprocess '%s' found in main process '%s'", child_name, process.name()
                     )
 
-                    command = child.cmdline()[0]
-                    cmd_args = child.cmdline()[1:]
+                    cmd_line = child.cmdline()
+                    logger.debug("Subprocess command line: %s", cmd_line)
+                    command, cmd_args = cmd_line[0], cmd_line[1:]
                     save_args = program.get("args", [])
 
                     # First, check if the subprocess includes the desired arguments
                     includes_save_arg = any(arg in cmd_args for arg in save_args)
                     if save_args and not includes_save_arg:
-                        logger.debug(
+                        logger.info(
                             "Skipping saving subprocess as it doesn't include desired arguments"
                         )
                         return
@@ -240,16 +244,18 @@ class Container:
         """
         if WEB_BROWSERS_DICT.get(web_browser):
             # The web browser has already been called, so don't save it again
-            logger.debug(
+            logger.info(
                 "Container detected as a web browser, but a web browser instance "
                 "has already been saved. Skipping..."
             )
             return
 
-        logger.debug("Saving container as a web browser")
+        logger.info("Saving container as a web browser")
         WEB_BROWSERS_DICT[web_browser] = True
 
-        with open(f"{i3_PATH}/web_browsers.sh", "a") as f:
+        file = Path(i3_PATH) / "web_browsers.sh"
+        logger.debug("Web browser file: %s. Command: %s", file, self.command)
+        with open(file, "a") as f:
             f.write(f"{self.command}\n")
 
 

@@ -50,7 +50,7 @@ Four things are needed to set up subprocess configuration:
 To restore subprocesses correctly, each subprocess command is saved in a separate script. When i3-restore attempts to restore
 your session, it will set an environment variable (`I3_RESTORE_SUBPROCESS_SCRIPT`) pointing to the path of the script and execute
 the command to launch your terminal. To have the subprocess script execute, you need to add a line in your shell's rcfile to
-correctly execute it. Here is an example of what this line looks like for bash:
+correctly execute it. Here is an example of what this line looks like for Bash:
 ```bash
 trap 'unset I3_RESTORE_SUBPROCESS_SCRIPT' SIGINT # Unset the variable on Ctrl+C as well
 [[ -n $I3_RESTORE_SUBPROCESS_SCRIPT ]] && "${I3_RESTORE_SUBPROCESS_SCRIPT}" && unset I3_RESTORE_SUBPROCESS_SCRIPT

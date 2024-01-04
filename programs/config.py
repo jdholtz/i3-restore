@@ -36,9 +36,9 @@ class Config:
         try:
             with open(config_file) as file:
                 config = json.load(file)
-            logger.debug("Configuration file found at %s", config_file)
+            logger.info("Configuration file found at %s", config_file)
         except FileNotFoundError:
-            logger.debug("No configuration file found at %s", config_file)
+            logger.info("No configuration file found at %s", config_file)
             config = {}
 
         return config
@@ -46,21 +46,21 @@ class Config:
     def _parse_config(self, config: JSON) -> None:
         if "subprocesses" in config:
             self.subprocesses = config["subprocesses"]
-            logger.debug("Subprocesses configuration: %s", self.subprocesses)
+            logger.info("Subprocesses configuration: %s", self.subprocesses)
 
             if not isinstance(self.subprocesses, list):
                 raise TypeError("'subprocesses' must be a list")
 
         if "terminals" in config:
             self.terminals = config["terminals"]
-            logger.debug("Terminals configuration: %s", self.terminals)
+            logger.info("Terminals configuration: %s", self.terminals)
 
             if not isinstance(self.terminals, list):
                 raise TypeError("'terminals' must be a list")
 
         if "web_browsers" in config:
             self.web_browsers = config["web_browsers"]
-            logger.debug("Web browsers configuration: %s", self.web_browsers)
+            logger.info("Web browsers configuration: %s", self.web_browsers)
 
             if not isinstance(self.web_browsers, list):
                 raise TypeError("'web_browsers' must be a list")

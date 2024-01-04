@@ -6,6 +6,11 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 
 ### New Features
 - Official support for Python 3.12
+- A help flag (`--help` or `-h`) can now be used on either script to get its usage
+- A verbose flag (`-v`) can be used to show debug messages while running the script. A double verbose flag (`-vv`) can
+be used to additionally show all commands executed by the script
+- The shorthand for the version flag has been changed from `-v` to `-V`
+
 
 ## 3.5 (2023-09-23)
 

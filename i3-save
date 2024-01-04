@@ -14,7 +14,7 @@ source "${CURR_DIR}/utils/common.bash"
 # Handle errors
 source "${CURR_DIR}/utils/error_handling.bash"
 
-check_version_flag "$@"
+parse_flags "$@"
 check_dependencies
 
 # Start logger
@@ -101,7 +101,7 @@ save_workspace_layouts() {
 #   None
 #####################################
 save_workspace_programs() {
-    python3 "${I3_RESTORE_SAVE_SCRIPT}" ||
+    I3_RESTORE_VERBOSE="${I3_RESTORE_VERBOSE}" python3 "${I3_RESTORE_SAVE_SCRIPT}" ||
         error "An error occurred saving the session's programs. View the logs for more details" 1
 }
 

@@ -40,6 +40,16 @@ def get_tree() -> JSON:
     return json.loads(tree)
 
 
+# Custom logging formatter to add prefixes to debug messages
+class Formatter(logging.Formatter):  # pragma: no cover
+    FORMATS = {logging.DEBUG: "+ %(message)s"}
+
+    def format(self, record):
+        log_format = self.FORMATS.get(record.levelno, "")
+        formatter = logging.Formatter(log_format)
+        return formatter.format(record)
+
+
 def get_logger() -> logging.RootLogger:
     project_dir = os.path.dirname(os.path.dirname(__file__))
     log_file = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/{DEFAULT_LOG_FILE}")
@@ -50,12 +60,21 @@ def get_logger() -> logging.RootLogger:
 
     file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter("")
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
 
     # Print error messages to stdout
     stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter("")
-    stream_handler.setLevel(logging.ERROR)
+    stream_handler.setFormatter(Formatter())
+
+    # Set verbosity level based on flags initialized through the command line
+    log_level = logging.ERROR
+    verbose_level = os.getenv("I3_RESTORE_VERBOSE")
+    if verbose_level == "1":
+        log_level = logging.INFO
+    elif verbose_level == "2":
+        log_level = logging.DEBUG
+
+    stream_handler.setLevel(log_level)
 
     logger.addHandler(file_handler)
     logger.addHandler(stream_handler)

@@ -4,31 +4,7 @@
 I3_RESTORE_SAVE_FILE="$(dirname "${0}")/i3-save"
 DEFAULT_INTERVAL_TIME=10
 
-#####################################
-# Get the sleep time (in seconds) from the
-# argument. If the argument is not a number,
-# the default time will be returned
-# Globals:
-#   DEFAULT_INTERVAL_TIME
-# Arguments:
-#   sleep time, in minutes
-# Returns:
-#   the sleep time in seconds
-#####################################
-get_sleep_time() {
-    local sleep_time="${1}"
-
-    if ! [[ ${sleep_time} =~ ^[0-9]+$ ]]; then
-        message="Sleep time not passed in (or is invalid). Using "
-        message+="default time of ${DEFAULT_INTERVAL_TIME} minutes"
-        log "${message}"
-        sleep_time="${DEFAULT_INTERVAL_TIME}"
-    fi
-
-    # Convert sleep time to seconds
-    sleep_time=$((sleep_time * 60))
-    echo "${sleep_time}"
-}
+readonly I3_RESTORE_SAVE_FILE DEFAULT_INTERVAL_TIME
 
 #####################################
 # Ensure the same i3 process that
@@ -40,8 +16,8 @@ get_sleep_time() {
 #   Original i3 PID
 #####################################
 check_i3_alive() {
-    if ! ps -p "${1}" | grep "i3"; then
-        message="Original i3 process is not alive anymore. "
+    if ! ps -p "${1}" | grep "i3" >/dev/null; then
+        local message="Original i3 process is not alive anymore. "
         message+="Exiting automatic scheduling"
         log "${message}"
         exit 0
@@ -53,11 +29,21 @@ check_i3_alive() {
 # on an interval.
 # Globals:
 #   I3_RESTORE_SAVE_FILE
-# Arguments:
-#   interval time, in minutes
+#   I3_RESTORE_INTERVAL_MINUTES
 #####################################
 start_save_interval() {
-    sleep_time="$(get_sleep_time "${1}")"
+    local i3_pid
+    local sleep_time="${I3_RESTORE_INTERVAL_MINUTES}"
+
+    # Ensure sleep time is passed in and is a number, otherwise use default interval
+    if ! [[ ${sleep_time} =~ ^[0-9]+$ ]] || [[ ${sleep_time} == 0 ]]; then
+        local message="Sleep time not passed in (or is invalid). Using "
+        message+="default time of ${DEFAULT_INTERVAL_TIME} minutes"
+        log "${message}"
+        sleep_time="${DEFAULT_INTERVAL_TIME}"
+    fi
+
+    sleep_time="$((sleep_time * 60))"
     i3_pid="$(pidof i3)"
 
     log "Starting automatic saving on an interval of ${sleep_time} seconds"

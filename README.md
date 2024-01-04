@@ -43,6 +43,15 @@ Then, verify the script is working
 Make sure to read the [Configuring](#configuring) section before officially using the script to ensure programs specific
 to you are set up correctly (terminals, web browsers, etc.).
 
+To get a more comprehensive understanding of what each mode in the script provides, run
+```shell
+./i3-save --help
+```
+or
+```shell
+./i3-restore --help
+```
+
 ## Upgrading
 When upgrading this script, it is important to follow the [Changelog](CHANGELOG.md) for any actions that need to be performed,
 as many changes will not be made backwards compatible.
@@ -109,6 +118,9 @@ Some programs that take a few seconds to start (such as Discord) might not resto
 the [assign][6] function in i3 and add it to your i3 configuration file.
 
 ## Troubleshooting
+To troubleshoot a problem, run the script with the `-v` flag. This will display debug messages so you can get a better overview of the problem.
+Using `-vv` will print out all commands executed by the script so you can trace through it and understand where and why a problem is occurring.
+
 If you run into any issues, please file it via [GitHub Issues][7]. Please attach any relevant logs (can be found in
 `logs/i3-restore.log`) to the issue. The logs may contain sensitive information such as directory names, program
 launch commands, and configuration settings, so make sure to remove any information you don't want to be shared before

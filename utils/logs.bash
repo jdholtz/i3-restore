@@ -39,9 +39,11 @@ rotate_log() {
 #   The log message
 # Globals:
 #   I3_RESTORE_LOG_FILE
+#   I3_RESORE_VERBOSE
 #####################################
 log() {
     echo -e "${1}" >>"${I3_RESTORE_LOG_FILE}"
+    [[ ${I3_RESTORE_VERBOSE} -gt 0 ]] && echo -e "${1}" || return 0
 }
 
 init_log

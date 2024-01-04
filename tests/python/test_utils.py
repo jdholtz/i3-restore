@@ -1,6 +1,7 @@
 import logging
 import os
 
+import pytest
 from pytest_mock import MockerFixture
 
 from programs import utils
@@ -28,11 +29,18 @@ def test_get_tree_retrieves_the_current_i3_tree(mocker: MockerFixture) -> None:
     mock_check_output.assert_called_once_with(["i3-msg", "-t", "get_tree"])
 
 
-def test_get_logger_initializes_the_logger_correctly(mocker: MockerFixture) -> None:
+@pytest.mark.parametrize(
+    ["verbose_level", "log_level"], [(0, logging.ERROR), (1, logging.INFO), (2, logging.DEBUG)]
+)
+def test_get_logger_initializes_the_logger_correctly(
+    mocker: MockerFixture, verbose_level: int, log_level: int
+) -> None:
     # Ensure the environment variable is read from. Also, don't actually write to a file
-    mocker.patch.dict(os.environ, {"I3_RESTORE_LOG_FILE": "/dev/null"})
+    mocker.patch.dict(
+        os.environ, {"I3_RESTORE_LOG_FILE": "/dev/null", "I3_RESTORE_VERBOSE": str(verbose_level)}
+    )
     logger = utils.get_logger()
 
     assert len(logger.handlers) == 2
     assert logger.handlers[0].baseFilename == "/dev/null"
-    assert logger.handlers[1].level == logging.ERROR
+    assert logger.handlers[1].level == log_level
