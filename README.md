@@ -1,9 +1,10 @@
 # i3-restore
 
 A simple Python and Bash script to restore your [i3][0] session. It works very similar to how Firefox restores a previous session.
-The script can correctly restore terminal sessions (such as Vim and ssh) and web browser instances exactly how they were before.
+The script can correctly restore terminal subprocesses (such as Vim and ssh) and web browser instances exactly how they were before.
 
 ## Table of Contents
+- [Features](#features)
 - [Getting Started](#getting-started)
     * [Dependencies](#dependencies)
 - [Upgrading](#upgrading)
@@ -14,6 +15,12 @@ The script can correctly restore terminal sessions (such as Vim and ssh) and web
     * [Restoring Programs In Assigned Workspaces](#restoring-programs-in-assigned-workspaces)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
+
+## Features
+i3-restore has the following features (fill out a feature request for more to be added!):
+- [x] Configuration to save and restore desired terminals, web browsers, and terminal subprocesses from your latest i3 session
+- [x] Automatic saving and restoring of all i3 window layouts and programs running in your current i3 session
+- [x] Correct restoring of subprocesses within terminals (such as Vim and ssh) and web browser instances
 
 ## Getting Started
 

@@ -9,6 +9,9 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 - A help flag (`--help` or `-h`) can now be used on either script to get its usage
 - A verbose flag (`-v`) can be used to show debug messages while running the script. A double verbose flag (`-vv`) can
 be used to additionally show all commands executed by the script
+- A [Features](README.md#features) section has been added to the Readme
+
+### Changes
 - The shorthand for the version flag has been changed from `-v` to `-V`
 
 
