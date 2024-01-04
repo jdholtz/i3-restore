@@ -48,10 +48,10 @@ class Workspace:
         self.containers = []
 
         logger.info("Saving programs for Workspace %s", self.name)
-        self.get_containers(properties)
-        self.save()
+        self._get_containers(properties)
+        self._save()
 
-    def get_containers(self, properties: JSON) -> None:
+    def _get_containers(self, properties: JSON) -> None:
         """Recursive function to get all containers in a workspace"""
         containers = properties["nodes"]
         for container in containers:
@@ -64,9 +64,9 @@ class Workspace:
                 if con.command is not None:
                     self.containers.append(con)
             else:
-                self.get_containers(container)
+                self._get_containers(container)
 
-    def save(self) -> None:
+    def _save(self) -> None:
         """Save all the containers' commands in a file"""
 
         # Don't save if there are no containers in the workspace
@@ -94,7 +94,7 @@ class Workspace:
             # Containers with subprocess commands need to save where they stored the
             # subprocess command so it could be executed correctly when restored
             if container.subprocess_command:
-                subprocess_file = self.save_subprocess(container, i)
+                subprocess_file = self._save_subprocess(container, i)
                 program_commands += f"I3_RESTORE_SUBPROCESS_SCRIPT={subprocess_file} "
 
             program_commands += f"{container.command}\n"
@@ -103,7 +103,7 @@ class Workspace:
         with file.open("w") as f:
             f.write(program_commands)
 
-    def save_subprocess(self, container: Container, container_num: int) -> Path:
+    def _save_subprocess(self, container: Container, container_num: int) -> Path:
         """
         Write the subprocess command to a separate file. This makes executed commands
         behave (nearly) identically to how it would be executed in a terminal.
@@ -127,10 +127,10 @@ class Container:
         self.subprocess_command = None
         self.working_directory = None
 
-        self.pid = self.get_pid(properties)
+        self.pid = self._get_pid(properties)
 
         try:
-            self.get_cmdline_options(properties)
+            self._get_cmdline_options(properties)
         except psutil.ZombieProcess:
             # This happens when i3 restore is attempting to save a container that was very recently
             # killed and the process hasn't been cleaned up yet
@@ -145,7 +145,7 @@ class Container:
             self.command = None
 
     @staticmethod
-    def get_pid(properties: JSON) -> Optional[int]:
+    def _get_pid(properties: JSON) -> Optional[int]:
         """Get the PID of the current container"""
         try:
             pid_info = subprocess.check_output(
@@ -158,7 +158,7 @@ class Container:
 
         return pid_info
 
-    def get_cmdline_options(self, properties: JSON) -> None:
+    def _get_cmdline_options(self, properties: JSON) -> None:
         """Set the command and working directory of the container"""
         if self.pid is None:
             return
@@ -174,7 +174,7 @@ class Container:
                 # the subprocess works as expected and doesn't store "[terminal] -e bash -c ..."
                 self.command = terminal["command"]
 
-                self.check_if_subprocess(process)
+                self._check_if_subprocess(process)
 
                 # Get the working directory of the last process because some terminals
                 # store working directories different than others (which is why it can't
@@ -188,9 +188,9 @@ class Container:
         # Next, handle saving web browsers. We only want to save the first
         # instance -- not every instance -- because the browser will handle
         # restoring every instance.
-        self.handle_web_browser()
+        self._handle_web_browser()
 
-    def check_if_subprocess(self, process: psutil.Process) -> None:
+    def _check_if_subprocess(self, process: psutil.Process) -> None:
         """
         Checks whether or not the process has any subprocesses that should be
         saved. Examples of subprocesses that run in the terminal include Vim,
@@ -228,15 +228,15 @@ class Container:
                     self.subprocess_command = launch_command.replace("{command}", command)
                     return
 
-    def handle_web_browser(self) -> None:
+    def _handle_web_browser(self) -> None:
         """Checks whether the container's program is a web browser"""
         for web_browser in CONFIG.web_browsers:
             if web_browser in self.command:
-                self.save_web_browser(web_browser)
+                self._save_web_browser(web_browser)
                 self.command = None
                 return
 
-    def save_web_browser(self, web_browser: str) -> None:
+    def _save_web_browser(self, web_browser: str) -> None:
         """
         Saves the web browser to a separate file only if it has not
         been saved already. Since the script uses the browsers'

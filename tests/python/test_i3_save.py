@@ -9,6 +9,9 @@ with mock.patch("utils.get_logger"):
     # Don't actually log messages to a file
     from programs import i3_save
 
+# This needs to be accessed to be tested
+# pylint: disable=protected-access
+
 
 def test_main_creates_workspaces_correctly(mocker: MockerFixture) -> None:
     mock_workspace = mocker.patch.object(i3_save, "Workspace")
@@ -25,7 +28,7 @@ class TestWorkspace:
         mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
 
         # Make sure the container with None pid doesn't get saved
-        mocker.patch.object(i3_save.Container, "get_pid", side_effect=["pid", "pid", None])
+        mocker.patch.object(i3_save.Container, "_get_pid", side_effect=["pid", "pid", None])
         mock_process = mocker.patch("psutil.Process")
         mock_process.return_value.cmdline.return_value = ["test_command"]
 
@@ -56,8 +59,8 @@ class TestWorkspace:
 
     def test_workspace_saves_subprocesses_correctly(self, mocker: MockerFixture) -> None:
         mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         properties = {"name": "test_workspace", "nodes": []}
         container = i3_save.Container({})
@@ -65,7 +68,7 @@ class TestWorkspace:
 
         workspace = i3_save.Workspace(properties)
         workspace.containers = [container]
-        workspace.save()
+        workspace._save()
 
         # Called once for the subprocess and once for the workspace
         assert mock_open.call_count == 2
@@ -73,8 +76,8 @@ class TestWorkspace:
 
 class TestContainer:
     def test_container_initializes_correctly(self, mocker: MockerFixture) -> None:
-        mock_get_pid = mocker.patch.object(i3_save.Container, "get_pid")
-        mock_get_cmd_options = mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mock_get_pid = mocker.patch.object(i3_save.Container, "_get_pid")
+        mock_get_cmd_options = mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         i3_save.Container({})
         mock_get_pid.assert_called_once_with({})
@@ -84,8 +87,8 @@ class TestContainer:
     def test_container_handles_psutil_expcetions(
         self, mocker: MockerFixture, exception: psutil.Error
     ) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options", side_effect=exception)
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options", side_effect=exception)
 
         container = i3_save.Container({})
         assert container.command is None
@@ -94,7 +97,7 @@ class TestContainer:
         mocker.patch("subprocess.check_output", return_value=b"1111")
         properties = {"window": 1}
 
-        pid = i3_save.Container.get_pid(properties)
+        pid = i3_save.Container._get_pid(properties)
         assert pid == 1111
 
     def test_get_pid_handles_called_process_error(self, mocker: MockerFixture) -> None:
@@ -103,18 +106,18 @@ class TestContainer:
         )
         properties = {"window": 1}
 
-        pid = i3_save.Container.get_pid(properties)
+        pid = i3_save.Container._get_pid(properties)
         assert pid is None
 
     def test_get_cmdline_options_does_not_run_with_no_pid(self, mocker: MockerFixture) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid", return_value=None)
+        mocker.patch.object(i3_save.Container, "_get_pid", return_value=None)
         mock_process = mocker.patch("psutil.Process")
 
         i3_save.Container({})
         mock_process.assert_not_called()
 
     def test_get_cmdline_options_saves_terminals(self, mocker: MockerFixture) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
+        mocker.patch.object(i3_save.Container, "_get_pid")
         mocker.patch("psutil.Process")
 
         i3_save.CONFIG.terminals = [{"command": "test_command", "class": "test_class"}]
@@ -124,7 +127,7 @@ class TestContainer:
         assert container.command == "test_command"
 
     def test_get_cmdline_options_saves_processes(self, mocker: MockerFixture) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
+        mocker.patch.object(i3_save.Container, "_get_pid")
         mock_process = mocker.patch("psutil.Process")
         mock_process.return_value.cmdline.return_value = ["test_command"]
         mock_process.return_value.cwd.return_value = "test_dir"
@@ -137,8 +140,8 @@ class TestContainer:
         assert container.working_directory == "test_dir"
 
     def test_check_if_subprocess_saves_subprocess(self, mocker: MockerFixture) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         mock_process = mocker.patch("psutil.Process")
         mock_process2 = mocker.patch("psutil.Process")
@@ -151,15 +154,15 @@ class TestContainer:
             {"name": "subprocess2", "args": ["--test-arg", "-t"]},
         ]
         container = i3_save.Container({})
-        container.check_if_subprocess(mock_process)
+        container._check_if_subprocess(mock_process)
 
         assert container.subprocess_command == r"test_command --test-arg file\ name"
 
     def test_check_if_subprocess_saves_subprocess_with_custom_launch_command(
         self, mocker: MockerFixture
     ) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         mock_process = mocker.patch("psutil.Process")
         mock_process.cmdline.return_value = ["test_command"]
@@ -171,15 +174,15 @@ class TestContainer:
         ]
 
         container = i3_save.Container({})
-        container.check_if_subprocess(mock_process)
+        container._check_if_subprocess(mock_process)
 
         assert container.subprocess_command == r"test_command and more!"
 
     def test_check_if_subprocess_does_not_save_subprocess_without_necessary_args(
         self, mocker: MockerFixture
     ) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         mock_process = mocker.patch("psutil.Process")
         mock_process.cmdline.return_value = ["test_command", "--not-test-arg"]
@@ -189,15 +192,15 @@ class TestContainer:
         i3_save.CONFIG.subprocesses = [{"name": "subprocess", "args": ["--test-arg"]}]
 
         container = i3_save.Container({})
-        container.check_if_subprocess(mock_process)
+        container._check_if_subprocess(mock_process)
 
         assert container.subprocess_command is None
 
     def test_check_if_subprocess_does_not_save_non_configured_subprocess(
         self, mocker: MockerFixture
     ) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         mock_process = mocker.patch("psutil.Process")
         mock_process.cmdline.return_value = ["test_command", "file name"]
@@ -207,19 +210,19 @@ class TestContainer:
         i3_save.CONFIG.subprocesses = [{"name": "subprocess1"}]
 
         container = i3_save.Container({})
-        container.check_if_subprocess(mock_process)
+        container._check_if_subprocess(mock_process)
 
         assert container.subprocess_command is None
 
     def test_handle_web_browser_saves_configured_browsers(self, mocker: MockerFixture) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
-        mock_save_browser = mocker.patch.object(i3_save.Container, "save_web_browser")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
+        mock_save_browser = mocker.patch.object(i3_save.Container, "_save_web_browser")
 
         i3_save.CONFIG.web_browsers = ["test_browser"]
         container = i3_save.Container({})
         container.command = "test_browser"
-        container.handle_web_browser()
+        container._handle_web_browser()
 
         mock_save_browser.assert_called_once()
         assert container.command is None
@@ -227,14 +230,14 @@ class TestContainer:
     def test_handle_web_browser_does_not_save_non_configured_browsers(
         self, mocker: MockerFixture
     ) -> None:
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
-        mock_save_browser = mocker.patch.object(i3_save.Container, "save_web_browser")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
+        mock_save_browser = mocker.patch.object(i3_save.Container, "_save_web_browser")
 
         i3_save.CONFIG.web_browsers = ["browser1"]
         container = i3_save.Container({})
         container.command = "browser2"
-        container.handle_web_browser()
+        container._handle_web_browser()
 
         mock_save_browser.assert_not_called()
         assert container.command == "browser2"
@@ -243,24 +246,24 @@ class TestContainer:
         self, mocker: MockerFixture
     ) -> None:
         mock_open = mocker.patch("builtins.open")
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         i3_save.WEB_BROWSERS_DICT = {"test_browser": True}
         container = i3_save.Container({})
-        container.save_web_browser("test_browser")
+        container._save_web_browser("test_browser")
 
         mock_open.assert_not_called()
 
     def test_save_web_browser_saves_browser_in_file(self, mocker: MockerFixture) -> None:
         mock_open = mocker.patch("builtins.open", new_callable=mock.mock_open)
-        mocker.patch.object(i3_save.Container, "get_pid")
-        mocker.patch.object(i3_save.Container, "get_cmdline_options")
+        mocker.patch.object(i3_save.Container, "_get_pid")
+        mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
         i3_save.WEB_BROWSERS_DICT = {"test_browser": False}
         container = i3_save.Container({})
         container.command = "test_browser_command"
-        container.save_web_browser("test_browser")
+        container._save_web_browser("test_browser")
 
         handle = mock_open()
         assert handle.write.call_args[0][0] == "test_browser_command\n"
