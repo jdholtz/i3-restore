@@ -2,11 +2,12 @@
 When upgrading to a new version, make sure to follow the directions under the "Upgrading" header of the corresponding version.
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
-## Upcoming
+## 4.1 (2024-01-07)
 
 ### Bug Fixes
 - Fix log messages messing up the restoring process when using a verbosity
 - Fix programs not restoring correctly when the default shell is not Bash
+
 
 ## 4.0 (2024-01-03)
 
