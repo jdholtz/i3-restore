@@ -203,31 +203,33 @@ class Container:
         for child in reversed(process.children(True)):
             child_name = child.name()
             for program in CONFIG.subprocesses:
-                if child_name == program["name"]:
+                if child_name != program["name"]:
+                    continue
+
+                logger.info(
+                    "Subprocess '%s' found in main process '%s'", child_name, process.name()
+                )
+
+                cmd_line = child.cmdline()
+                logger.debug("Subprocess command line: %s", cmd_line)
+                command, cmd_args = cmd_line[0], cmd_line[1:]
+                save_args = program.get("args", [])
+
+                # First, check if the subprocess includes the desired arguments
+                includes_save_arg = any(arg in cmd_args for arg in save_args)
+                if save_args and not includes_save_arg:
                     logger.info(
-                        "Subprocess '%s' found in main process '%s'", child_name, process.name()
+                        "Skipping saving subprocess as it doesn't include desired arguments"
                     )
-
-                    cmd_line = child.cmdline()
-                    logger.debug("Subprocess command line: %s", cmd_line)
-                    command, cmd_args = cmd_line[0], cmd_line[1:]
-                    save_args = program.get("args", [])
-
-                    # First, check if the subprocess includes the desired arguments
-                    includes_save_arg = any(arg in cmd_args for arg in save_args)
-                    if save_args and not includes_save_arg:
-                        logger.info(
-                            "Skipping saving subprocess as it doesn't include desired arguments"
-                        )
-                        return
-
-                    # Next, build the command
-                    for arg in cmd_args:
-                        command += " " + arg.replace(" ", r"\ ")
-
-                    launch_command = program.get("launch_command", "{command}")
-                    self.subprocess_command = launch_command.replace("{command}", command)
                     return
+
+                # Next, build the command
+                for arg in cmd_args:
+                    command += " " + arg.replace(" ", r"\ ")
+
+                launch_command = program.get("launch_command", "{command}")
+                self.subprocess_command = launch_command.replace("{command}", command)
+                return
 
     def _handle_web_browser(self) -> None:
         """Checks whether the container's program is a web browser"""
