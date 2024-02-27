@@ -21,6 +21,7 @@ i3-restore has the following features (fill out a feature request for more to be
 - [x] Configuration to save and restore desired terminals, web browsers, and terminal subprocesses from your latest i3 session
 - [x] Automatic saving and restoring of all i3 window layouts and programs running in your current i3 session
 - [x] Correct restoring of subprocesses within terminals (such as Vim and ssh) and web browser instances
+- [ ] Kitty terminal sessions https://github.com/jdholtz/i3-restore/issues/14 ([for not you can do it manually]([url](https://sw.kovidgoyal.net/kitty/overview/#startup-sessions)))
 
 ## Getting Started
 
