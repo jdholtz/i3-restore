@@ -182,6 +182,10 @@ restore_workspace() {
 #   None
 #####################################
 kill_empty_containers() {
+    # Don't output this function to the debug logs as there is too much useless
+    # information logged (the entire i3-tree multiple times)
+    [[ $I3_RESTORE_VERBOSE == 2 ]] && set +x
+
     local containers
     containers="$(i3-msg --type get_tree | jq '.nodes[]')"
 
@@ -203,6 +207,9 @@ kill_empty_containers() {
 
         containers="$(echo "${containers}" | jq '.nodes[]')"
     done
+
+    # Restore debug logging
+    [[ $I3_RESTORE_VERBOSE == 2 ]] && set -x
 }
 
 #####################################

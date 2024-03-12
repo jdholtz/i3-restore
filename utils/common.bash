@@ -45,7 +45,7 @@ usage() {
     fi
 
     echo "    -v, -vv                Increase the verbosity of the script. One v prints debug messages and"
-    echo "                           two v's prints all commands executed too"
+    echo "                           two v's print all commands executed too"
     echo "    -h, --help             Display this help and exit"
     echo "    -V, --version          Display version information and exit"
     echo
