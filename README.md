@@ -13,6 +13,7 @@ The script can correctly restore terminal subprocesses (such as Vim and ssh) and
     * [Saving](#saving)
     * [Restoring](#restoring)
     * [Restoring Programs In Assigned Workspaces](#restoring-programs-in-assigned-workspaces)
+- [Limitations](#limitations)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 
@@ -124,6 +125,21 @@ exec /path/to/i3-restore/i3-restore --interval <minutes>
 Some programs that take a few seconds to start (such as Discord) might not restore on the correct workspace. To mitigate this issue, simply use
 the [assign][6] function in i3 and add it to your i3 configuration file.
 
+## Limitations
+Due to i3-restore relying partially on program load times and i3 swallowing, there are some limitations to how it restores your process.
+
+First, i3-restore cannot restore fully programs that it does not have permission to access. For example, this can be seen when saving a root
+terminal while i3-restore is running under an unprivileged user. In this case, the window may not be placed in the same location when it is
+restored (although, the program used to run the root terminal--such as `sudo` or `su`--will be called).
+
+Second, programs that take more than a few seconds to load (such as Discord) may not be placed in the correct location. Look at
+[Restoring Programs In Assigned Workspaces](#restoring-programs-in-assigned-workspaces) for information on how to make restores more reliable
+for these programs.
+
+Last, since i3-restore relies on i3 swallowing and how well individual programs can be restored to their last used state, the restoring process
+is not always 100% reliable. Occasionally, windows will be in different places or not fully restored. If you have ideas or fixes for making the
+restoring process, you're welcome to submit an [issue][7] or [pull request][8] so these can be implemented.
+
 ## Troubleshooting
 To troubleshoot a problem, run the script with the `-v` flag. This will display debug messages so you can get a better overview of the problem.
 Using `-vv` will print out all commands executed by the script so you can trace through it and understand where and why a problem is occurring.
@@ -133,7 +149,7 @@ If you run into any issues, please file it via [GitHub Issues][7]. Please attach
 launch commands, and configuration settings, so make sure to remove any information you don't want to be shared before
 attaching them.
 
-If you have any questions or discussion topics, start a [GitHub Discussion][8].
+If you have any questions or discussion topics, start a [GitHub Discussion][9].
 
 ## Contributing
 Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md) if you are considering making contributions.
@@ -146,4 +162,5 @@ Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md)
 [5]: https://github.com/jordansissel/xdotool
 [6]: https://i3wm.org/docs/userguide.html#assign_workspace
 [7]: https://github.com/jdholtz/i3-restore/issues/new/choose
-[8]: https://github.com/jdholtz/i3-restore/discussions/new/choose
+[8]: https://github.com/jdholtz/i3-restore/compare
+[9]: https://github.com/jdholtz/i3-restore/discussions/new/choose
