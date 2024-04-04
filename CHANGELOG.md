@@ -5,8 +5,8 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 ## Upcoming
 
 ### New Features
-- A [Limitations](README.md#limitations) section has been added to the Readme
-([#13](https://github.com/jdholtz/i3-restore/issues/13))
+- A [Similar Software](README.md#similar-software) and [Limitations](README.md#limitations) section has been added to the Readme
+([#11](https://github.com/jdholtz/i3-restore/issues/11) and [#13](https://github.com/jdholtz/i3-restore/issues/13))
 
 
 ## 4.1 (2024-01-07)

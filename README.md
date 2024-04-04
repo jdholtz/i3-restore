@@ -14,6 +14,8 @@ The script can correctly restore terminal subprocesses (such as Vim and ssh) and
     * [Restoring](#restoring)
     * [Restoring Programs In Assigned Workspaces](#restoring-programs-in-assigned-workspaces)
 - [Limitations](#limitations)
+- [Similar Software](#similar-software)
+    * [i3-resurrect](#i3-resurrect)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 
@@ -140,6 +142,13 @@ Last, since i3-restore relies on i3 swallowing and how well individual programs 
 is not always 100% reliable. Occasionally, windows will be in different places or not fully restored. If you have ideas or fixes for making the
 restoring process, you're welcome to submit an [issue][7] or [pull request][8] so these can be implemented.
 
+## Similar Software
+### i3-resurrect
+While [i3-resurrect][9] has more flexible and configurable restoring options for i3, i3-restore is designed to only restore your previous i3
+session. While i3-restore can be configured to your specific use case, the default configuration is designed to be sufficient for most programs and
+work out of the box. Additionally, i3-restore can be easily configured to save your session right before you log out and restore it upon login (see
+[Automating the Script](#automating-the-script) for more information on how to configure that).
+
 ## Troubleshooting
 To troubleshoot a problem, run the script with the `-v` flag. This will display debug messages so you can get a better overview of the problem.
 Using `-vv` will print out all commands executed by the script so you can trace through it and understand where and why a problem is occurring.
@@ -149,7 +158,7 @@ If you run into any issues, please file it via [GitHub Issues][7]. Please attach
 launch commands, and configuration settings, so make sure to remove any information you don't want to be shared before
 attaching them.
 
-If you have any questions or discussion topics, start a [GitHub Discussion][9].
+If you have any questions or discussion topics, start a [GitHub Discussion][10].
 
 ## Contributing
 Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md) if you are considering making contributions.
@@ -163,4 +172,5 @@ Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md)
 [6]: https://i3wm.org/docs/userguide.html#assign_workspace
 [7]: https://github.com/jdholtz/i3-restore/issues/new/choose
 [8]: https://github.com/jdholtz/i3-restore/compare
-[9]: https://github.com/jdholtz/i3-restore/discussions/new/choose
+[9]: https://github.com/JonnyHaystack/i3-resurrect
+[10]: https://github.com/jdholtz/i3-restore/discussions/new/choose
