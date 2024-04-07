@@ -140,8 +140,7 @@ Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md)
 
 ## Related projects
 - [i3-resurrect](https://github.com/JonnyHaystack/i3-resurrect) - "Simple solution to saving and restoring i3 workspaces"
-- [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) - which obviously also inspired
-the name of this project
+- [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect)
 - [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) - an excellent companion to
 tmux-resurrect
 - [qutebrowser](https://github.com/qutebrowser/qutebrowser) - which has excellent session
