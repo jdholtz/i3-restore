@@ -138,6 +138,16 @@ If you have any questions or discussion topics, start a [GitHub Discussion][8].
 ## Contributing
 Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md) if you are considering making contributions.
 
+## Related projects
+- [i3-resurrect](https://github.com/JonnyHaystack/i3-resurrect) - "Simple solution to saving and restoring i3 workspaces"
+- [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) - which obviously also inspired
+the name of this project
+- [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) - an excellent companion to
+tmux-resurrect
+- [qutebrowser](https://github.com/qutebrowser/qutebrowser) - which has excellent session
+management, especially if you create bindings for saving and loading individual windows
+- [firefox-i3-workspaces](https://github.com/yurikhan/firefox-i3-workspaces) - to restore Firefox windows to the same workspaces, helper browser extension is needed to install
+
 [0]: https://github.com/i3/i3
 [1]: https://www.python.org/downloads/
 [2]: https://pip.pypa.io/en/stable/installation/
