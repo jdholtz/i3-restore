@@ -2,6 +2,10 @@
 Welcome! Thanks for considering contributing to the development of **i3-restore**. This guide contains useful tips and guidelines
 to contribute to this project.
 
+Please submit all changes to the `develop` branch. This allows for separation between new changes and the latest stable release. When submitting a
+pull request, make sure to add the change/feature to the [Upcoming](CHANGELOG.md#upcoming) section of the changelog with a reference to the
+pull request (this can be done after submitting the PR or separately by me).
+
 ## Adding To The Configuration
 Adding/modifying the configuration file is highly encouraged to increase i3-restore's compatibility with common software. Simply add
 your desired programs to the [config.example.json](config.example.json), test it, and submit a PR!

@@ -61,7 +61,7 @@ or
 ```shell
 ./i3-restore --help
 ```
-
+\
 On Gentoo you can emerge [x11-misc/i3-restore](https://github.com/gentoo/guru/tree/master/x11-misc/i3-restore)
 
 ## Upgrading
