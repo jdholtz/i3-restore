@@ -59,6 +59,8 @@ or
 ./i3-restore --help
 ```
 
+On Gentoo you can emerge [x11-misc/i3-restore](https://github.com/gentoo/guru/tree/master/x11-misc/i3-restore)
+
 ## Upgrading
 When upgrading this script, it is important to follow the [Changelog](CHANGELOG.md) for any actions that need to be performed,
 as many changes will not be made backwards compatible.
