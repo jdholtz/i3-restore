@@ -33,9 +33,9 @@ usage() {
     echo
     echo "Usage:"
     if [[ "$(basename "$cmd")" == "i3-save" ]]; then
-        echo "    ${cmd} [options]      Save your current i3 session"
+        echo "    i3-save [options]      Save your current i3 session"
     else
-        echo "    ${cmd} [options]      Restore your last saved i3 session"
+        echo "    i3-restore [options]   Restore your last saved i3 session"
     fi
     echo
     echo "Options:"
