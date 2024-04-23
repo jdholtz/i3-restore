@@ -210,6 +210,9 @@ kill_empty_containers() {
 
     # Restore debug logging
     [[ $I3_RESTORE_VERBOSE == 2 ]] && set -x
+
+    # Always return 0, even if the condition above has a non-zero code
+    return 0
 }
 
 #####################################
