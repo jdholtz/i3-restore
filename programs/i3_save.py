@@ -168,7 +168,10 @@ class Container:
 
         # First, check if it is a terminal
         for terminal in CONFIG.terminals:
-            if properties["window_properties"]["class"] == terminal["class"]:
+            if (
+                "class" in properties["window_properties"]
+                and properties["window_properties"]["class"] == terminal["class"]
+            ):
                 logger.info("Main process of container is a terminal")
 
                 # The terminal command is set here manually so the custom command used to restore

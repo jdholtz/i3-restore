@@ -10,6 +10,9 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 - Directions on installing on Gentoo Linux using emerge have been added to the Readme
 ([#20](https://github.com/jdholtz/i3-restore/pull/20) by [@vitaly-zdanevich](https://github.com/vitaly-zdanevich))
 
+### Bug Fixes
+- Fix saving windows with classes that aren't retrieved from i3-msg
+
 
 ## 4.1 (2024-01-07)
 

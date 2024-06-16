@@ -9,6 +9,8 @@ with mock.patch("utils.get_logger"):
     # Don't actually log messages to a file
     from programs import i3_save
 
+from programs.utils import JSON
+
 # This needs to be accessed to be tested
 # pylint: disable=protected-access
 
@@ -126,15 +128,17 @@ class TestContainer:
 
         assert container.command == "test_command"
 
-    def test_get_cmdline_options_saves_processes(self, mocker: MockerFixture) -> None:
+    @pytest.mark.parametrize("window_props", [{"class": "not_terminal"}, {}])
+    def test_get_cmdline_options_saves_processes(
+        self, mocker: MockerFixture, window_props: JSON
+    ) -> None:
         mocker.patch.object(i3_save.Container, "_get_pid")
         mock_process = mocker.patch("psutil.Process")
         mock_process.return_value.cmdline.return_value = ["test_command"]
         mock_process.return_value.cwd.return_value = "test_dir"
 
         i3_save.CONFIG.terminals = [{"command": "test_command", "class": "test_class"}]
-        properties = {"window_properties": {"class": "not_terminal"}}
-        container = i3_save.Container(properties)
+        container = i3_save.Container({"window_properties": window_props})
 
         assert container.command == "test_command"
         assert container.working_directory == "test_dir"
