@@ -2,7 +2,8 @@
 When upgrading to a new version, make sure to follow the directions under the "Upgrading" header of the corresponding version.
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
-## Upcoming
+
+## 4.2 (2024-07-06)
 
 ### New Features
 - A [Similar Software](README.md#similar-software) and [Limitations](README.md#limitations) section has been added to the Readme
