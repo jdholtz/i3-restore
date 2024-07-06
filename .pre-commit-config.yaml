@@ -1,16 +1,16 @@
 repos:
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 23.12.1
+    rev: 24.4.2
     hooks:
       - id: black
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
       - id: codespell
         additional_dependencies:
           - tomli
   - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
+    rev: 7.1.0
     hooks:
       -  id: flake8
   - repo: https://github.com/PyCQA/isort
@@ -18,11 +18,11 @@ repos:
     hooks:
       - id: isort
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.7.0-4
+    rev: v3.8.0-1
     hooks:
       - id: shfmt
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
+    rev: v0.10.0
     hooks:
       - id: shellcheck
         args: [-x]
