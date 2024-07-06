@@ -151,6 +151,13 @@ session. While i3-restore can be configured to your specific use case, the defau
 work out of the box. Additionally, i3-restore can be easily configured to save your session right before you log out and restore it upon login (see
 [Automating the Script](#automating-the-script) for more information on how to configure that).
 
+### tmux-resurrect
+[Tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) is a Tmux plugin to restore your tmux environment after a system restart.
+
+### firefox-i3-workspaces
+[Firefox-i3-workspaces](https://github.com/yurikhan/firefox-i3-workspaces) is a Firefox plugin and Python script to restore multiple windows
+of Firefox on i3.
+
 ## Troubleshooting
 To troubleshoot a problem, run the script with the `-v` flag. This will display debug messages so you can get a better overview of the problem.
 Using `-vv` will print out all commands executed by the script so you can trace through it and understand where and why a problem is occurring.
