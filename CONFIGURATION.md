@@ -101,5 +101,8 @@ By default, the layout and program files are saved under `$HOME/.config/i3`. To 
 the desired location.
 
 ## Restoring Vim And Neovim Sessions
-It is recommended to use [vim-prosession](https://github.com/dhruvasagar/vim-prosession) to manage your vim/neovim sessions, allowing for
+It is recommended to use [vim-prosession] to manage your vim/neovim sessions, allowing for
 more reliable restores.
+
+
+[vim-prosession]: https://github.com/dhruvasagar/vim-prosession

@@ -1,6 +1,6 @@
 # i3-restore
 
-A simple Python and Bash script to restore your [i3][0] session. It works very similar to how Firefox restores a previous session.
+A simple Python and Bash script to restore your [i3] session. It works very similar to how Firefox restores a previous session.
 The script can correctly restore terminal subprocesses (such as Vim and ssh) and web browser instances exactly how they were before.
 
 ## Table of Contents
@@ -28,11 +28,11 @@ i3-restore has the following features (fill out a feature request for more to be
 ## Getting Started
 
 ### Dependencies
-- [Python 3.7+][1]
-- [Pip][2]
-- [Jq][3]
-- [Perl-anyevent-i3][4]
-- [Xdotool][5]
+- [Python 3.7+]
+- [Pip]
+- [Jq]
+- [Perl-anyevent-i3]
+- [Xdotool]
 
 First, download the script onto your computer
 ```shell
@@ -62,7 +62,7 @@ or
 ./i3-restore --help
 ```
 \
-On Gentoo you can emerge [x11-misc/i3-restore](https://github.com/gentoo/guru/tree/master/x11-misc/i3-restore)
+On Gentoo you can emerge [x11-misc/i3-restore]
 
 ## Upgrading
 When upgrading this script, it is important to follow the [Changelog](CHANGELOG.md) for any actions that need to be performed,
@@ -127,7 +127,7 @@ exec /path/to/i3-restore/i3-restore --interval <minutes>
 
 ### Restoring Programs In Assigned Workspaces
 Some programs that take a few seconds to start (such as Discord) might not restore on the correct workspace. To mitigate this issue, simply use
-the [assign][6] function in i3 and add it to your i3 configuration file.
+the [assign][assign workspace] function in i3 and add it to your i3 configuration file.
 
 ## Limitations
 Due to i3-restore relying partially on program load times and i3 swallowing, there are some limitations to how it restores your process.
@@ -142,44 +142,47 @@ for these programs.
 
 Last, since i3-restore relies on i3 swallowing and how well individual programs can be restored to their last used state, the restoring process
 is not always 100% reliable. Occasionally, windows will be in different places or not fully restored. If you have ideas or fixes for making the
-restoring process, you're welcome to submit an [issue][7] or [pull request][8] so these can be implemented.
+restoring process, you're welcome to submit an [issue][GitHub Issues] or [pull request][GitHub Pull Request] so these can be implemented.
 
 ## Similar Software
 ### i3-resurrect
-While [i3-resurrect][9] has more flexible and configurable restoring options for i3, i3-restore is designed to only restore your previous i3
+While [i3-resurrect] has more flexible and configurable restoring options for i3, i3-restore is designed to only restore your previous i3
 session. While i3-restore can be configured to your specific use case, the default configuration is designed to be sufficient for most programs and
 work out of the box. Additionally, i3-restore can be easily configured to save your session right before you log out and restore it upon login (see
 [Automating the Script](#automating-the-script) for more information on how to configure that).
 
 ### tmux-resurrect
-[Tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) is a Tmux plugin to restore your tmux environment after a system restart.
+[Tmux-resurrect] is a Tmux plugin to restore your tmux environment after a system restart.
 
 ### firefox-i3-workspaces
-[Firefox-i3-workspaces](https://github.com/yurikhan/firefox-i3-workspaces) is a Firefox plugin and Python script to restore multiple windows
+[Firefox-i3-workspaces] is a Firefox plugin and Python script to restore multiple windows
 of Firefox on i3.
 
 ## Troubleshooting
 To troubleshoot a problem, run the script with the `-v` flag. This will display debug messages so you can get a better overview of the problem.
 Using `-vv` will print out all commands executed by the script so you can trace through it and understand where and why a problem is occurring.
 
-If you run into any issues, please file it via [GitHub Issues][7]. Please attach any relevant logs (can be found in
+If you run into any issues, please file it via [GitHub Issues]. Please attach any relevant logs (can be found in
 `logs/i3-restore.log`) to the issue. The logs may contain sensitive information such as directory names, program
 launch commands, and configuration settings, so make sure to remove any information you don't want to be shared before
 attaching them.
 
-If you have any questions or discussion topics, start a [GitHub Discussion][10].
+If you have any questions or discussion topics, start a [GitHub Discussion].
 
 ## Contributing
 Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md) if you are considering making contributions.
 
-[0]: https://github.com/i3/i3
-[1]: https://www.python.org/downloads/
-[2]: https://pip.pypa.io/en/stable/installation/
-[3]: https://stedolan.github.io/jq/download/
-[4]: https://github.com/i3/i3/blob/next/AnyEvent-I3/README
-[5]: https://github.com/jordansissel/xdotool
-[6]: https://i3wm.org/docs/userguide.html#assign_workspace
-[7]: https://github.com/jdholtz/i3-restore/issues/new/choose
-[8]: https://github.com/jdholtz/i3-restore/compare
-[9]: https://github.com/JonnyHaystack/i3-resurrect
-[10]: https://github.com/jdholtz/i3-restore/discussions/new/choose
+[i3]: https://github.com/i3/i3
+[Python 3.7+]: https://www.python.org/downloads/
+[Pip]: https://pip.pypa.io/en/stable/installation/
+[Jq]: https://stedolan.github.io/jq/download/
+[Perl-anyevent-i3]: https://github.com/i3/i3/blob/next/AnyEvent-I3/README
+[Xdotool]: https://github.com/jordansissel/xdotool
+[x11-misc/i3-restore]: https://github.com/gentoo/guru/tree/master/x11-misc/i3-restore
+[assign workspace]: https://i3wm.org/docs/userguide.html#assign_workspace
+[GitHub Issues]: https://github.com/jdholtz/i3-restore/issues/new/choose
+[GitHub Pull Request]: https://github.com/jdholtz/i3-restore/compare
+[GitHub Discussion]: https://github.com/jdholtz/i3-restore/discussions/new/choose
+[i3-resurrect]: https://github.com/JonnyHaystack/i3-resurrect
+[tmux-resurrect]: https://github.com/tmux-plugins/tmux-resurrect
+[Firefox-i3-workspaces]: https://github.com/yurikhan/firefox-i3-workspaces
