@@ -21,17 +21,26 @@ check_dependencies
 source "${CURR_DIR}/utils/logs.bash"
 rotate_log
 
-#####################################
-# Get the names of all workspaces currently used.
+####################################################
+# Get the names of all workspaces currently used and
+# the displays they are on. For each workspace, the
+# first line will be the workspace name and the
+# second will be the display name.
 # Arguments:
 #   None
 # Returns:
-#   An array containing the workspaces' names.
-#####################################
+#   A string of workspace and display names. The
+#   workspace name is the first line and the display
+#   the workspace is on is the second line
+#   e.g.
+#   workspace1
+#   display1
+#   workspace2
+#   display2
+####################################################
 get_workspaces() {
-    ALLWORKSPACES="$(i3-msg --type get_workspaces)"
-    workspaces=$(echo "${ALLWORKSPACES}" | jq -r '.[] | .name') # Match only the workspaces' names
-    echo "${workspaces}"
+    # Match only the workspace name and the output it is on
+    i3-msg --type get_workspaces | jq -r '.[] | .name, .output'
 }
 
 #####################################
@@ -40,18 +49,19 @@ get_workspaces() {
 #   i3_PATH
 # Arguments:
 #   Workspace name
+#   Display name the workspace is on
 # Returns:
 #   0 if either no program file is found or programs
 #   were restored correctly. Non-zero on error.
 #####################################
 save_workspace_layout() {
     workspace="${1}"
+    display="${2}"
 
     log "Saving layout for Workspace ${workspace}"
     # Replace slash in workspace name as file names cannot have slashes
-    sanitized_ws_name="${ws//\//\{slash\}}"
+    sanitized_ws_name="${workspace//\//\{slash\}}"
 
-    file_name="${i3_PATH}/workspace_${sanitized_ws_name}_layout.json"
     workspace_tree="$(i3-save-tree --workspace "${workspace}")"
 
     # If workspace is empty (i.e doesn't contain any actual configuration lines)
@@ -60,6 +70,7 @@ save_workspace_layout() {
         return 0
     fi
 
+    file_name="${i3_PATH}/workspace_${sanitized_ws_name}_${display}_layout.json"
     echo "${workspace_tree}" >"${file_name}"
 
     # Automatically edit the file
@@ -74,7 +85,11 @@ save_workspace_layout() {
 #   None
 #####################################
 save_workspace_layouts() {
+    local workspaces workspaces_arr
+
+    # Get the workspaces and convert the output into an array
     workspaces="$(get_workspaces)"
+    readarray -t workspaces_arr <<<"$workspaces"
 
     # Remove previous saved session. --force is used so it doesn't exit if a file isn't found
     rm --force "${i3_PATH}"/*_layout.json
@@ -85,8 +100,10 @@ save_workspace_layouts() {
     # Save a mark on the focused window so it can be restored later
     i3-msg --quiet 'mark --add _i3_restore_focus'
 
-    for ws in ${workspaces}; do
-        save_workspace_layout "${ws}"
+    for ((idx = 0; idx < ${#workspaces_arr[@]}; idx += 2)); do
+        local workspace="${workspaces_arr[idx]}"
+        local display="${workspaces_arr[idx + 1]}"
+        save_workspace_layout "$workspace" "$display"
     done
 
     i3-msg --quiet 'unmark _i3_restore_focus'

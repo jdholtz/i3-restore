@@ -134,12 +134,19 @@ map_windows() {
 # Arguments:
 #   Layout file, a path
 #   Workspace name
+#   Display name the workspace should be restored on
 #####################################
 restore_layout() {
     local file="${1}"
     local workspace_name="${2}"
+    local display="${3}"
 
     log "Restoring layout for Workspace ${workspace_name}"
+
+    # Move the workspace to the display it should be restored on. In case the display no longer
+    # exists, the workspace will be restored on the display i3 chose.
+    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; \
+        move workspace to output ${display}" || true
 
     # Append the layout of the saved workspace
     i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; \
@@ -154,11 +161,17 @@ restore_layout() {
 #   Layout file, a path.
 #####################################
 restore_workspace() {
-    local file="${1}"
+    local file workspace_and_display_name workspace_name display_name
 
-    # Get workspace name from file name
-    local workspace_name="${file#*_}"
-    workspace_name="${workspace_name%_*}"
+    file="${1}"
+
+    # Get the workspace and display name from the file name
+    workspace_and_display_name="${file#*_}"
+    workspace_and_display_name="${workspace_and_display_name%_*}"
+    # The display name is between the last and second-to-last underscore
+    display_name="${workspace_and_display_name##*_}"
+    # The workspace name is between the first and second-to-last underscore
+    workspace_name="${workspace_and_display_name%_*}"
 
     # Unsanitize the workspace name
     workspace_name="${workspace_name//\{slash\}/\/}"
@@ -168,7 +181,7 @@ restore_workspace() {
     log "Unmapping windows for Workspace ${workspace_name}"
     unmap_windows "${window_ids}"
 
-    restore_layout "${file}" "${workspace_name}"
+    restore_layout "${file}" "${workspace_name}" "${display_name}"
 
     log "Mapping windows for Workspace ${workspace_name}"
     map_windows "${window_ids}"
