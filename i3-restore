@@ -7,6 +7,10 @@ readonly IFS=$'\n\t'
 CURR_DIR="$(dirname "$0")"
 readonly CURR_DIR
 
+# Variables to control how quick restores are
+readonly SLEEP_BETWEEN_CONTAINERS=0.3
+readonly SLEEP_BEFORE_RELOADING=2
+
 # Import common variables and functions
 source "$CURR_DIR/utils/common.bash"
 
@@ -82,9 +86,9 @@ restore_programs() {
     # Execute one container at a time to ensure each one is reliably
     # restored in the correct order
     for ((i = 0; i < "$num_containers"; i++)); do
-        # Execute the command in the script pertaining to 'i'
+        # Execute the i-th line in the script
         i3-msg --quiet exec "$file" "$i"
-        sleep 0.3
+        sleep "$SLEEP_BETWEEN_CONTAINERS"
     done
 
     # Return the newly created window IDs so they can be unmapped
@@ -222,10 +226,7 @@ kill_empty_containers() {
     done
 
     # Restore debug logging
-    [[ $I3_RESTORE_VERBOSE == 2 ]] && set -x
-
-    # Always return 0, even if the condition above has a non-zero code
-    return 0
+    ([[ $I3_RESTORE_VERBOSE == 2 ]] && set -x) || true
 }
 
 #####################################
@@ -237,17 +238,17 @@ kill_empty_containers() {
 #   None
 #####################################
 restore_browsers() {
-    local file="$i3_PATH/web_browsers.sh"
-    if [[ ! -f $file ]]; then
+    local browser_file="$i3_PATH/web_browsers.sh"
+    if [[ ! -f $browser_file ]]; then
         return 0
     fi
 
     log "Restoring web browsers"
 
     # Make the file executable
-    chmod +x "$file"
+    chmod +x "$browser_file"
 
-    i3-msg exec "$file"
+    i3-msg exec "$browser_file"
 }
 
 #####################################
@@ -270,7 +271,7 @@ restore_workspaces() {
     restore_browsers
 
     # Wait for the programs to load and the layout windows to get swallowed
-    sleep 2
+    sleep "$SLEEP_BEFORE_RELOADING"
 
     # Clean up any leftover containers that didn't get swallowed
     kill_empty_containers
@@ -281,7 +282,7 @@ restore_workspaces() {
 
     # Reload i3 to fix any graphical errors (specifically with firefox)
     log "Restarting session to fix graphical errors"
-    i3-msg restart
+    i3-msg --quiet restart
 }
 
 #####################################
