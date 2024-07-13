@@ -1,7 +1,7 @@
 # Automatically save i3 layouts + programs on an interval
 # Functions can only be called after common.sh is sourced.
 
-I3_RESTORE_SAVE_FILE="$(dirname "${0}")/i3-save"
+I3_RESTORE_SAVE_FILE="$(dirname "$0")/i3-save"
 DEFAULT_INTERVAL_TIME=10
 
 readonly I3_RESTORE_SAVE_FILE DEFAULT_INTERVAL_TIME
@@ -19,18 +19,19 @@ readonly I3_RESTORE_SAVE_FILE DEFAULT_INTERVAL_TIME
 #   the sleep time in seconds
 #####################################
 get_sleep_time() {
-    local sleep_time="${1}"
+    local sleep_time message
+    sleep_time="$1"
 
-    if ! [[ ${sleep_time} =~ ^[0-9]+$ ]] || [[ ${sleep_time} == 0 ]]; then
+    if ! [[ $sleep_time =~ ^[0-9]+$ ]] || [[ $sleep_time == 0 ]]; then
         message="Sleep time not passed in (or is invalid). Using "
-        message+="default time of ${DEFAULT_INTERVAL_TIME} minutes"
-        log "${message}"
-        sleep_time="${DEFAULT_INTERVAL_TIME}"
+        message+="default time of $DEFAULT_INTERVAL_TIME minutes"
+        log "$message"
+        sleep_time="$DEFAULT_INTERVAL_TIME"
     fi
 
     # Convert sleep time to seconds
     sleep_time=$((sleep_time * 60))
-    echo "${sleep_time}"
+    echo "$sleep_time"
 }
 
 #####################################
@@ -43,10 +44,10 @@ get_sleep_time() {
 #   Original i3 PID
 #####################################
 check_i3_alive() {
-    if ! ps -p "${1}" | grep "i3" >/dev/null; then
+    if ! ps -p "$1" | grep "i3" >/dev/null; then
         local message="Original i3 process is not alive anymore. "
         message+="Exiting automatic scheduling"
-        log "${message}"
+        log "$message"
         exit 0
     fi
 }
@@ -59,16 +60,16 @@ check_i3_alive() {
 #   I3_RESTORE_INTERVAL_MINUTES
 #####################################
 start_save_interval() {
-    local i3_pid sleep_time
+    local sleep_time i3_pid
 
-    sleep_time="$(get_sleep_time "${I3_RESTORE_INTERVAL_MINUTES}")"
+    sleep_time="$(get_sleep_time "$I3_RESTORE_INTERVAL_MINUTES")"
     i3_pid="$(pidof i3)"
 
-    log "Starting automatic saving on an interval of ${sleep_time} seconds"
+    log "Starting automatic saving on an interval of $sleep_time seconds"
     while true; do
-        sleep "${sleep_time}"
-        check_i3_alive "${i3_pid}"
+        sleep "$sleep_time"
+        check_i3_alive "$i3_pid"
         echo "Automatically saving current i3wm session"
-        "${I3_RESTORE_SAVE_FILE}"
+        "$I3_RESTORE_SAVE_FILE"
     done
 }

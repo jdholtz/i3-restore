@@ -5,23 +5,23 @@
 set -e
 IFS=$'\n\t'
 
-CURR_DIR="$(dirname "${0}")"
-I3_RESTORE_SAVE_SCRIPT="${CURR_DIR}/programs/i3_save.py"
+CURR_DIR="$(dirname "$0")"
+I3_RESTORE_SAVE_SCRIPT="$CURR_DIR/programs/i3_save.py"
 
 # Import common variables and functions
-source "${CURR_DIR}/utils/common.bash"
+source "$CURR_DIR/utils/common.bash"
 
 # Handle errors
-source "${CURR_DIR}/utils/error_handling.bash"
+source "$CURR_DIR/utils/error_handling.bash"
 
 parse_flags "$@"
 check_dependencies
 
 # Start logger
-source "${CURR_DIR}/utils/logs.bash"
+source "$CURR_DIR/utils/logs.bash"
 rotate_log
 
-####################################################
+#####################################
 # Get the names of all workspaces currently used and
 # the displays they are on. For each workspace, the
 # first line will be the workspace name and the
@@ -37,7 +37,7 @@ rotate_log
 #   display1
 #   workspace2
 #   display2
-####################################################
+#####################################
 get_workspaces() {
     # Match only the workspace name and the output it is on
     i3-msg --type get_workspaces | jq -r '.[] | .name, .output'
@@ -55,26 +55,27 @@ get_workspaces() {
 #   were restored correctly. Non-zero on error.
 #####################################
 save_workspace_layout() {
-    workspace="${1}"
-    display="${2}"
+    local workspace display sanitized_ws_name workspace_tree file_name
+    workspace="$1"
+    display="$2"
 
-    log "Saving layout for Workspace ${workspace}"
+    log "Saving layout for Workspace $workspace"
     # Replace slash in workspace name as file names cannot have slashes
     sanitized_ws_name="${workspace//\//\{slash\}}"
 
-    workspace_tree="$(i3-save-tree --workspace "${workspace}")"
+    workspace_tree="$(i3-save-tree --workspace "$workspace")"
 
     # If workspace is empty (i.e doesn't contain any actual configuration lines)
-    if [[ ${workspace_tree} != *"{"* ]]; then
-        log "Empty layout for Workspace ${workspace}. Skipping..."
+    if [[ $workspace_tree != *"{"* ]]; then
+        log "Empty layout for Workspace $workspace. Skipping..."
         return 0
     fi
 
-    file_name="${i3_PATH}/workspace_${sanitized_ws_name}_${display}_layout.json"
-    echo "${workspace_tree}" >"${file_name}"
+    file_name="$i3_PATH/workspace_${sanitized_ws_name}_${display}_layout.json"
+    echo "$workspace_tree" >"$file_name"
 
     # Automatically edit the file
-    sed --in-place 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "${file_name}"
+    sed --in-place 's|^\(\s*\)// "|\1"|g; /^\s*\/\//d' "$file_name"
 }
 
 #####################################
@@ -92,10 +93,10 @@ save_workspace_layouts() {
     readarray -t workspaces_arr <<<"$workspaces"
 
     # Remove previous saved session. --force is used so it doesn't exit if a file isn't found
-    rm --force "${i3_PATH}"/*_layout.json
-    rm --force "${i3_PATH}"/*_programs.sh
-    rm --force "${i3_PATH}"/*_subprocess_*.sh
-    rm --force "${i3_PATH}"/web_browsers.sh
+    rm --force "$i3_PATH"/*_layout.json
+    rm --force "$i3_PATH"/*_programs.sh
+    rm --force "$i3_PATH"/*_subprocess_*.sh
+    rm --force "$i3_PATH"/web_browsers.sh
 
     # Save a mark on the focused window so it can be restored later
     i3-msg --quiet 'mark --add _i3_restore_focus'
@@ -118,7 +119,7 @@ save_workspace_layouts() {
 #   None
 #####################################
 save_workspace_programs() {
-    I3_RESTORE_VERBOSE="${I3_RESTORE_VERBOSE}" python3 "${I3_RESTORE_SAVE_SCRIPT}" ||
+    I3_RESTORE_VERBOSE="$I3_RESTORE_VERBOSE" python3 "$I3_RESTORE_SAVE_SCRIPT" ||
         error "An error occurred saving the session's programs. View the logs for more details" 1
 }
 

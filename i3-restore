@@ -4,21 +4,21 @@
 
 set -e
 readonly IFS=$'\n\t'
-CURR_DIR="$(dirname "${0}")"
+CURR_DIR="$(dirname "$0")"
 readonly CURR_DIR
 
 # Import common variables and functions
-source "${CURR_DIR}/utils/common.bash"
+source "$CURR_DIR/utils/common.bash"
 
 # Handle errors
-source "${CURR_DIR}/utils/error_handling.bash"
+source "$CURR_DIR/utils/error_handling.bash"
 
 parse_flags "$@"
 
 # Start logger
-source "${CURR_DIR}/utils/logs.bash"
+source "$CURR_DIR/utils/logs.bash"
 
-source "${CURR_DIR}/utils/automatic_saving.bash"
+source "$CURR_DIR/utils/automatic_saving.bash"
 
 #####################################
 # Get all the window IDs on a workspace
@@ -28,20 +28,16 @@ source "${CURR_DIR}/utils/automatic_saving.bash"
 #   The IDs of the windows on the workspace
 #####################################
 get_window_ids_on_workspace() {
-    local window_ids
-    local workspace_name="${1}"
+    local workspace_name="$1"
 
     # First, get the workspace tree from the i3 tree. Then, get the
     # window IDs that are not null and return those.
-    window_ids="$(
-        i3-msg -t get_tree |
-            jq --arg ws "${workspace_name}" \
-                'recurse(.nodes[]) |
-                 select(.name==$ws) |
-                 recurse(.nodes[]).window |
-                 select(. != null)'
-    )"
-    echo "${window_ids}"
+    i3-msg -t get_tree |
+        jq --arg ws "$workspace_name" \
+            'recurse(.nodes[]) |
+             select(.name==$ws) |
+             recurse(.nodes[]).window |
+             select(. != null)'
 }
 
 #####################################
@@ -55,45 +51,45 @@ get_window_ids_on_workspace() {
 #   were restored correctly. Non-zero on error.
 #####################################
 restore_programs() {
-    local workspace_name="${1}"
+    local workspace_name sanitized_ws_name file num_containers window_ids
+    workspace_name="$1"
 
     # Sanitize the workspace name so it matches the file name
-    local sanitized_ws_name="${workspace_name// /\{space\}}"
+    sanitized_ws_name="${workspace_name// /\{space\}}"
     sanitized_ws_name="${sanitized_ws_name//\//\{slash\}}"
-    local file="${i3_PATH}/workspace_${sanitized_ws_name}_programs.sh"
+    file="$i3_PATH/workspace_${sanitized_ws_name}_programs.sh"
 
-    if [[ ! -f ${file} ]]; then
-        log "No programs file found for Workspace ${workspace_name}"
+    if [[ ! -f $file ]]; then
+        log "No programs file found for Workspace $workspace_name"
         return 0
     fi
 
-    log "Restoring programs for Workspace ${workspace_name}"
+    log "Restoring programs for Workspace $workspace_name"
 
     # Focus on the workspace. It should already be foucsed
     # from appending the layout, but this is here as a safety
-    i3-msg --quiet "workspace --no-auto-back-and-forth ${workspace_name}"
+    i3-msg --quiet "workspace --no-auto-back-and-forth $workspace_name"
 
     # Make the file executable and all subprocess programs in the same workspace
-    chmod +x "${file}"
-    chmod +x "${i3_PATH}"/workspace_"${sanitized_ws_name}"_subprocess_*.sh 2>/dev/null
+    chmod +x "$file"
+    chmod +x "$i3_PATH"/workspace_"$sanitized_ws_name"_subprocess_*.sh 2>/dev/null
 
     # The number of containers are needed for the script to select
     # which command it wants to execute for every container
-    local num_containers
-    num_containers="$(wc --lines <"${file}")"
-    log "Number of containers: ${num_containers}"
+    num_containers="$(wc --lines <"$file")"
+    log "Number of containers: $num_containers"
 
     # Execute one container at a time to ensure each one is reliably
     # restored in the correct order
-    for ((i = 0; i < "${num_containers}"; i++)); do
+    for ((i = 0; i < "$num_containers"; i++)); do
         # Execute the command in the script pertaining to 'i'
-        i3-msg --quiet exec "${file}" "${i}"
+        i3-msg --quiet exec "$file" "$i"
         sleep 0.3
     done
 
     # Return the newly created window IDs so they can be unmapped
-    window_ids="$(get_window_ids_on_workspace "${workspace_name}")"
-    echo "${window_ids}"
+    window_ids="$(get_window_ids_on_workspace "$workspace_name")"
+    echo "$window_ids"
 }
 
 #####################################
@@ -103,12 +99,13 @@ restore_programs() {
 #   Window IDs
 #####################################
 unmap_windows() {
-    window_ids="${1}"
+    local window_ids id
+    window_ids="$1"
     # Iterating through the IDs cannot be quoted with
     # the way it is formatted
     # shellcheck disable=2068
     for id in ${window_ids[@]}; do
-        xdotool windowunmap "${id}"
+        xdotool windowunmap "$id"
     done
 }
 
@@ -119,12 +116,13 @@ unmap_windows() {
 #   Window IDs
 #####################################
 map_windows() {
-    window_ids="${1}"
+    local window_ids id
+    window_ids="$1"
     # Iterating through the IDs cannot be quoted with
     # the way it is formatted
     # shellcheck disable=2068
     for id in ${window_ids[@]}; do
-        xdotool windowmap "${id}"
+        xdotool windowmap "$id"
     done
 }
 
@@ -137,20 +135,22 @@ map_windows() {
 #   Display name the workspace should be restored on
 #####################################
 restore_layout() {
-    local file="${1}"
-    local workspace_name="${2}"
-    local display="${3}"
+    local file workspace_name display
 
-    log "Restoring layout for Workspace ${workspace_name}"
+    file="$1"
+    workspace_name="$2"
+    display="$3"
+
+    log "Restoring layout for Workspace $workspace_name"
 
     # Move the workspace to the display it should be restored on. In case the display no longer
     # exists, the workspace will be restored on the display i3 chose.
-    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; \
-        move workspace to output ${display}" || true
+    i3-msg "workspace --no-auto-back-and-forth $workspace_name; \
+        move workspace to output $display" || true
 
     # Append the layout of the saved workspace
-    i3-msg "workspace --no-auto-back-and-forth ${workspace_name}; \
-        append_layout ${file}"
+    i3-msg "workspace --no-auto-back-and-forth $workspace_name; \
+        append_layout $file"
 }
 
 #####################################
@@ -161,9 +161,9 @@ restore_layout() {
 #   Layout file, a path.
 #####################################
 restore_workspace() {
-    local file workspace_and_display_name workspace_name display_name
+    local file workspace_and_display_name workspace_name display_name window_ids
 
-    file="${1}"
+    file="$1"
 
     # Get the workspace and display name from the file name
     workspace_and_display_name="${file#*_}"
@@ -176,15 +176,15 @@ restore_workspace() {
     # Unsanitize the workspace name
     workspace_name="${workspace_name//\{slash\}/\/}"
 
-    window_ids="$(restore_programs "${workspace_name}")"
+    window_ids="$(restore_programs "$workspace_name")"
 
-    log "Unmapping windows for Workspace ${workspace_name}"
-    unmap_windows "${window_ids}"
+    log "Unmapping windows for Workspace $workspace_name"
+    unmap_windows "$window_ids"
 
-    restore_layout "${file}" "${workspace_name}" "${display_name}"
+    restore_layout "$file" "$workspace_name" "$display_name"
 
-    log "Mapping windows for Workspace ${workspace_name}"
-    map_windows "${window_ids}"
+    log "Mapping windows for Workspace $workspace_name"
+    map_windows "$window_ids"
 }
 
 #####################################
@@ -204,21 +204,21 @@ kill_empty_containers() {
 
     # Recursively get all containers that still have swallow criteria (meaning
     # they never got populated) and kill them
-    while [[ -n ${containers} ]]; do
+    while [[ -n $containers ]]; do
         local empty_containers
-        empty_containers="$(echo "${containers}" |
+        empty_containers="$(echo "$containers" |
             jq 'select(( .swallows == [] | not ) and ( .type == "con" )) .window')"
 
-        if [[ -n ${empty_containers} ]]; then
+        if [[ -n $empty_containers ]]; then
             local num_containers
-            num_containers="$(echo "${empty_containers}" | wc --words)"
+            num_containers="$(echo "$empty_containers" | wc --words)"
 
             # Kill all containers by ID
-            log "Killing ${num_containers} empty containers"
-            echo "${empty_containers}" | xargs -I % i3-msg [id=%] kill
+            log "Killing $num_containers empty containers"
+            echo "$empty_containers" | xargs -I % i3-msg [id=%] kill
         fi
 
-        containers="$(echo "${containers}" | jq '.nodes[]')"
+        containers="$(echo "$containers" | jq '.nodes[]')"
     done
 
     # Restore debug logging
@@ -237,17 +237,17 @@ kill_empty_containers() {
 #   None
 #####################################
 restore_browsers() {
-    local file="${i3_PATH}/web_browsers.sh"
-    if [[ ! -f ${file} ]]; then
+    local file="$i3_PATH/web_browsers.sh"
+    if [[ ! -f $file ]]; then
         return 0
     fi
 
     log "Restoring web browsers"
 
     # Make the file executable
-    chmod +x "${file}"
+    chmod +x "$file"
 
-    i3-msg exec "${file}"
+    i3-msg exec "$file"
 }
 
 #####################################
@@ -261,10 +261,10 @@ restore_browsers() {
 #####################################
 restore_workspaces() {
     local files file
-    files="$(ls "${i3_PATH}"/*_layout.json)"
+    files="$(ls "$i3_PATH"/*_layout.json)"
 
     for file in ${files}; do
-        restore_workspace "${file}"
+        restore_workspace "$file"
     done
 
     restore_browsers
@@ -291,7 +291,7 @@ restore_workspaces() {
 #   I3_RESTORE_INTERVAL_MINUTES
 #####################################
 start_automatic_saving() {
-    if [[ ${I3_RESTORE_INTERVAL} == 1 ]]; then
+    if [[ $I3_RESTORE_INTERVAL == 1 ]]; then
         start_save_interval
     fi
 }

@@ -1,8 +1,8 @@
 # Contains all functions that are used in both the
 # i3-save and i3-restore scripts.
 
-LOG_DIR="${CURR_DIR}/logs"
-I3_RESTORE_LOG_FILE="${LOG_DIR}/i3-restore.log"
+LOG_DIR="$CURR_DIR/logs"
+I3_RESTORE_LOG_FILE="$LOG_DIR/i3-restore.log"
 LOG_FILE_OLD="i3-restore-old.log"
 LOG_FILE_SIZE=1000
 
@@ -13,15 +13,16 @@ I3_RESTORE_INTERVAL=0
 readonly LOG_DIR I3_RESTORE_LOG_FILE LOG_FILE_OLD LOG_FILE_SIZE
 
 # Set default if not configured
-i3_PATH="${i3_PATH:=${HOME}/.config/i3}"
+i3_PATH="${i3_PATH:=$HOME/.config/i3}"
 readonly i3_PATH
 
 #####################################
 # Display the script's version
 #####################################
 version() {
-    version="$(cat "${CURR_DIR}/VERSION")"
-    echo "i3-restore v${version}"
+    local version
+    version="$(cat "$CURR_DIR/VERSION")"
+    echo "i3-restore v$version"
 }
 
 #####################################
@@ -92,10 +93,12 @@ parse_flags() {
 # Ensure the script's dependencies are installed.
 #####################################
 check_dependencies() {
-    local deps=("jq" "xdotool")
+    local deps dep
+
+    deps=("jq" "xdotool")
     for dep in "${deps[@]}"; do
-        if ! command -v "${dep}" >/dev/null 2>&1; then
-            error "${dep} is required for i3-restore!"
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            error "$dep is required for i3-restore!"
             exit
         fi
     done

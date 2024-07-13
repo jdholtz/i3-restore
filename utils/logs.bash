@@ -9,8 +9,8 @@
 #####################################
 init_log() {
     # Create the directory and/or file if they don't exist
-    mkdir -p "${LOG_DIR}"
-    touch "${I3_RESTORE_LOG_FILE}"
+    mkdir -p "$LOG_DIR"
+    touch "$I3_RESTORE_LOG_FILE"
 }
 
 #####################################
@@ -26,10 +26,10 @@ init_log() {
 #####################################
 rotate_log() {
     local current_log_size
-    current_log_size="$(wc <"${I3_RESTORE_LOG_FILE}" --lines)"
-    if [[ ${current_log_size} -gt ${LOG_FILE_SIZE} ]]; then
-        cp "${I3_RESTORE_LOG_FILE}" "${LOG_DIR}/${LOG_FILE_OLD}"
-        rm "${I3_RESTORE_LOG_FILE}"
+    current_log_size="$(wc <"$I3_RESTORE_LOG_FILE" --lines)"
+    if [[ $current_log_size -gt $LOG_FILE_SIZE ]]; then
+        cp "$I3_RESTORE_LOG_FILE" "$LOG_DIR/$LOG_FILE_OLD"
+        rm "$I3_RESTORE_LOG_FILE"
     fi
 }
 
@@ -42,8 +42,8 @@ rotate_log() {
 #   I3_RESORE_VERBOSE
 #####################################
 log() {
-    echo -e "${1}" >>"${I3_RESTORE_LOG_FILE}"
-    [[ ${I3_RESTORE_VERBOSE} -ge 1 ]] && echo -e "${1}" >&2 || return 0
+    echo -e "$1" >>"$I3_RESTORE_LOG_FILE"
+    [[ $I3_RESTORE_VERBOSE -ge 1 ]] && echo -e "$1" >&2 || return 0
 }
 
 init_log
