@@ -58,8 +58,10 @@ def get_logger() -> logging.RootLogger:
     logger.handlers = []  # Ensure there are no handlers before adding our own
     logger.setLevel(logging.DEBUG)  # The minimum level for all handlers
 
+    formatter = logging.Formatter("%(asctime)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+
     file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter("")
+    file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.INFO)
 
     # Print error messages to stdout

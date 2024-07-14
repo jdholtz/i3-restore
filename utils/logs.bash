@@ -11,6 +11,9 @@ init_log() {
     # Create the directory and/or file if they don't exist
     mkdir -p "$LOG_DIR"
     touch "$I3_RESTORE_LOG_FILE"
+
+    # Add the version to the log whenever it's initialized
+    log "$(version)"
 }
 
 #####################################
@@ -42,7 +45,11 @@ rotate_log() {
 #   I3_RESORE_VERBOSE
 #####################################
 log() {
-    echo -e "$1" >>"$I3_RESTORE_LOG_FILE"
+    local time
+    time="$(date +"%F %T")"
+
+    echo -e "$time: $1" >>"$I3_RESTORE_LOG_FILE"
+    # Only log the message to stdout (not the time), if running in verbose mode
     [[ $I3_RESTORE_VERBOSE -ge 1 ]] && echo -e "$1" >&2 || return 0
 }
 
