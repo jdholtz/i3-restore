@@ -3,6 +3,19 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
+## 4.3 (2024-08-11)
+
+### Improvements
+- Restore workspaces on their correct displays, if possible
+([#17](https://github.com/jdholtz/i3-restore/issues/17))
+- The `--interval` flag was renamed to `--save-interval` to reduce confusion about the flag's
+purpose ([#18](https://github.com/jdholtz/i3-restore/issues/18))
+
+### Upgrading
+- If you have the `--interval` flag in your i3 config file, it needs to be changed to
+`--save-interval`
+
+
 ## 4.2 (2024-07-06)
 
 ### New Features
