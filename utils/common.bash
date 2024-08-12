@@ -29,26 +29,29 @@ version() {
 # Display the script's usage
 #####################################
 usage() {
-    local cmd="${0##*/}"
+    local cmd="${0##*/}" spaces
     version
     echo
     echo "Usage:"
     if [[ "$(basename "$cmd")" == "i3-save" ]]; then
-        echo "    i3-save [options]      Save your current i3 session"
+        echo "    i3-save [options]   Save your current i3 session"
     else
-        echo "    i3-restore [options]   Restore your last saved i3 session"
+        # More spaces should be added for the restore usage screen to line up all of the
+        # descriptions for the flags
+        spaces="        "
+        echo "    i3-restore [options]        Restore your last saved i3 session"
     fi
     echo
     echo "Options:"
 
     if [[ "$(basename "$cmd")" == "i3-restore" ]]; then
-        echo "    --interval <minutes>   Automatically save your session on an interval (default is 10 minutes)"
+        echo "    --save-interval <minutes>   Automatically save your session on an interval (default is 10 minutes)"
     fi
 
-    echo "    -v, -vv                Increase the verbosity of the script. One v prints debug messages and"
-    echo "                           two v's print all commands executed too"
-    echo "    -h, --help             Display this help and exit"
-    echo "    -V, --version          Display version information and exit"
+    echo "    -v, -vv            $spaces Increase the verbosity of the script. One v prints debug messages and"
+    echo "                       $spaces two v's print all commands executed too"
+    echo "    -h, --help         $spaces Display this help and exit"
+    echo "    -V, --version      $spaces Display version information and exit"
     echo
     echo "For more information, check out https://github.com/jdholtz/i3-restore#readme"
 }
@@ -78,11 +81,17 @@ parse_flags() {
             I3_RESTORE_VERBOSE=2
             set -x # Print all commands executed
             ;;
-        --interval)
+        --save-interval)
             # shellcheck disable=SC2034
             I3_RESTORE_INTERVAL=1
             # shellcheck disable=SC2034
             I3_RESTORE_INTERVAL_MINUTES="${2}"
+            ;;
+        -*)
+            echo "Error: Unrecognized flag: $1"
+            echo
+            usage
+            exit 2
             ;;
         esac
         shift
