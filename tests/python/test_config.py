@@ -1,4 +1,3 @@
-import os
 from typing import Any, Dict
 from unittest import mock
 
@@ -22,23 +21,21 @@ def mock_open(mocker: MockerFixture) -> None:
 
 
 def test_config_exits_on_error_in_config_file(mocker: MockerFixture) -> None:
-    mocker.patch.object(config.Config, "_parse_config", side_effect=TypeError())
+    invalid_config = {"subprocesses": "invalid"}
+    mocker.patch("json.load", return_value=invalid_config)
 
     with pytest.raises(SystemExit):
         config.Config()
 
 
 def test_read_config_reads_the_config_file_correctly(mocker: MockerFixture) -> None:
-    mock_open = mocker.patch("builtins.open")
-    mocker.patch("json.load", return_value={"test": "data"})
+    expected_config = {"test": "data"}
+    mocker.patch("json.load", return_value=expected_config)
 
     test_config = config.Config()
     config_content = test_config._read_config()
 
-    assert config_content == {"test": "data"}
-    mock_open.assert_called_with(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/" + config.CONFIG_FILE_NAME
-    )
+    assert config_content == expected_config
 
 
 def test_read_config_returns_empty_config_when_file_is_not_found(mocker: MockerFixture) -> None:

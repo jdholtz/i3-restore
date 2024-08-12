@@ -11,10 +11,7 @@ trap 'error "An unknown error occurred. Run ${0##*/} manually to see the error" 
 #   Boolean to add button to view logs (Optional)
 #####################################
 error() {
-    # Add arguments
-    local args=()
-    args+=("-m" "i3-restore: $1")
-    args+=("-t error")
+    local args=("-m" "i3-restore: $1" "-t error")
 
     if [[ -n $2 ]]; then
         args+=("-b" "View Logs" "i3-sensible-editor $I3_RESTORE_LOG_FILE")

@@ -152,12 +152,12 @@ class Container:
             pid_info = subprocess.check_output(
                 ["xdotool", "getwindowpid", str(properties["window"])], stderr=subprocess.DEVNULL
             ).decode("utf-8")
-            pid_info = int(pid_info)
+            pid = int(pid_info)
         except subprocess.CalledProcessError:
             logger.info("No PID associated with container. Skipping...")
-            pid_info = None
+            pid = None
 
-        return pid_info
+        return pid
 
     def _get_cmdline_options(self, properties: JSON) -> None:
         """Set the command and working directory of the container"""
