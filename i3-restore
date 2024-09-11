@@ -51,8 +51,10 @@ get_window_ids_on_workspace() {
 # Arguments:
 #   Workspace name
 # Returns:
-#   0 if either no program file is found or programs
-#   were restored correctly. Non-zero on error.
+#   Exit code: 0 if either no program file is found or
+#   programs were restored correctly. Non-zero on error.
+#
+#   Output: The newly created window IDs on the workspace
 #####################################
 restore_programs() {
     local workspace_name sanitized_ws_name file num_containers window_ids
@@ -131,8 +133,7 @@ map_windows() {
 }
 
 #####################################
-# Restore the web browsers if they were
-# saved from the last session
+# Restore the workspace layout
 # Arguments:
 #   Layout file, a path
 #   Workspace name
