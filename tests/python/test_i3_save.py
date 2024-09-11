@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 
 with mock.patch("utils.get_logger"):
     with mock.patch("config.Config._read_config", return_value={}):
-        # Don't actually log messages or read the config file
+        # Don't log messages or read the config file
         from programs import i3_save
 
 from programs import constants
@@ -241,7 +241,7 @@ class TestContainer:
             {"name": "subprocess2", "args": ["--test-arg", "-t"]},
         ]
         container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
-        container._check_if_subprocess(mock_process)
+        container.check_if_subprocess(mock_process)
 
         # The space should be escaped
         assert container.subprocess_command == r"test_command --test-arg file\ name"
@@ -262,7 +262,7 @@ class TestContainer:
         ]
 
         container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
-        container._check_if_subprocess(mock_process)
+        container.check_if_subprocess(mock_process)
 
         assert container.subprocess_command == r"test_command and more!"
 
@@ -279,7 +279,7 @@ class TestContainer:
         i3_save.CONFIG.subprocesses = [{"name": "subprocess", "args": ["--test-arg"]}]
 
         container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
-        container._check_if_subprocess(mock_process)
+        container.check_if_subprocess(mock_process)
 
         assert container.subprocess_command is None
 
@@ -296,7 +296,7 @@ class TestContainer:
         i3_save.CONFIG.subprocesses = [{"name": "subprocess1"}]
 
         container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
-        container._check_if_subprocess(mock_process)
+        container.check_if_subprocess(mock_process)
 
         assert container.subprocess_command is None
 

@@ -97,6 +97,7 @@ save_workspace_layouts() {
     rm --force "$i3_PATH"/*_programs.sh
     rm --force "$i3_PATH"/*_subprocess_*.sh
     rm --force "$i3_PATH"/web_browsers.sh
+    rm --force "$i3_PATH"/kitty-session-*
 
     # Save a mark on the focused window so it can be restored later
     i3-msg --quiet 'mark --add _i3_restore_focus'

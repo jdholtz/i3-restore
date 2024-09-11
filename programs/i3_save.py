@@ -184,7 +184,7 @@ class Container:
                 # the subprocess works as expected and doesn't store "[terminal] -e bash -c ..."
                 self.command = terminal["command"]
 
-                self._check_if_subprocess(process)
+                self.check_if_subprocess(process)
 
                 # Get the working directory of the last process because some terminals
                 # store working directories different than others (which is why it can't
@@ -219,7 +219,9 @@ class Container:
         except utils.PluginSaveError:
             return False
 
-    def _check_if_subprocess(self, process: psutil.Process) -> None:
+    def check_if_subprocess(
+        self, process: psutil.Process, default_launch_command: str = "{command}"
+    ) -> None:
         """
         Checks whether or not the process has any subprocesses that should be
         saved. Examples of subprocesses that run in the terminal include Vim,
@@ -228,7 +230,11 @@ class Container:
         Since the subprocesses are retrieved recursively, the newest subprocess
         will be saved and restored.
         """
-        for child in reversed(process.children(True)):
+        # Preprending the current process is useful when the process is not a terminal (which can
+        # happen when some plugins use it)
+        processes = [process] + process.children(True)
+
+        for child in reversed(processes):
             child_name = child.name()
             for program in CONFIG.subprocesses:
                 if child_name != program["name"]:
@@ -255,7 +261,7 @@ class Container:
                 for arg in cmd_args:
                     command += " " + arg.replace(" ", r"\ ")
 
-                launch_command = program.get("launch_command", "{command}")
+                launch_command = program.get("launch_command", default_launch_command)
                 self.subprocess_command = launch_command.replace("{command}", command)
                 return
 

@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 with mock.patch("utils.get_logger"):
-    # Don't actually log messages to a file
+    # Don't log messages to a file
     from programs import config
 
 # This needs to be accessed to be tested
