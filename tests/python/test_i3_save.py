@@ -141,6 +141,7 @@ class TestContainer:
         self, mocker: MockerFixture
     ) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
+        mock_process = mocker.patch("psutil.Process")
 
         # Add the config so it's seen as a plugin enabled by the user
         i3_save.CONFIG.enabled_plugins = {constants.KITTY_CLASS: {"listen_socket": "test_socket"}}
@@ -149,7 +150,30 @@ class TestContainer:
         properties = {"window_properties": {"class": constants.KITTY_CLASS}, "window": 9999}
 
         i3_save.Container(properties)
+
         mock_saver.assert_called_once()
+        mock_process.assert_not_called()
+
+    def test_get_cmdline_options_saves_normally_when_plugin_fails_to_save(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+        mocker.patch("psutil.Process")
+
+        # Add the config so it's seen as a plugin enabled by the user
+        i3_save.CONFIG.enabled_plugins = {constants.KITTY_CLASS: {"listen_socket": "test_socket"}}
+        i3_save.CONFIG.terminals = [{"command": "test_command", "class": constants.KITTY_CLASS}]
+
+        mocker.patch.object(
+            i3_save.SUPPORTED_PLUGINS[constants.KITTY_CLASS],
+            "main",
+            # pylint: disable-next=c-extension-no-member
+            side_effect=i3_save.utils.PluginSaveError,
+        )
+        properties = {"window_properties": {"class": constants.KITTY_CLASS}, "window": 9999}
+
+        container = i3_save.Container(properties)
+        assert container.command == "test_command"
 
     def test_get_cmdline_options_saves_terminals(self, mocker: MockerFixture) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
@@ -182,13 +206,25 @@ class TestContainer:
         self, mocker: MockerFixture
     ) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
-        mock_saver = mocker.patch.object(i3_save.SUPPORTED_PLUGINS[constants.KITTY_CLASS], "main")
 
         properties = {"window_properties": {"class": "unknown"}, "window": 9999}
         container = i3_save.Container(properties)
-        container._save_with_plugin("unknown")
 
-        mock_saver.assert_not_called()
+        assert not container._save_with_plugin("unknown")
+
+    def test_save_with_plugin_handles_plugin_save_errors(self, mocker: MockerFixture) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+        mocker.patch.object(
+            i3_save.SUPPORTED_PLUGINS[constants.KITTY_CLASS],
+            "main",
+            # pylint: disable-next=c-extension-no-member
+            side_effect=i3_save.utils.PluginSaveError,
+        )
+
+        properties = {"window_properties": {"class": "unknown"}, "window": 9999}
+        container = i3_save.Container(properties)
+
+        assert not container._save_with_plugin(constants.KITTY_CLASS)
 
     def test_check_if_subprocess_saves_subprocess(self, mocker: MockerFixture) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")

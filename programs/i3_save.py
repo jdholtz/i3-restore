@@ -171,9 +171,10 @@ class Container:
             return
 
         window_class = properties["window_properties"].get("class")
-        if window_class in CONFIG.enabled_plugins:
-            # Use a custom save algorithm to save this container
-            self._save_with_plugin(window_class)
+
+        # Use a custom save plugin to save this container. The container will be saved normally if
+        # the plugin is not enabled or the plugin fails to save it.
+        if window_class in CONFIG.enabled_plugins and self._save_with_plugin(window_class):
             return
 
         process = psutil.Process(self.pid)
@@ -203,18 +204,24 @@ class Container:
         # restoring every instance.
         self._handle_web_browser()
 
-    def _save_with_plugin(self, window_class: str) -> None:
+    def _save_with_plugin(self, window_class: str) -> bool:
         """
-        Save the container using a supported plugin. This function assumes that
-        the plugin is enabled in the user config.
+        Save the container using a supported plugin. Returns true when the container is successfully
+        saved, false if an error occurred or if no plugin supports saving this window. This function
+        assumes that the plugin is enabled in the user config.
         """
         if window_class not in SUPPORTED_PLUGINS:
-            logger.error("Plugin not supported: %s. Skipping saving container", window_class)
-            return
+            logger.error("Plugin not supported: %s. Saving container regularly", window_class)
+            return False
 
         logger.info("Saving container with plugin: %s", window_class)
         plugin_config = CONFIG.enabled_plugins[window_class]
-        SUPPORTED_PLUGINS[window_class].main(self, plugin_config)
+
+        try:
+            SUPPORTED_PLUGINS[window_class].main(self, plugin_config)
+            return True
+        except utils.PluginSaveError:
+            return False
 
     def _check_if_subprocess(self, process: psutil.Process) -> None:
         """

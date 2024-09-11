@@ -82,3 +82,8 @@ def get_logger() -> logging.RootLogger:
     logger.addHandler(stream_handler)
 
     return logger
+
+
+# Custom exception for when a plugin fails to save a container.
+class PluginSaveError(Exception):
+    pass
