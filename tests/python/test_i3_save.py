@@ -92,8 +92,8 @@ class TestWorkspace:
         mocker.patch.object(i3_save.Container, "_get_pid")
         mocker.patch.object(i3_save.Container, "_get_cmdline_options")
 
-        properties = {"name": "test_workspace", "nodes": [], "window": 9999}
-        container = i3_save.Container({})
+        properties = {"name": "test_workspace", "nodes": [], "window": 999, "window_properties": {}}
+        container = i3_save.Container(properties)
         container.subprocess_command = "test_subprocess"
 
         workspace = i3_save.Workspace(properties)
@@ -111,22 +111,22 @@ class TestContainer:
         mocker.patch("subprocess.check_output", return_value=b"1")
         mocker.patch.object(i3_save.Container, "_get_cmdline_options", side_effect=exception)
 
-        container = i3_save.Container({"window": 9999})
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
         assert container.command is None
 
     def test_get_pid_returns_the_pid(self, mocker: MockerFixture) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1111")
 
-        pid = i3_save.Container._get_pid({"window": 9999})
-        assert pid == 1111
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
+        assert container._get_pid() == 1111
 
     def test_get_pid_handles_called_process_error(self, mocker: MockerFixture) -> None:
         mocker.patch(
             "subprocess.check_output", side_effect=subprocess.CalledProcessError(None, None)
         )
 
-        pid = i3_save.Container._get_pid({"window": 9999})
-        assert pid is None
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
+        assert container._get_pid() is None
 
     def test_get_cmdline_options_does_not_run_with_no_pid(self, mocker: MockerFixture) -> None:
         mocker.patch(
@@ -134,7 +134,7 @@ class TestContainer:
         )
         mock_process = mocker.patch("psutil.Process")
 
-        i3_save.Container({"window": 9999})
+        i3_save.Container({"window": 9999, "window_properties": {}})
         mock_process.assert_not_called()
 
     def test_get_cmdline_options_uses_plugin_for_matching_window_class(
@@ -210,7 +210,7 @@ class TestContainer:
         properties = {"window_properties": {"class": "unknown"}, "window": 9999}
         container = i3_save.Container(properties)
 
-        assert not container._save_with_plugin("unknown")
+        assert not container._save_with_plugin()
 
     def test_save_with_plugin_handles_plugin_save_errors(self, mocker: MockerFixture) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
@@ -221,10 +221,10 @@ class TestContainer:
             side_effect=i3_save.utils.PluginSaveError,
         )
 
-        properties = {"window_properties": {"class": "unknown"}, "window": 9999}
+        properties = {"window_properties": {"class": constants.KITTY_CLASS}, "window": 9999}
         container = i3_save.Container(properties)
 
-        assert not container._save_with_plugin(constants.KITTY_CLASS)
+        assert not container._save_with_plugin()
 
     def test_check_if_subprocess_saves_subprocess(self, mocker: MockerFixture) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
