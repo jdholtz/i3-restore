@@ -9,11 +9,17 @@ from typing import Optional
 import psutil
 
 import config
+import constants
+import plugins.kitty
 import utils
 
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
 HOME = os.getenv("HOME")
 i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
+
+# Plugins that are supported to have custom save algorithms. The key is the window class and the
+# value is the module to use to save the container (the module's 'main' function will be called).
+SUPPORTED_PLUGINS = {constants.KITTY_CLASS: plugins.kitty}
 
 # Type alias for JSON
 JSON = utils.JSON
@@ -164,14 +170,17 @@ class Container:
         if self.pid is None:
             return
 
+        window_class = properties["window_properties"].get("class")
+        if window_class in CONFIG.enabled_plugins:
+            # Use a custom save algorithm to save this container
+            self._save_with_plugin(window_class)
+            return
+
         process = psutil.Process(self.pid)
 
         # First, check if it is a terminal
         for terminal in CONFIG.terminals:
-            if (
-                "class" in properties["window_properties"]
-                and properties["window_properties"]["class"] == terminal["class"]
-            ):
+            if window_class == terminal["class"]:
                 logger.info("Main process of container is a terminal")
 
                 # The terminal command is set here manually so the custom command used to restore
@@ -193,6 +202,19 @@ class Container:
         # instance -- not every instance -- because the browser will handle
         # restoring every instance.
         self._handle_web_browser()
+
+    def _save_with_plugin(self, window_class: str) -> None:
+        """
+        Save the container using a supported plugin. This function assumes that
+        the plugin is enabled in the user config.
+        """
+        if window_class not in SUPPORTED_PLUGINS:
+            logger.error("Plugin not supported: %s. Skipping saving container", window_class)
+            return
+
+        logger.info("Saving container with plugin: %s", window_class)
+        plugin_config = CONFIG.enabled_plugins[window_class]
+        SUPPORTED_PLUGINS[window_class].main(self, plugin_config)
 
     def _check_if_subprocess(self, process: psutil.Process) -> None:
         """

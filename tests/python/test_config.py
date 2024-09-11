@@ -53,6 +53,7 @@ def test_read_config_returns_empty_config_when_file_is_not_found(mocker: MockerF
         {"subprocesses": "invalid"},
         {"terminals": "invalid"},
         {"web_browsers": "invalid"},
+        {"enabled_plugins": []},
     ],
 )
 def test_parse_config_raises_exception_with_invalid_entries(config_content: Dict[str, Any]) -> None:
@@ -63,18 +64,20 @@ def test_parse_config_raises_exception_with_invalid_entries(config_content: Dict
 
 
 def test_parse_config_sets_the_correct_config_values() -> None:
-    test_config = config.Config()
-    test_config._parse_config(
-        {
-            "subprocesses": ["subprocess1", "subprocess2"],
-            "terminals": ["terminal1", "terminal2"],
-            "web_browsers": ["browser1", "browser2"],
-        }
-    )
+    json_config = {
+        "subprocesses": ["subprocess1", "subprocess2"],
+        "terminals": ["terminal1", "terminal2"],
+        "web_browsers": ["browser1", "browser2"],
+        "enabled_plugins": {"plugin": {"test": "config"}},
+    }
 
-    assert test_config.subprocesses == ["subprocess1", "subprocess2"]
-    assert test_config.terminals == ["terminal1", "terminal2"]
-    assert test_config.web_browsers == ["browser1", "browser2"]
+    test_config = config.Config()
+    test_config._parse_config(json_config)
+
+    assert test_config.subprocesses == json_config["subprocesses"]
+    assert test_config.terminals == json_config["terminals"]
+    assert test_config.web_browsers == json_config["web_browsers"]
+    assert test_config.enabled_plugins == json_config["enabled_plugins"]
 
 
 def test_parse_config_does_not_set_values_when_a_config_value_is_empty() -> None:

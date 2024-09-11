@@ -18,6 +18,7 @@ class Config:
         self.terminals = []
         self.subprocesses = []
         self.web_browsers = []
+        self.enabled_plugins = {}
 
         config = self._read_config()
 
@@ -64,3 +65,10 @@ class Config:
 
             if not isinstance(self.web_browsers, list):
                 raise TypeError("'web_browsers' must be a list")
+
+        if "enabled_plugins" in config:
+            self.enabled_plugins = config["enabled_plugins"]
+            logger.info("Enabled plugins: %s", self.enabled_plugins)
+
+            if not isinstance(self.enabled_plugins, dict):
+                raise TypeError("'enabled_plugins' must be a dictionary")

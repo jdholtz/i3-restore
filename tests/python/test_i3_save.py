@@ -7,9 +7,11 @@ import pytest
 from pytest_mock import MockerFixture
 
 with mock.patch("utils.get_logger"):
-    # Don't actually log messages to a file
-    from programs import i3_save
+    with mock.patch("config.Config._read_config", return_value={}):
+        # Don't actually log messages or read the config file
+        from programs import i3_save
 
+from programs import constants
 from programs.utils import JSON
 
 # This needs to be accessed to be tested
@@ -19,9 +21,9 @@ WORKSPACE = """{
     "name": "test_workspace",
     "nodes": [
         {"nodes": [], "swallows": ["swallow1"]},
-        {"nodes": [{"nodes": [], "swallows": [], "window": 999}]},
-        {"nodes": [{"nodes": [], "swallows": [], "window": 999}]},
-        {"nodes": [{"nodes": [], "swallows": [], "window": 999}]}
+        {"nodes": [{"nodes": [], "swallows": [], "window": 999, "window_properties": {}}]},
+        {"nodes": [{"nodes": [], "swallows": [], "window": 999, "window_properties": {}}]},
+        {"nodes": [{"nodes": [], "swallows": [], "window": 999, "window_properties": {}}]}
     ]
 }"""
 
@@ -135,6 +137,20 @@ class TestContainer:
         i3_save.Container({"window": 9999})
         mock_process.assert_not_called()
 
+    def test_get_cmdline_options_uses_plugin_for_matching_window_class(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+
+        # Add the config so it's seen as a plugin enabled by the user
+        i3_save.CONFIG.enabled_plugins = {constants.KITTY_CLASS: {"listen_socket": "test_socket"}}
+
+        mock_saver = mocker.patch.object(i3_save.SUPPORTED_PLUGINS[constants.KITTY_CLASS], "main")
+        properties = {"window_properties": {"class": constants.KITTY_CLASS}, "window": 9999}
+
+        i3_save.Container(properties)
+        mock_saver.assert_called_once()
+
     def test_get_cmdline_options_saves_terminals(self, mocker: MockerFixture) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
         mocker.patch("psutil.Process")
@@ -161,6 +177,18 @@ class TestContainer:
 
         assert container.command == "test_command"
         assert container.working_directory == "test_dir"
+
+    def test_save_with_plugin_skips_saving_when_plugin_not_supported(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+        mock_saver = mocker.patch.object(i3_save.SUPPORTED_PLUGINS[constants.KITTY_CLASS], "main")
+
+        properties = {"window_properties": {"class": "unknown"}, "window": 9999}
+        container = i3_save.Container(properties)
+        container._save_with_plugin("unknown")
+
+        mock_saver.assert_not_called()
 
     def test_check_if_subprocess_saves_subprocess(self, mocker: MockerFixture) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
@@ -243,7 +271,7 @@ class TestContainer:
 
         i3_save.CONFIG.terminals = []
         i3_save.CONFIG.web_browsers = ["test_browser"]
-        container = i3_save.Container({"window": 9999})
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
         container.command = "test_browser"
         container._handle_web_browser()
 
@@ -259,7 +287,7 @@ class TestContainer:
 
         i3_save.CONFIG.terminals = []
         i3_save.CONFIG.web_browsers = ["browser1"]
-        container = i3_save.Container({"window": 9999})
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
         container.command = "not_a_browser"
         container._handle_web_browser()
 
@@ -274,7 +302,7 @@ class TestContainer:
         mocker.patch("psutil.Process")
 
         i3_save.WEB_BROWSERS_DICT = {"test_browser": True}
-        container = i3_save.Container({"window": 9999})
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
         container._save_web_browser("test_browser")
 
         mock_open.assert_not_called()
@@ -285,7 +313,7 @@ class TestContainer:
         mocker.patch("psutil.Process")
 
         i3_save.WEB_BROWSERS_DICT = {"test_browser": False}
-        container = i3_save.Container({"window": 9999})
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
         container.command = "test_browser_command"
         container._save_web_browser("test_browser")
 
