@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+import constants
 import utils
 
 CONFIG_FILE_NAME = "config.json"
@@ -67,8 +68,32 @@ class Config:
                 raise TypeError("'web_browsers' must be a list")
 
         if "enabled_plugins" in config:
-            self.enabled_plugins = config["enabled_plugins"]
+            enabled_plugins = config["enabled_plugins"]
+            if not isinstance(enabled_plugins, dict):
+                raise TypeError("'enabled_plugins' must be a dictionary")
+
+            self.enabled_plugins = self._parse_plugins(enabled_plugins)
             logger.info("Enabled plugins: %s", self.enabled_plugins)
 
-            if not isinstance(self.enabled_plugins, dict):
-                raise TypeError("'enabled_plugins' must be a dictionary")
+    def _parse_plugins(self, plugins: JSON) -> JSON:
+        # Available plugin parsers. The key is the plugin name and the value is the
+        # function used to parse the plugin.
+        plugin_parsers = {constants.KITTY_CLASS: parse_kitty_plugin}
+
+        parsed_plugins = {}
+
+        for name, parser in plugin_parsers.items():
+            if name in plugins:
+                parsed_plugins[name] = parser(plugins[name])
+
+        return parsed_plugins
+
+
+def parse_kitty_plugin(plugin: JSON) -> JSON:
+    if not isinstance(plugin, dict):
+        raise TypeError(f"'{constants.KITTY_CLASS}' plugin must be a dictionary")
+
+    if "listen_socket" not in plugin:
+        raise TypeError("'kitty' plugin must include a 'listen_socket'")
+
+    return {"listen_socket": plugin["listen_socket"]}
