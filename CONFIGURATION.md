@@ -104,7 +104,7 @@ extensively. The only plugin currently implemented is the `Kitty` plugin.
 
 ### Kitty
 The Kitty plugin allows i3-restore to save and restore Kitty much better than the general terminal
-save and restoring. It can restore Kitty tabs, windows, and different layout configurations. To
+save and restoring. It can restore Kitty tabs, windows, and scrollback. To
 enable it, you need to enable two options in your Kitty configuration and add the plugin
 configuration to i3-restore's `config.json`.
 
@@ -131,6 +131,27 @@ documentation before deciding on the values you put.
 ```
 **Note**: Replace `<listen_on value>` with the value you used for `listen_on` in your Kitty
 configuration.
+
+#### Saving Scrollback
+The Kitty plugin also has the ability to restore each terminal's scrollback. By default, the
+plugin does not. However, by adding `scrollback` to the plugin configuration your terminal
+scrollback can be restored.
+
+`scrollback` accepts three values:
+- `none` (default): Don't restore any scrollback
+- `screen`: Only restore the scrollback that is visible on each window's screen
+- `all`: Restore all the scrollback for each window
+
+```json
+{
+    "enabled_plugins": {
+        "kitty": {
+            "listen_socket": "<listen_on value>",
+            "scrollback": "<scrollback>"
+        }
+    }
+}
+```
 
 ## Setting A Custom Save Path
 By default, the layout and program files are saved under `$HOME/.config/i3`. To change this, set the `i3_PATH` environment variable to

@@ -12,6 +12,8 @@ JSON = utils.JSON
 
 logger = utils.get_logger()
 
+KITTY_PLUGIN_SCROLLBACK_OPTIONS = ["all", "screen", "none"]
+
 
 class Config:
     def __init__(self):
@@ -94,6 +96,16 @@ def parse_kitty_plugin(plugin: JSON) -> JSON:
         raise TypeError(f"'{constants.KITTY_CLASS}' plugin must be a dictionary")
 
     if "listen_socket" not in plugin:
-        raise TypeError("'kitty' plugin must include a 'listen_socket'")
+        raise TypeError("kitty plugin: 'listen_socket' must be included")
 
-    return {"listen_socket": plugin["listen_socket"]}
+    plugin_config = {
+        "listen_socket": plugin["listen_socket"],
+        "scrollback": plugin.get("scrollback", "none"),
+    }
+
+    if plugin_config["scrollback"] not in KITTY_PLUGIN_SCROLLBACK_OPTIONS:
+        raise TypeError(
+            f"kitty plugin: 'scrollback' must be one of: {KITTY_PLUGIN_SCROLLBACK_OPTIONS}"
+        )
+
+    return plugin_config

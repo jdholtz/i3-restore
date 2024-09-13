@@ -4,7 +4,7 @@ A simple Python and Bash script to restore your [i3] session. It works very simi
 The script can correctly restore terminal subprocesses (such as Vim and ssh) and web browser instances exactly how they were before.
 
 Additionally, with its plugin system i3-restore can save and restore specific programs much more extensively. Currently, the Kitty
-terminal has a plugin to restore tabs, windows, and layouts. Pull Requests are welcome to add plugins for more programs!
+terminal has a plugin to restore tabs, windows, and scrollback. Pull Requests are welcome to add plugins for more programs!
 
 ## Table of Contents
 - [Features](#features)
@@ -27,7 +27,7 @@ i3-restore has the following features (fill out a feature request for more to be
 - [x] Configuration to save and restore desired terminals, web browsers, and terminal subprocesses from your latest i3 session
 - [x] Automatic saving and restoring of all i3 window layouts and programs running in your current i3 session
 - [x] Correct restoring of subprocesses within terminals (such as Vim and ssh) and web browser instances
-- [x] Restoring Kitty terminal tabs, windows, and layouts. Enable this using the [Kitty plugin](CONFIGURATION.md#kitty)
+- [x] Restoring Kitty terminal tabs, windows, and scrollback. Enable this using the [Kitty plugin](CONFIGURATION.md#kitty)
 
 ## Getting Started
 

@@ -25,7 +25,8 @@ KITTY_CONTAINER_TREE = [
                         "env": {
                             "SHELL": "/bin/bash",
                         },
-                        "cwd": "/home",
+                        "cwd": "/home/test",
+                        "id": 1,
                         "pid": 1,
                     }
                 ],
@@ -36,6 +37,7 @@ KITTY_CONTAINER_TREE = [
                     {
                         "env": {},
                         "cwd": "/home",
+                        "id": 2,
                         "pid": 2,
                     }
                 ],
@@ -46,9 +48,10 @@ KITTY_CONTAINER_TREE = [
 
 KITTY_CONTAINER_SESSION = """new_tab
 focus
-launch --cwd=/home /bin/bash -c 'subprocess'
+launch --cwd=/home/test /bin/bash -c 'subprocess'
 new_tab
-launch --cwd=/home \n"""
+launch --cwd=/home
+"""
 
 
 def test_get_listen_socket_default_format() -> None:
@@ -76,24 +79,114 @@ def test_get_container_raises_plugin_save_error_when_command_fails(mocker: Mocke
         kitty.get_container_tree("test-socket")
 
 
-def test_parse_tree_to_session(mocker: MockerFixture) -> None:
+def test_save_scrollback_skips_with_none_scrollback_config() -> None:
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+    assert kitty.save_scrollback(0, 0, plugin_config) is None
+
+
+def test_save_scrollback_handles_failed_command(mocker: MockerFixture) -> None:
+    mocker.patch("subprocess.check_call", side_effect=subprocess.CalledProcessError(None, None))
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
+    assert kitty.save_scrollback(0, 0, plugin_config) is None
+
+
+def test_save_scrollback_saves_scrollback(mocker: MockerFixture) -> None:
+    mocker.patch("subprocess.check_call")
+    # mocker.patch("pathlib.Path.open")
+
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
+    session_file = kitty.save_scrollback(11, 94, plugin_config)
+
+    assert session_file.name == "kitty-scrollback-94-11"
+
+
+def test_get_window_subprocess_command_returns_subprocess_command(mocker: MockerFixture) -> None:
     container = i3_save.Container({"window_properties": {}, "window": 9999})
-    mocker.patch.object(container, "check_if_subprocess")
     container.subprocess_command = "subprocess"
 
+    mocker.patch.object(container, "check_if_subprocess")
+
+    window_tree = KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0]
+
     assert (
-        kitty.parse_tree_to_session(container, KITTY_CONTAINER_TREE[0]) == KITTY_CONTAINER_SESSION
+        kitty.get_window_subprocess_command(container, window_tree, {})
+        == "/bin/bash -c 'subprocess'"
     )
+    assert container.subprocess_command is None
+
+
+def test_get_window_subprocess_command_returns_subprocess_with_scrollback(
+    mocker: MockerFixture,
+) -> None:
+    container = i3_save.Container({"window_properties": {}, "window": 9999})
+    container.subprocess_command = None
+
+    mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("subprocess.check_call")
+
+    window_tree = KITTY_CONTAINER_TREE[0]["tabs"][1]["windows"][0]
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
+
+    subprocess_cmd = kitty.get_window_subprocess_command(container, window_tree, plugin_config)
+
+    # Ensure the most important parts of the command are present
+    assert "bash -c 'cat" in subprocess_cmd
+    assert "kitty-scrollback-9999-2" in subprocess_cmd
+    assert " && bash" in subprocess_cmd
+
+
+def test_get_window_subprocess_command_returns_no_subprocess_when_none_is_present(
+    mocker: MockerFixture,
+) -> None:
+    container = i3_save.Container({"window_properties": {}, "window": 9999})
+    container.subprocess_command = None
+
+    mocker.patch.object(container, "check_if_subprocess")
+
+    window_tree = KITTY_CONTAINER_TREE[0]["tabs"][1]["windows"][0]
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+
+    assert kitty.get_window_subprocess_command(container, window_tree, plugin_config) is None
+
+
+def test_get_window_launch_command_returns_launch_command_without_subprocess(
+    mocker: MockerFixture,
+) -> None:
+    container = i3_save.Container({"window_properties": {}, "window": 9999})
+    container.subprocess_command = None
+
+    mocker.patch.object(container, "check_if_subprocess")
+
+    window_tree = KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0]
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+
+    launch_cmd = kitty.get_window_launch_command(container, window_tree, plugin_config)
+
+    assert "launch" in launch_cmd
+    assert window_tree["cwd"] in launch_cmd
+
+
+def test_parse_tree_to_session(mocker: MockerFixture) -> None:
+    container = i3_save.Container({"window_properties": {}, "window": 9999})
+    container.subprocess_command = "subprocess"
+
+    mocker.patch.object(container, "check_if_subprocess")
+
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+    session_output = kitty.parse_tree_to_session(container, KITTY_CONTAINER_TREE[0], plugin_config)
+
+    assert session_output == KITTY_CONTAINER_SESSION
 
 
 def test_create_session_file_gets_session_output_and_writes_to_file(mocker: MockerFixture) -> None:
-    mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
-
     container = i3_save.Container({"window_properties": {}, "window": 9999})
-    mocker.patch.object(container, "check_if_subprocess")
     container.subprocess_command = "subprocess"
 
-    session_file = kitty.create_session_file(container, KITTY_CONTAINER_TREE)
+    mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
+    mocker.patch.object(container, "check_if_subprocess")
+
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+    session_file = kitty.create_session_file(container, KITTY_CONTAINER_TREE, plugin_config)
 
     handle = mock_open()
     assert (
@@ -104,15 +197,16 @@ def test_create_session_file_gets_session_output_and_writes_to_file(mocker: Mock
 
 
 def test_main_saves_a_kitty_container(mocker: MockerFixture) -> None:
-    mocker.patch("pathlib.Path.open")
-
     container = i3_save.Container({"window_properties": {}, "window": 9999})
-    mocker.patch.object(container, "check_if_subprocess")
     container.subprocess_command = "subprocess"
 
-    kitty_tree_command_output = json.dumps(KITTY_CONTAINER_TREE).encode("utf-8")
+    mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("pathlib.Path.open")
 
+    kitty_tree_command_output = json.dumps(KITTY_CONTAINER_TREE).encode("utf-8")
     mocker.patch("subprocess.check_output", return_value=kitty_tree_command_output)
-    kitty.main(container, {"listen_socket": "test-socket"})
+
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+    kitty.main(container, plugin_config)
 
     assert "kitty-session-9999" in container.command
