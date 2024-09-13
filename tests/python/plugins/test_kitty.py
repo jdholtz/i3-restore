@@ -181,7 +181,7 @@ def test_get_window_launch_command_returns_launch_command_without_subprocess(
     assert window_tree["cwd"] in launch_cmd
 
 
-def test_parse_tree_to_session(mocker: MockerFixture) -> None:
+def test_parse_tree_to_session_parses_tree_into_session_correctly(mocker: MockerFixture) -> None:
     container = i3_save.Container({"window_properties": {}, "window": 9999})
     container.subprocess_command = "subprocess"
 

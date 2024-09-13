@@ -230,7 +230,7 @@ class Container:
         Since the subprocesses are retrieved recursively, the newest subprocess
         will be saved and restored.
         """
-        # Preprending the current process is useful when the process is not a terminal (which can
+        # Prepending the current process is useful when the process is not a terminal (which can
         # happen when some plugins use it)
         processes = [process] + process.children(True)
 
