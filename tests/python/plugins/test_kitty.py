@@ -9,9 +9,9 @@ with mock.patch("utils.get_logger"):
     # Don't log messages to a file
     from programs.plugins import kitty
 
-with mock.patch("config.Config._read_config", return_value={}):
-    # Don't read the config file
-    from programs import i3_save
+    with mock.patch("config.Config._read_config", return_value={}):
+        # Don't read the config file
+        from programs.i3_save import Container
 
 # Overwrite for testing so it is deterministic
 kitty.utils.i3_PATH = "/tmp/i3-restore-test"
@@ -67,6 +67,13 @@ launch --cwd=/ bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-3" && ba
 """
 
 
+@pytest.fixture(autouse=True)
+def container(mocker: MockerFixture) -> Container:
+    mocker.patch.object(Container, "_get_pid")
+    mocker.patch.object(Container, "_get_cmdline_options")
+    return Container({"window_properties": {}, "window": 9999})
+
+
 def test_get_listen_socket_default_format() -> None:
     expected_listen_socket = "test-123"
     assert kitty.get_listen_socket("test", 123) == expected_listen_socket
@@ -114,10 +121,10 @@ def test_save_scrollback_saves_scrollback(mocker: MockerFixture) -> None:
     assert session_file.name == "kitty-scrollback-94-11"
 
 
-def test_get_window_subprocess_command_returns_subprocess_command(mocker: MockerFixture) -> None:
-    container = i3_save.Container({"window_properties": {}, "window": 9999})
+def test_get_window_subprocess_command_returns_subprocess_command(
+    mocker: MockerFixture, container: Container
+) -> None:
     container.subprocess_command = "subprocess"
-
     mocker.patch.object(container, "check_if_subprocess")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0]
@@ -130,9 +137,8 @@ def test_get_window_subprocess_command_returns_subprocess_command(mocker: Mocker
 
 
 def test_get_window_subprocess_command_returns_subprocess_with_scrollback(
-    mocker: MockerFixture,
+    mocker: MockerFixture, container: Container
 ) -> None:
-    container = i3_save.Container({"window_properties": {}, "window": 9999})
     container.subprocess_command = None
 
     mocker.patch.object(container, "check_if_subprocess")
@@ -151,11 +157,9 @@ def test_get_window_subprocess_command_returns_subprocess_with_scrollback(
 
 
 def test_get_window_subprocess_command_returns_no_subprocess_when_none_is_present(
-    mocker: MockerFixture,
+    mocker: MockerFixture, container: Container
 ) -> None:
-    container = i3_save.Container({"window_properties": {}, "window": 9999})
     container.subprocess_command = None
-
     mocker.patch.object(container, "check_if_subprocess")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][1]["windows"][0]
@@ -165,11 +169,9 @@ def test_get_window_subprocess_command_returns_no_subprocess_when_none_is_presen
 
 
 def test_get_window_launch_command_returns_launch_command_without_subprocess(
-    mocker: MockerFixture,
+    mocker: MockerFixture, container: Container
 ) -> None:
-    container = i3_save.Container({"window_properties": {}, "window": 9999})
     container.subprocess_command = None
-
     mocker.patch.object(container, "check_if_subprocess")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0]
@@ -181,8 +183,9 @@ def test_get_window_launch_command_returns_launch_command_without_subprocess(
     assert window_tree["cwd"] in launch_cmd
 
 
-def test_parse_tree_to_session_parses_tree_into_session_correctly(mocker: MockerFixture) -> None:
-    container = i3_save.Container({"window_properties": {}, "window": 9999})
+def test_parse_tree_to_session_parses_tree_into_session_correctly(
+    mocker: MockerFixture, container: Container
+) -> None:
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")
@@ -195,8 +198,9 @@ def test_parse_tree_to_session_parses_tree_into_session_correctly(mocker: Mocker
     assert session_output == KITTY_CONTAINER_SESSION
 
 
-def test_create_session_file_gets_session_output_and_writes_to_file(mocker: MockerFixture) -> None:
-    container = i3_save.Container({"window_properties": {}, "window": 9999})
+def test_create_session_file_gets_session_output_and_writes_to_file(
+    mocker: MockerFixture, container: Container
+) -> None:
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")
@@ -214,8 +218,7 @@ def test_create_session_file_gets_session_output_and_writes_to_file(mocker: Mock
     assert session_file.name == "kitty-session-9999"
 
 
-def test_main_saves_a_kitty_container(mocker: MockerFixture) -> None:
-    container = i3_save.Container({"window_properties": {}, "window": 9999})
+def test_main_saves_a_kitty_container(mocker: MockerFixture, container: Container) -> None:
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")

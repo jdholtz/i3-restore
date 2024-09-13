@@ -115,10 +115,11 @@ class TestContainer:
         assert container.command is None
 
     def test_get_pid_returns_the_pid(self, mocker: MockerFixture) -> None:
-        mocker.patch("subprocess.check_output", return_value=b"1111")
+        mocker.patch("subprocess.check_output", return_value=b"99999")
+        mocker.patch("psutil.Process")
 
         container = i3_save.Container({"window": 9999, "window_properties": {}})
-        assert container._get_pid() == 1111
+        assert container._get_pid() == 99999
 
     def test_get_pid_handles_called_process_error(self, mocker: MockerFixture) -> None:
         mocker.patch(
