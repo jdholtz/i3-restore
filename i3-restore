@@ -274,12 +274,13 @@ restore_workspaces() {
     # Wait for the programs to load and the layout windows to get swallowed
     sleep "$SLEEP_BEFORE_RELOADING"
 
+    # Restore focus before killing empty containers as the container with the _i3_restore_focus mark
+    # could be killed if it didn't swallow a program, causing the command to fail
+    log "Restoring focus from previous session"
+    i3-msg '[con_mark="_i3_restore_focus"] focus; unmark _i3_restore_focus'
+
     # Clean up any leftover containers that didn't get swallowed
     kill_empty_containers
-
-    log "Restoring focus from previous session"
-    i3-msg '[con_mark="_i3_restore_focus"] focus'
-    i3-msg 'unmark _i3_restore_focus'
 
     # Reload i3 to fix any graphical errors (specifically with firefox)
     log "Restarting session to fix graphical errors"

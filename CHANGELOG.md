@@ -3,8 +3,12 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
-## 4.3 (2024-08-11)
+## Upcoming
+### Improvements
+- Fix an issue where a window not being swallowed could cause the restore process to exit early
 
+
+## 4.3 (2024-08-11)
 ### Improvements
 - Restore workspaces on their correct displays, if possible
 ([#17](https://github.com/jdholtz/i3-restore/issues/17))
@@ -17,7 +21,6 @@ purpose ([#18](https://github.com/jdholtz/i3-restore/issues/18))
 
 
 ## 4.2 (2024-07-06)
-
 ### New Features
 - A [Similar Software](README.md#similar-software) and [Limitations](README.md#limitations) section has been added to the Readme
 ([#11](https://github.com/jdholtz/i3-restore/issues/11) and [#13](https://github.com/jdholtz/i3-restore/issues/13))
@@ -29,14 +32,12 @@ purpose ([#18](https://github.com/jdholtz/i3-restore/issues/18))
 
 
 ## 4.1 (2024-01-07)
-
 ### Bug Fixes
 - Fix log messages messing up the restoring process when using a verbosity
 - Fix programs not restoring correctly when the default shell is not Bash
 
 
 ## 4.0 (2024-01-03)
-
 ### New Features
 - Official support for Python 3.12
 - A help flag (`--help` or `-h`) can now be used on either script to get its usage
@@ -49,13 +50,11 @@ be used to additionally show all commands executed by the script
 
 
 ## 3.5 (2023-09-23)
-
 ### New Features
 - The currently focused container is now saved and restored next session
 
 
 ## 3.4 (2023-08-12)
-
 ### New Features
 - This project is now licensed under the GPLv3 license instead of the MIT license
 - Natively support restoring `pipenv`, `sudo`, and `su` in the configuration
@@ -67,7 +66,6 @@ configuration file
 
 
 ## 3.3 (2023-03-18)
-
 ### Improvements
 - Restoring subprocesses is now handled better (and works with the kitty terminal!)
 
@@ -78,7 +76,6 @@ section and the [example configuration file](config.example.json) to adjust your
 
 
 ## 3.2 (2023-01-16)
-
 ### Improvements
 - The configuration file was changed from `programs/config.py` to `config.json`, making it much easier to configure i3-restore.
 Additionally, a [Configuration](CONFIGURATION.md) guide was written to facilitate the script's configuration.
@@ -92,7 +89,6 @@ old configuration into the new file.
 
 
 ## 3.1 (2023-01-05)
-
 ### New Features
 - An `--interval` flag can now be specified to automatically save your i3 session every X minutes. See more information on
 how to use this in the [Restoring section of the README](README.md#restoring)
@@ -106,7 +102,6 @@ how to use this in the [Restoring section of the README](README.md#restoring)
 
 
 ## 3.0 (2022-12-24)
-
 ### New Features
 - New formatting standards were added for Contributors
 
@@ -122,7 +117,6 @@ make the necessary changes within your i3 config
 
 
 ## 2.0 (2022-11-08)
-
 ### New Features
 - A button was added to the i3-nagbars that allows the user to run the script manually to view the error that occurred
 
@@ -135,7 +129,6 @@ will never be removed (the file names changed).
 
 
 ## 1.2 (2022-10-29)
-
 ### New Features
 - A logger was added to make it easier to debug the script
 - An [i3-nagbar](https://man.archlinux.org/man/community/i3-wm/i3-nagbar.1.en) will now appear when an error occurs while
@@ -146,7 +139,6 @@ running the script, making it easier for the user to see what is wrong.
 
 
 ## 1.1 (2022-08-13)
-
 ### New Features
 - The version can now be retrieved by using the `--version` or `-v` flag when running either one of the two shell scripts
   - `./i3-save.sh --version`
