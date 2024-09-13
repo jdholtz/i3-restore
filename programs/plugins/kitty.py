@@ -34,9 +34,9 @@ def get_container_tree(listen_socket: str) -> JSON:
     listen_socket.
     """
     try:
-        output = subprocess.check_output(["kitty", "@", "--to", listen_socket, "ls"]).decode(
-            "utf-8"
-        )
+        output = subprocess.check_output(
+            ["kitty", "@", "--to", listen_socket, "ls", "--all-env-vars"]
+        ).decode("utf-8")
     except subprocess.CalledProcessError as err:
         logger.error("Failed retrieving Kitty container tree")
         raise utils.PluginSaveError from err
@@ -149,16 +149,15 @@ def parse_tree_to_session(container: Container, tree: JSON, plugin_config: JSON)
     output = ""
     for tab in tree["tabs"]:
         output += "new_tab\n"
+        output += f"layout {tab['layout']}\n"
 
         if tab["is_active"]:
             output += "focus\n"
 
-        # Only save the first window in a tab. Kitty currently doesn't have a way to restore
-        # the layout of multiple windows in a tab.
-        # TODO: Save more than one window, even though the layout won't be restored exactly correct
-        window = tab["windows"][0]
-
-        output += get_window_launch_command(container, window, plugin_config)
+        # The window layouts won't be restored perfectly as the Kitty tree doesn't provide enough
+        # information to do so.
+        for window in tab["windows"]:
+            output += get_window_launch_command(container, window, plugin_config)
 
     logger.debug("Kitty session output:\n%s", output)
     return output

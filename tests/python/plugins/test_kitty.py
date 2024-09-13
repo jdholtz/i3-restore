@@ -13,6 +13,8 @@ with mock.patch("config.Config._read_config", return_value={}):
     # Don't read the config file
     from programs import i3_save
 
+# Overwrite for testing so it is deterministic
+kitty.utils.i3_PATH = "/tmp/i3-restore-test"
 
 KITTY_CONTAINER_TREE = [
     {
@@ -20,6 +22,7 @@ KITTY_CONTAINER_TREE = [
         "tabs": [
             {
                 "is_active": True,
+                "layout": "fat",
                 "windows": [
                     {
                         "env": {
@@ -33,13 +36,20 @@ KITTY_CONTAINER_TREE = [
             },
             {
                 "is_active": False,
+                "layout": "tall",
                 "windows": [
                     {
                         "env": {},
                         "cwd": "/home",
                         "id": 2,
                         "pid": 2,
-                    }
+                    },
+                    {
+                        "env": {},
+                        "cwd": "/",
+                        "id": 3,
+                        "pid": 2,
+                    },
                 ],
             },
         ],
@@ -47,10 +57,13 @@ KITTY_CONTAINER_TREE = [
 ]
 
 KITTY_CONTAINER_SESSION = """new_tab
+layout fat
 focus
 launch --cwd=/home/test /bin/bash -c 'subprocess'
 new_tab
-launch --cwd=/home
+layout tall
+launch --cwd=/home bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-2" && bash'
+launch --cwd=/ bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-3" && bash'
 """
 
 
@@ -86,13 +99,14 @@ def test_save_scrollback_skips_with_none_scrollback_config() -> None:
 
 def test_save_scrollback_handles_failed_command(mocker: MockerFixture) -> None:
     mocker.patch("subprocess.check_call", side_effect=subprocess.CalledProcessError(None, None))
+    mocker.patch("pathlib.Path.open")
     plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
     assert kitty.save_scrollback(0, 0, plugin_config) is None
 
 
 def test_save_scrollback_saves_scrollback(mocker: MockerFixture) -> None:
     mocker.patch("subprocess.check_call")
-    # mocker.patch("pathlib.Path.open")
+    mocker.patch("pathlib.Path.open")
 
     plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
     session_file = kitty.save_scrollback(11, 94, plugin_config)
@@ -123,6 +137,7 @@ def test_get_window_subprocess_command_returns_subprocess_with_scrollback(
 
     mocker.patch.object(container, "check_if_subprocess")
     mocker.patch("subprocess.check_call")
+    mocker.patch("pathlib.Path.open")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][1]["windows"][0]
     plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
@@ -171,8 +186,10 @@ def test_parse_tree_to_session(mocker: MockerFixture) -> None:
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("subprocess.check_call")
+    mocker.patch("pathlib.Path.open")
 
-    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
     session_output = kitty.parse_tree_to_session(container, KITTY_CONTAINER_TREE[0], plugin_config)
 
     assert session_output == KITTY_CONTAINER_SESSION
@@ -182,10 +199,11 @@ def test_create_session_file_gets_session_output_and_writes_to_file(mocker: Mock
     container = i3_save.Container({"window_properties": {}, "window": 9999})
     container.subprocess_command = "subprocess"
 
-    mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("subprocess.check_call")
+    mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
 
-    plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
     session_file = kitty.create_session_file(container, KITTY_CONTAINER_TREE, plugin_config)
 
     handle = mock_open()
