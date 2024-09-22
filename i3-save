@@ -44,6 +44,23 @@ get_workspaces() {
 }
 
 #####################################
+# Remove the session files from the previous saved session
+# Globals:
+#  i3_PATH
+# Arguments:
+#  None
+#####################################
+remove_previous_session() {
+    # --force is used so it doesn't exit if a file isn't found
+    rm --force "$i3_PATH"/*_layout.json
+    rm --force "$i3_PATH"/*_programs.sh
+    rm --force "$i3_PATH"/*_subprocess_*.sh
+    rm --force "$i3_PATH"/web_browsers.sh
+    rm --force "$i3_PATH"/kitty-session-*
+    rm --force "$i3_PATH"/kitty-scrollback-*
+}
+
+#####################################
 # Save the layout of a workspace
 # Globals:
 #   i3_PATH
@@ -92,13 +109,7 @@ save_workspace_layouts() {
     workspaces="$(get_workspaces)"
     readarray -t workspaces_arr <<<"$workspaces"
 
-    # Remove previous saved session. --force is used so it doesn't exit if a file isn't found
-    rm --force "$i3_PATH"/*_layout.json
-    rm --force "$i3_PATH"/*_programs.sh
-    rm --force "$i3_PATH"/*_subprocess_*.sh
-    rm --force "$i3_PATH"/web_browsers.sh
-    rm --force "$i3_PATH"/kitty-session-*
-    rm --force "$i3_PATH"/kitty-scrollback-*
+    remove_previous_session
 
     # Save a mark on the focused window so it can be restored later
     i3-msg --quiet 'mark --add _i3_restore_focus'

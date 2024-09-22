@@ -40,5 +40,6 @@
     ],
     "web_browsers": [
         "firefox"
-    ]
+    ],
+    "enabled_plugins": {}
 }
