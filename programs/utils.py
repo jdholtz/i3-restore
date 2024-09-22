@@ -7,6 +7,10 @@ from typing import Any, Dict, List
 
 DEFAULT_LOG_FILE = "logs/i3-restore.log"
 
+# Get path where layouts were saved. Sets a default if the environment variable isn't set
+HOME = os.getenv("HOME")
+i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
+
 # Type alias for JSON
 JSON = Dict[str, Any]
 
@@ -82,3 +86,8 @@ def get_logger() -> logging.RootLogger:
     logger.addHandler(stream_handler)
 
     return logger
+
+
+# Custom exception for when a plugin fails to save a container.
+class PluginSaveError(Exception):
+    pass

@@ -9,6 +9,8 @@ for more information.
 - [Terminals](#terminals)
 - [Subprocesses](#subprocesses)
 - [Web Browsers](#web-browsers)
+- [Enabled Plugins](#enabled-plugins)
+    - [Kitty](#kitty)
 - [Setting A Custom Save Path](#setting-a-custom-save-path)
 - [Restoring Vim And Neovim Sessions](#restoring-vim-and-neovim-sessions)
 
@@ -93,6 +95,61 @@ contains the configured web browsers
         "browser 1 launch command",
         "browser 2 launch command"
     ]
+}
+```
+
+## Enabled Plugins
+i3-restore has built-in plugins that allow you to save and restore specific programs much more
+extensively. The only plugin currently implemented is the `Kitty` plugin.
+
+### Kitty
+The Kitty plugin allows i3-restore to save and restore Kitty much better than the general terminal
+save and restoring. It can restore Kitty tabs, windows, and scrollback. To
+enable it, you need to enable two options in your Kitty configuration and add the plugin
+configuration to i3-restore's `config.json`.
+
+**kitty.conf**:
+```
+# allow_remote_control needs to be set to either socket-only, socket, or yes. See
+# https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.allow_remote_control for more details.
+allow_remote_control socket-only
+
+# listen_on needs to be a valid socket. See
+# https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.listen_on for more details.
+listen_on unix:@mykitty
+```
+**Note**: These are just sample values. It is highly recommended that you check out Kitty's
+documentation before deciding on the values you put.
+
+**config.json**:
+```json
+{
+    "enabled_plugins": {
+        "kitty": {"listen_socket": "<listen_on value>"}
+    }
+}
+```
+**Note**: Replace `<listen_on value>` with the value you used for `listen_on` in your Kitty
+configuration.
+
+#### Saving Scrollback
+The Kitty plugin also has the ability to restore each terminal's scrollback. By default, the
+plugin does not. However, by adding `scrollback` to the plugin configuration your terminal
+scrollback can be restored.
+
+`scrollback` accepts three values:
+- `none` (default): Don't restore any scrollback
+- `screen`: Only restore the scrollback that is visible on each window's screen
+- `all`: Restore all the scrollback for each window
+
+```json
+{
+    "enabled_plugins": {
+        "kitty": {
+            "listen_socket": "<listen_on value>",
+            "scrollback": "<scrollback>"
+        }
+    }
 }
 ```
 

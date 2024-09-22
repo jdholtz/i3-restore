@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -9,11 +8,13 @@ from typing import Optional
 import psutil
 
 import config
+import constants
+import plugins.kitty
 import utils
 
-# Get path where layouts were saved. Sets a default if the environment variable isn't set
-HOME = os.getenv("HOME")
-i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
+# Plugins that are supported to have custom save algorithms. The key is the window class and the
+# value is the module to use to save the container (the module's 'main' function will be called).
+SUPPORTED_PLUGINS = {constants.KITTY_CLASS: plugins.kitty}
 
 # Type alias for JSON
 JSON = utils.JSON
@@ -76,7 +77,7 @@ class Workspace:
 
         logger.info("Number of containers: %s", len(self.containers))
 
-        file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_programs.sh"
+        file = Path(utils.i3_PATH) / f"workspace_{self.sanitized_name}_programs.sh"
 
         program_commands = "#!/usr/bin/env bash\n"
         for i, container in enumerate(self.containers):
@@ -108,7 +109,9 @@ class Workspace:
         Write the subprocess command to a separate file. This makes executed commands
         behave (nearly) identically to how it would be executed in a terminal.
         """
-        file = Path(i3_PATH) / f"workspace_{self.sanitized_name}_subprocess_{container_num}.sh"
+        file = (
+            Path(utils.i3_PATH) / f"workspace_{self.sanitized_name}_subprocess_{container_num}.sh"
+        )
         logger.debug("File: %s. Subprocess command: %s", file, container.subprocess_command)
         subprocess_cmd = "#!/usr/bin/env bash\n" + container.subprocess_command
         with file.open("w") as f:
@@ -127,11 +130,13 @@ class Container:
         self.command = None
         self.subprocess_command = None
         self.working_directory = None
+        self.window_class = properties["window_properties"].get("class")
+        self.window_id = properties["window"]
 
-        self.pid = self._get_pid(properties)
+        self.pid = self._get_pid()
 
         try:
-            self._get_cmdline_options(properties)
+            self._get_cmdline_options()
         except psutil.ZombieProcess:
             # This happens when i3 restore is attempting to save a container that was very recently
             # killed and the process hasn't been cleaned up yet
@@ -145,12 +150,11 @@ class Container:
             # Don't save the container if it fails to access all of its attributes
             self.command = None
 
-    @staticmethod
-    def _get_pid(properties: JSON) -> Optional[int]:
+    def _get_pid(self) -> Optional[int]:
         """Get the PID of the current container"""
         try:
             pid_info = subprocess.check_output(
-                ["xdotool", "getwindowpid", str(properties["window"])], stderr=subprocess.DEVNULL
+                ["xdotool", "getwindowpid", str(self.window_id)], stderr=subprocess.DEVNULL
             ).decode("utf-8")
             pid = int(pid_info)
         except subprocess.CalledProcessError:
@@ -159,26 +163,28 @@ class Container:
 
         return pid
 
-    def _get_cmdline_options(self, properties: JSON) -> None:
+    def _get_cmdline_options(self) -> None:
         """Set the command and working directory of the container"""
         if self.pid is None:
+            return
+
+        # Use a custom save plugin to save this container. The container will be saved normally if
+        # the plugin is not enabled or the plugin fails to save it.
+        if self.window_class in CONFIG.enabled_plugins and self._save_with_plugin():
             return
 
         process = psutil.Process(self.pid)
 
         # First, check if it is a terminal
         for terminal in CONFIG.terminals:
-            if (
-                "class" in properties["window_properties"]
-                and properties["window_properties"]["class"] == terminal["class"]
-            ):
+            if self.window_class == terminal["class"]:
                 logger.info("Main process of container is a terminal")
 
                 # The terminal command is set here manually so the custom command used to restore
                 # the subprocess works as expected and doesn't store "[terminal] -e bash -c ..."
                 self.command = terminal["command"]
 
-                self._check_if_subprocess(process)
+                self.check_if_subprocess(process)
 
                 # Get the working directory of the last process because some terminals
                 # store working directories different than others (which is why it can't
@@ -194,7 +200,28 @@ class Container:
         # restoring every instance.
         self._handle_web_browser()
 
-    def _check_if_subprocess(self, process: psutil.Process) -> None:
+    def _save_with_plugin(self) -> bool:
+        """
+        Save the container using a supported plugin. Returns true when the container is successfully
+        saved, false if an error occurred or if no plugin supports saving this window. This function
+        assumes that the plugin is enabled in the user config.
+        """
+        if self.window_class not in SUPPORTED_PLUGINS:
+            logger.error("Plugin not supported: %s. Saving container regularly", self.window_class)
+            return False
+
+        logger.info("Saving container with plugin: %s", self.window_class)
+        plugin_config = CONFIG.enabled_plugins[self.window_class]
+
+        try:
+            SUPPORTED_PLUGINS[self.window_class].main(self, plugin_config)
+            return True
+        except utils.PluginSaveError:
+            return False
+
+    def check_if_subprocess(
+        self, process: psutil.Process, default_launch_command: str = "{command}"
+    ) -> None:
         """
         Checks whether or not the process has any subprocesses that should be
         saved. Examples of subprocesses that run in the terminal include Vim,
@@ -203,7 +230,11 @@ class Container:
         Since the subprocesses are retrieved recursively, the newest subprocess
         will be saved and restored.
         """
-        for child in reversed(process.children(True)):
+        # Prepending the current process is useful when the process is not a terminal (which can
+        # happen when some plugins use it)
+        processes = [process] + process.children(True)
+
+        for child in reversed(processes):
             child_name = child.name()
             for program in CONFIG.subprocesses:
                 if child_name != program["name"]:
@@ -230,7 +261,7 @@ class Container:
                 for arg in cmd_args:
                     command += " " + arg.replace(" ", r"\ ")
 
-                launch_command = program.get("launch_command", "{command}")
+                launch_command = program.get("launch_command", default_launch_command)
                 self.subprocess_command = launch_command.replace("{command}", command)
                 return
 
@@ -259,7 +290,7 @@ class Container:
         logger.info("Saving container as a web browser")
         WEB_BROWSERS_DICT[web_browser] = True
 
-        file = Path(i3_PATH) / "web_browsers.sh"
+        file = Path(utils.i3_PATH) / "web_browsers.sh"
         logger.debug("Web browser file: %s. Command: %s", file, self.command)
         with open(file, "a") as f:
             f.write(f"{self.command}\n")
