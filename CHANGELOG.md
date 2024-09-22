@@ -4,6 +4,11 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 
 
 ## Upcoming
+### New Features
+- Add scrollback, tab, and window restoring for the Kitty terminal
+([#24](https://github.com/jdholtz/i3-restore/pull/24))
+    - Refer to the [Kitty Configuration](CONFIGURATION.md#kitty) for information on how to enable this feature
+
 ### Improvements
 - Fix an issue where a window not being swallowed could cause the restore process to exit early
 
