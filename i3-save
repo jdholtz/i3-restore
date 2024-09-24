@@ -28,7 +28,7 @@ rotate_log
 # second will be the display name.
 # Arguments:
 #   None
-# Returns:
+# Outputs:
 #   A string of workspace and display names. The
 #   workspace name is the first line and the display
 #   the workspace is on is the second line
@@ -68,8 +68,8 @@ remove_previous_session() {
 #   Workspace name
 #   Display name the workspace is on
 # Returns:
-#   0 if either no program file is found or programs
-#   were restored correctly. Non-zero on error.
+#   0 if either the workspace is empty or programs
+#   were saved correctly. Non-zero on error.
 #####################################
 save_workspace_layout() {
     local workspace display sanitized_ws_name workspace_tree file_name

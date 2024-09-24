@@ -28,7 +28,7 @@ source "$CURR_DIR/utils/automatic_saving.bash"
 # Get all the window IDs on a workspace
 # Arguments:
 #   Workspace name
-# Returns:
+# Outputs:
 #   The IDs of the windows on the workspace
 #####################################
 get_window_ids_on_workspace() {
@@ -53,8 +53,8 @@ get_window_ids_on_workspace() {
 # Returns:
 #   Exit code: 0 if either no program file is found or
 #   programs were restored correctly. Non-zero on error.
-#
-#   Output: The newly created window IDs on the workspace
+# Outputs:
+#   The newly created window IDs on the workspace
 #####################################
 restore_programs() {
     local workspace_name sanitized_ws_name file num_containers window_ids
