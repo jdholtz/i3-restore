@@ -3,7 +3,7 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
-## Upcoming
+## 4.4 (2024-10-03)
 ### New Features
 - Add scrollback, tab, and window restoring for the Kitty terminal
 ([#24](https://github.com/jdholtz/i3-restore/pull/24))

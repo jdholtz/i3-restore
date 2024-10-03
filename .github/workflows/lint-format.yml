@@ -60,7 +60,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run shell checker
-        uses: luizm/action-sh-checker@v0.8.0
+        uses: luizm/action-sh-checker@v0.9.0
         env:
           SHELLCHECK_OPTS: -x --severity=warning
           SHFMT_OPTS: -s
