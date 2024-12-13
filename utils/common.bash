@@ -34,6 +34,7 @@ usage() {
     echo
     echo "Usage:"
     if [[ "$(basename "$cmd")" == "i3-save" ]]; then
+        spaces=""
         echo "    i3-save [options]   Save your current i3 session"
     else
         # More spaces should be added for the restore usage screen to line up all of the
@@ -84,8 +85,14 @@ parse_flags() {
         --save-interval)
             # shellcheck disable=SC2034
             I3_RESTORE_INTERVAL=1
-            # shellcheck disable=SC2034
-            I3_RESTORE_INTERVAL_MINUTES="${2}"
+
+            # Only set the interval minutes if it matches a nonnegative integer
+            I3_RESTORE_INTERVAL_MINUTES=0
+            if [[ $# -ge 2 ]] && [[ $2 =~ ^[0-9]+$ ]]; then
+                # shellcheck disable=SC2034
+                I3_RESTORE_INTERVAL_MINUTES=$2
+                shift
+            fi
             ;;
         -*)
             echo "Error: Unrecognized flag: $1"

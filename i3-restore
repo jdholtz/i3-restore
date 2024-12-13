@@ -2,7 +2,7 @@
 #
 # Restore the layout + programs from the previous saved i3 session
 
-set -e
+set -euo pipefail
 readonly IFS=$'\n\t'
 CURR_DIR="$(dirname "$0")"
 readonly CURR_DIR

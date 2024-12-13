@@ -2,11 +2,12 @@
 #
 # Save the layout + programs of the current i3 session
 
-set -e
+set -euo pipefail
 IFS=$'\n\t'
 
 CURR_DIR="$(dirname "$0")"
 I3_RESTORE_SAVE_SCRIPT="$CURR_DIR/programs/i3_save.py"
+readonly CURR_DIR I3_RESTORE_SAVE_SCRIPT
 
 # Import common variables and functions
 source "$CURR_DIR/utils/common.bash"
