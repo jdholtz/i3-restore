@@ -3,7 +3,6 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 import psutil
 
@@ -150,7 +149,7 @@ class Container:
             # Don't save the container if it fails to access all of its attributes
             self.command = None
 
-    def _get_pid(self) -> Optional[int]:
+    def _get_pid(self) -> int | None:
         """Get the PID of the current container"""
         try:
             pid_info = subprocess.check_output(

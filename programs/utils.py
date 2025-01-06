@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 import sys
-from typing import Any, Dict, List
+from typing import Any
 
 DEFAULT_LOG_FILE = "logs/i3-restore.log"
 
@@ -12,10 +12,10 @@ HOME = os.getenv("HOME")
 i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
 
 # Type alias for JSON
-JSON = Dict[str, Any]
+JSON = dict[str, Any]
 
 
-def get_workspaces() -> List[JSON]:
+def get_workspaces() -> list[JSON]:
     """
     Retrieve a list of all workspaces currently active along with their
     trees that contain all the containers on each workspace.

@@ -6,6 +6,10 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 ## Upcoming
 ### New Features
 - Official support for Python 3.13
+    - Support for Python 3.8 and below has been dropped
+
+### Upgrading
+- Python 3.9+ is now needed (previously Python 3.7+)
 
 
 ## 4.4 (2024-10-03)

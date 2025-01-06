@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -58,7 +58,7 @@ def test_read_config_returns_empty_config_when_file_is_not_found(mocker: MockerF
         {"enabled_plugins": []},
     ],
 )
-def test_parse_config_raises_exception_with_invalid_entries(config_content: Dict[str, Any]) -> None:
+def test_parse_config_raises_exception_with_invalid_entries(config_content: dict[str, Any]) -> None:
     test_config = config.Config()
 
     with pytest.raises(TypeError):
