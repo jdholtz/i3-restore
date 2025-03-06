@@ -17,11 +17,11 @@ following the conventions in this guide.
 It is highly recommended for you to use [pre-commit] to ensure you are following these conventions.
 
 ### Linting
-[Shellcheck] is used to lint the bash scripts and [Flake8] is used to lint the Python scripts. When validating your code
+[Shellcheck] is used to lint the bash scripts and [Ruff] (`ruff check`) is used to lint the Python scripts. When validating your code
 against these linters, use your best judgement to determine whether to fix the issue or disable the warning.
 
 ### Formatting
-[Shfmt] is used to format the bash scripts and [Black] is used to format the Python scripts. Using a common formatter
+[Shfmt] is used to format the bash scripts and [Ruff] (`ruff format`) is used to format the Python scripts. Using a common formatter
 ensures that the code looks the same throughout the project.
 
 It is also highly recommended to use an [EditorConfig] plugin for your code editor to maintain a consistent coding style for all project files.
@@ -29,7 +29,6 @@ It is also highly recommended to use an [EditorConfig] plugin for your code edit
 [Google's Shell Style Guide]: https://google.github.io/styleguide/shellguide.html
 [pre-commit]: https://pre-commit.com
 [Shellcheck]: https://www.shellcheck.net
-[Flake8]: https://flake8.pycqa.org/en/latest
+[Ruff]: https://docs.astral.sh/ruff/
 [Shfmt]: https://github.com/mvdan/sh
-[Black]: https://black.readthedocs.io/en/stable
 [EditorConfig]: https://editorconfig.org/

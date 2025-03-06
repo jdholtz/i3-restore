@@ -8,6 +8,9 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 - Official support for Python 3.13
     - Support for Python 3.8 and below has been dropped
 
+### Improvements
+- [Development] [Ruff](https://docs.astral.sh/ruff/) is now used to lint and format the project
+
 ### Upgrading
 - Python 3.9+ is now needed (previously Python 3.7+)
 
