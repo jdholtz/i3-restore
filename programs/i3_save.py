@@ -231,7 +231,7 @@ class Container:
         """
         # Prepending the current process is useful when the process is not a terminal (which can
         # happen when some plugins use it)
-        processes = [process] + process.children(True)
+        processes = [process, *process.children(True)]
 
         for child in reversed(processes):
             child_name = child.name()

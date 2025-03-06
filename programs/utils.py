@@ -3,13 +3,13 @@ import logging
 import os
 import subprocess
 import sys
-from typing import Any
+from typing import Any, ClassVar
 
 DEFAULT_LOG_FILE = "logs/i3-restore.log"
 
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
 HOME = os.getenv("HOME")
-i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")
+i3_PATH = os.getenv("i3_PATH", f"{HOME}/.config/i3")  # noqa: N816
 
 # Type alias for JSON
 JSON = dict[str, Any]
@@ -46,9 +46,9 @@ def get_tree() -> JSON:
 
 # Custom logging formatter to add prefixes to debug messages
 class Formatter(logging.Formatter):  # pragma: no cover
-    FORMATS = {logging.DEBUG: "+ %(message)s"}
+    FORMATS: ClassVar = {logging.DEBUG: "+ %(message)s"}
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         log_format = self.FORMATS.get(record.levelno, "")
         formatter = logging.Formatter(log_format)
         return formatter.format(record)

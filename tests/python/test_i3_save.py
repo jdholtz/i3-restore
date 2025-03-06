@@ -14,9 +14,6 @@ with mock.patch("utils.get_logger"):
 from programs import constants
 from programs.utils import JSON
 
-# This needs to be accessed to be tested
-# pylint: disable=protected-access
-
 WORKSPACE = """{
     "name": "test_workspace",
     "nodes": [
@@ -27,20 +24,14 @@ WORKSPACE = """{
     ]
 }"""
 
-
 I3_TREE = bytes(
-    """{
+    f"""{{
     "nodes": [
-        {},
-        {"nodes": [{"type": "con", "nodes": [%s]}, {"type": ""}]},
-        {"nodes": [{"type": "con", "nodes": [%s, %s]}]}
+        {{}},
+        {{ "nodes": [{{"type": "con", "nodes": [{WORKSPACE}]}} , {{"type": ""}}] }},
+        {{ "nodes": [{{"type": "con", "nodes": [{WORKSPACE}, {WORKSPACE} ]}}] }}
     ]
-}"""
-    % (
-        WORKSPACE,
-        WORKSPACE,
-        WORKSPACE,
-    ),
+}}""",
     encoding="utf-8",
 )
 
@@ -72,9 +63,9 @@ class TestWorkspace:
         assert len(workspace.containers) == 2
 
         handle = mock_open()
-        assert (
-            handle.write.call_args[0][0].count("[[ $1 ==") == 2
-        ), "Containers were not saved in the correct format"
+        assert handle.write.call_args[0][0].count("[[ $1 ==") == 2, (
+            "Containers were not saved in the correct format"
+        )
 
     def test_workspace_does_not_save_with_no_containers(self, mocker: MockerFixture) -> None:
         mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
@@ -168,7 +159,6 @@ class TestContainer:
         mocker.patch.object(
             i3_save.SUPPORTED_PLUGINS[constants.KITTY_CLASS],
             "main",
-            # pylint: disable-next=c-extension-no-member
             side_effect=i3_save.utils.PluginSaveError,
         )
         properties = {"window_properties": {"class": constants.KITTY_CLASS}, "window": 9999}
@@ -218,7 +208,6 @@ class TestContainer:
         mocker.patch.object(
             i3_save.SUPPORTED_PLUGINS[constants.KITTY_CLASS],
             "main",
-            # pylint: disable-next=c-extension-no-member
             side_effect=i3_save.utils.PluginSaveError,
         )
 

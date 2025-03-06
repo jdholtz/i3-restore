@@ -16,7 +16,7 @@ KITTY_PLUGIN_SCROLLBACK_OPTIONS = ["all", "screen", "none"]
 
 
 class Config:
-    def __init__(self):
+    def __init__(self) -> None:
         # Default values are set
         self.terminals = []
         self.subprocesses = []

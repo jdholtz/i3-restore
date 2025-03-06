@@ -1,10 +1,3 @@
-[tool.black]
-line-length = 100
-target-version = ['py312']
-
-[tool.isort]
-src_paths = ["programs"]
-
 [tool.coverage.run]
 branch = true
 omit = ["**/venv/*"]
@@ -24,3 +17,33 @@ exclude_lines = [
 [tool.pytest.ini_options]
 pythonpath = "programs"
 testpaths = "tests/python"
+
+[tool.ruff]
+line-length = 100
+src = [".", "programs"]
+
+[tool.ruff.lint]
+extend-select = [
+    "ANN",   # flake8-annotations
+    "ARG",   # flake8-unused-arguments
+    "E501",  # line-too-long
+    "FA",    # flake8-future-annotations
+    "G",     # flake8-logging-format
+    "I",     # isort
+    "N",     # pep8-naming
+    "PIE",   # flake8-pie
+    "PT",    # flake8-pytest-style
+    "RUF",   # Ruff-specific rules
+    "SLF",   # flake8-self
+    "TC",    # flake8-type-checking
+    "UP",    # pyupgrade
+]
+
+ignore = [
+    # Disable disallowing the Any type
+    "ANN401", # any-type
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Don't check private-member-access in test files
+"tests/*" = ["SLF001"]

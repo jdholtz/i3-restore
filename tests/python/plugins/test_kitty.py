@@ -94,7 +94,6 @@ def test_get_container_tree_retrieves_container_tree(mocker: MockerFixture) -> N
 
 def test_get_container_raises_plugin_save_error_when_command_fails(mocker: MockerFixture) -> None:
     mocker.patch("subprocess.check_output", side_effect=subprocess.CalledProcessError(None, None))
-    # pylint: disable-next=c-extension-no-member
     with pytest.raises(kitty.utils.PluginSaveError):
         kitty.get_container_tree("test-socket")
 
@@ -211,9 +210,9 @@ def test_create_session_file_gets_session_output_and_writes_to_file(
     session_file = kitty.create_session_file(container, KITTY_CONTAINER_TREE, plugin_config)
 
     handle = mock_open()
-    assert (
-        handle.write.call_args[0][0] == KITTY_CONTAINER_SESSION
-    ), "Kitty container session was not saved correctly"
+    assert handle.write.call_args[0][0] == KITTY_CONTAINER_SESSION, (
+        "Kitty container session was not saved correctly"
+    )
 
     assert session_file.name == "kitty-session-9999"
 

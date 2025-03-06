@@ -10,9 +10,6 @@ with mock.patch("utils.get_logger"):
 
 import constants
 
-# This needs to be accessed to be tested
-# pylint: disable=protected-access
-
 
 # Make sure we don't actually read the config file. The
 # mocks can still be overridden in each test

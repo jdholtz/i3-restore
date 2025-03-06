@@ -14,7 +14,6 @@ on:
       - "i3-restore"
       - "i3-save"
       - "pyproject.toml"
-      - "setup.cfg"
   pull_request:
     paths:
       - "**.bash"
@@ -25,7 +24,6 @@ on:
       - "i3-restore"
       - "i3-save"
       - "pyproject.toml"
-      - "setup.cfg"
 
 jobs:
   codespell:

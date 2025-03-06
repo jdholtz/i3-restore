@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import psutil
 
@@ -44,7 +44,7 @@ def get_container_tree(listen_socket: str) -> JSON:
     return json.loads(output)
 
 
-def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> Optional[Path]:
+def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> Path | None:
     """
     Save the scrollback for a Kitty window.
 
@@ -93,7 +93,7 @@ def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> O
 
 def get_window_subprocess_command(
     container: Container, window: JSON, plugin_config: JSON
-) -> Optional[str]:
+) -> str | None:
     """
     Create the subprocess command to restore any subprocesses in the current window. If a subprocess
     is running and is configured to be saved, it will be saved and restored. Otherwise, if the

@@ -30,7 +30,7 @@ def test_get_tree_retrieves_the_current_i3_tree(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.parametrize(
-    ["verbose_level", "log_level"], [(0, logging.ERROR), (1, logging.INFO), (2, logging.DEBUG)]
+    ("verbose_level", "log_level"), [(0, logging.ERROR), (1, logging.INFO), (2, logging.DEBUG)]
 )
 def test_get_logger_initializes_the_logger_correctly(
     mocker: MockerFixture, verbose_level: int, log_level: int
