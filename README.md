@@ -122,10 +122,10 @@ Similarly, you can also automatically restore your session upon starting i3. To 
 exec /path/to/i3-restore/i3-restore
 ```
 
-To automatically save your session on an interval, pass the `--interval` flag into the script. You can also configure how often
+To automatically save your session on an interval, pass the `--save-interval` flag into the script. You can also configure how often
 the save is triggered (it defaults to 10 minutes if no argument is passed in).
 ```
-exec /path/to/i3-restore/i3-restore --interval <minutes>
+exec /path/to/i3-restore/i3-restore --save-interval <minutes>
 ```
 **Note**: To restore web browsers correctly, you need to have their "Restore previous session" feature enabled
 

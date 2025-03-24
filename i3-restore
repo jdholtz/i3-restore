@@ -289,7 +289,7 @@ restore_workspaces() {
 
 #####################################
 # If the restore script is invoked with
-# --interval, initialize automatic saving.
+# --save-interval, initialize automatic saving.
 # Globals:
 #   I3_RESTORE_INTERVAL_MINUTES
 #####################################
