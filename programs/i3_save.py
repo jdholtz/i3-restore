@@ -246,17 +246,29 @@ class Container:
                 cmd_line = child.cmdline()
                 logger.debug("Subprocess command line: %s", cmd_line)
                 command, cmd_args = cmd_line[0], cmd_line[1:]
-                save_args = program.get("args", [])
+
+                include_args = program.get("include_args", [])
+                if not include_args:
+                    # Check for the use of the deprecated 'args' key
+                    include_args = program.get("args", [])
+
+                exclude_args = program.get("exclude_args", [])
 
                 # First, check if the subprocess includes the desired arguments
-                includes_save_arg = any(arg in cmd_args for arg in save_args)
-                if save_args and not includes_save_arg:
+                has_include_arg = any(arg in cmd_args for arg in include_args)
+                if include_args and not has_include_arg:
                     logger.info(
                         "Skipping saving subprocess as it doesn't include desired arguments"
                     )
-                    return
+                    continue
 
-                # Next, build the command
+                # Next, check if the subprocess includes any of the excluded arguments
+                has_exclude_arg = any(arg in cmd_args for arg in exclude_args)
+                if exclude_args and has_exclude_arg:
+                    logger.info("Skipping saving subprocess as it includes excluded arguments")
+                    continue
+
+                # Last, build the command
                 for arg in cmd_args:
                     command += " " + arg.replace(" ", r"\ ")
 

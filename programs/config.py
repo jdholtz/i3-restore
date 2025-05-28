@@ -55,6 +55,12 @@ class Config:
             if not isinstance(self.subprocesses, list):
                 raise TypeError("'subprocesses' must be a list")
 
+            # Check for deprecated 'args' keyword in subprocesses
+            # Will be removed the version after this change is released
+            for program in self.subprocesses:
+                if program.get("args") is not None:
+                    logger.error("Keyword 'args' is deprecated, use 'include_args' instead")
+
         if "terminals" in config:
             self.terminals = config["terminals"]
             logger.info("Terminals configuration: %s", self.terminals)

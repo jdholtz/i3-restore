@@ -7,12 +7,21 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 ### New Features
 - Official support for Python 3.13
     - Support for Python 3.8 and below has been dropped
+- The new `exclude_args` keyword is added to the subprocess configuration, allowing you to specify arguments that cannot be included
+in the subprocess command for it to be restored. See the [subprocess configuration](CONFIGURATION.md#subprocesses) for more
+information
+    - This is helpful, for example, when restoring Neovim as its lowest subprocess command runs a
+    server. Specifying `exclude_args: ["--embed"]` in the Neovim subprocess configuration will
+    ensure that Neovim is restored correctly (this example can be found in the [example configuration file](config.example.json))
+    - The old `args` keyword has been renamed to `include_args`
 
 ### Improvements
 - [Development] [Ruff](https://docs.astral.sh/ruff/) is now used to lint and format the project
 
 ### Upgrading
 - Python 3.9+ is now needed (previously Python 3.7+)
+- The `args` keyword in the subprocess configuration has been renamed to `include_args`. You should
+rename this, as it will be removed in the next version
 
 
 ## 4.4 (2024-10-03)

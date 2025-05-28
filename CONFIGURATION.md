@@ -68,9 +68,9 @@ Additionally, `{command}` can be used as a placeholder to inject the actual comm
 launch command. You might need to play around with this before putting it in your configuration file to make sure it performs
 exactly how you want it to. For examples, refer to the [example configuration file](config.example.json).
 
-To include more specific criteria to save the subprocess, you can use the `args` option in the configuration. Then, the subprocess
-would only be restored if it was launched with one of the arguments specified. For example, including the `"args": ["-i"]` configuration
-for the `sudo` subprocess would only restore the subprocess if it was launched with the `-i` flag.
+To include more specific criteria to save the subprocess, you can use the `include_args` and `exclude_args` options in the configuration:
+- `include_args`: the subprocess will only be restored if it was launched with one of the arguments specified. For example, including the `"include_args": ["-i"]` configuration for the `sudo` subprocess would only restore the subprocess if it was launched with the `-i` flag.
+- `exclude_args`: the subprocess will **not** be restored if it was launched with one of the arguments specified. For example, including the `"exclude_args": ["--embed"]` configuration for the `nvim` subprocess would only restore the subprocess if it was **not** launched with the `--embed` flag.
 
 Next, input the information into the `subprocesses` section of the configuration. Make sure the `subprocesses` section is
 a list that contains the configured terminals.
@@ -79,7 +79,8 @@ a list that contains the configured terminals.
   "subprocesses": [
     {
       "name": "<name>",
-      "args": ["<arg>", "<arg>"],
+      "include_args": ["<arg>", "<arg>"],
+      "exclude_args": ["<arg>", "<arg>"],
       "launch_command": "<launch command>"
     }
   ]
@@ -129,7 +130,7 @@ documentation before deciding on the values you put.
     }
 }
 ```
-**Note**: Replace `<listen_on value>` with the value you used for `listen_on` in your Kitty
+**Note**: Replace `<listen_on value>` with the value you use for `listen_on` in your Kitty
 configuration.
 
 #### Saving Scrollback

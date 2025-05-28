@@ -256,7 +256,24 @@ class TestContainer:
 
         assert container.subprocess_command == r"test_command and more!"
 
-    def test_check_if_subprocess_does_not_save_subprocess_without_necessary_args(
+    def test_check_if_subprocess_does_not_save_subprocess_without_include_args(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+
+        mock_process = mocker.patch("psutil.Process")
+        mock_process.cmdline.return_value = ["test_command", "--not-test-arg"]
+        mock_process.name.return_value = "subprocess"
+        mock_process.children.return_value = [mock_process]
+
+        i3_save.CONFIG.subprocesses = [{"name": "subprocess", "include_args": ["--test-arg"]}]
+
+        container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
+        container.check_if_subprocess(mock_process)
+
+        assert container.subprocess_command is None
+
+    def test_check_if_subprocess_does_not_save_subprocess_without_deprecated_args(
         self, mocker: MockerFixture
     ) -> None:
         mocker.patch("subprocess.check_output", return_value=b"1")
@@ -267,6 +284,23 @@ class TestContainer:
         mock_process.children.return_value = [mock_process]
 
         i3_save.CONFIG.subprocesses = [{"name": "subprocess", "args": ["--test-arg"]}]
+
+        container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
+        container.check_if_subprocess(mock_process)
+
+        assert container.subprocess_command is None
+
+    def test_check_if_subprocess_does_not_save_subprocess_with_exclude_args(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+
+        mock_process = mocker.patch("psutil.Process")
+        mock_process.cmdline.return_value = ["test_command", "--test-arg"]
+        mock_process.name.return_value = "subprocess"
+        mock_process.children.return_value = [mock_process]
+
+        i3_save.CONFIG.subprocesses = [{"name": "subprocess", "exclude_args": ["--test-arg"]}]
 
         container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
         container.check_if_subprocess(mock_process)

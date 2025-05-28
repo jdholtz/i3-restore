@@ -64,7 +64,7 @@ def test_parse_config_raises_exception_with_invalid_entries(config_content: dict
 
 def test_parse_config_sets_the_correct_config_values() -> None:
     json_config = {
-        "subprocesses": ["subprocess1", "subprocess2"],
+        "subprocesses": [{"name": "subprocess1"}, {"name": "subprocess2"}],
         "terminals": ["terminal1", "terminal2"],
         "web_browsers": ["browser1", "browser2"],
         "enabled_plugins": {
@@ -91,6 +91,20 @@ def test_parse_config_does_not_set_values_when_a_config_value_is_empty() -> None
     assert test_config.terminals == expected_config.terminals
     assert test_config.web_browsers == expected_config.web_browsers
     assert test_config.enabled_plugins == expected_config.enabled_plugins
+
+
+def test_parse_config_warns_about_deprecated_args_keyword(mocker: MockerFixture) -> None:
+    mock_logger = mocker.patch.object(config, "logger")
+
+    json_config = {
+        "subprocesses": [{"name": "subprocess1", "args": []}, {"name": "subprocess2"}],
+    }
+
+    test_config = config.Config()
+    test_config._parse_config(json_config)
+
+    mock_logger.error.assert_called_once()
+    assert test_config.subprocesses == json_config["subprocesses"]
 
 
 def test_parse_plugins_parses_only_supported_plugins() -> None:
