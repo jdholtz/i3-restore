@@ -33,5 +33,13 @@ body:
       description: A clear and concise description of what you expected to happen.
   - type: textarea
     attributes:
+      label: Relevant logs and program output
+      description: |
+        Please paste relevant output or logs here, such as logs from the save or restore giving you issues.
+        Additionally, the log file can be attached to this issue (found at `logs/i3-restore.log`).
+      placeholder: This will be automatically formatted into code, so no need for backticks.
+      render: sh
+  - type: textarea
+    attributes:
       label: Additional context
-      description: Add any other context about the problem here such as logs, relevant configuration, etc.
+      description: Add any other context about the problem here such as relevant configuration
