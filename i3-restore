@@ -4,25 +4,25 @@
 
 set -euo pipefail
 readonly IFS=$'\n\t'
-CURR_DIR="$(dirname "$0")"
-readonly CURR_DIR
+ROOT_DIR="$(dirname "$0")"
+readonly ROOT_DIR
 
 # Variables to control how quick restores are
 readonly SLEEP_BETWEEN_CONTAINERS=0.3
 readonly SLEEP_BEFORE_RELOADING=2
 
 # Import common variables and functions
-source "$CURR_DIR/utils/common.bash"
+source "$ROOT_DIR/utils/common.bash"
 
 # Handle errors
-source "$CURR_DIR/utils/error_handling.bash"
+source "$ROOT_DIR/utils/error_handling.bash"
 
 parse_flags "$@"
 
 # Start logger
-source "$CURR_DIR/utils/logs.bash"
+source "$ROOT_DIR/utils/logs.bash"
 
-source "$CURR_DIR/utils/automatic_saving.bash"
+source "$ROOT_DIR/utils/automatic_saving.bash"
 
 #####################################
 # Get all the window IDs on a workspace
@@ -36,7 +36,7 @@ get_window_ids_on_workspace() {
 
     # First, get the workspace tree from the i3 tree. Then, get the
     # window IDs that are not null and return those.
-    i3-msg -t get_tree |
+    i3-msg --type get_tree |
         jq --arg ws "$workspace_name" \
             'recurse(.nodes[]) |
              select(.name==$ws) |
@@ -291,7 +291,7 @@ restore_workspaces() {
 # If the restore script is invoked with
 # --save-interval, initialize automatic saving.
 # Globals:
-#   I3_RESTORE_INTERVAL_MINUTES
+#   I3_RESTORE_INTERVAL
 #####################################
 start_automatic_saving() {
     if [[ $I3_RESTORE_INTERVAL == 1 ]]; then

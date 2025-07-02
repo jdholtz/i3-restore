@@ -23,15 +23,14 @@ init_log() {
 # without the potential of them being erased.
 # Globals:
 #   I3_RESTORE_LOG_FILE
-#   LOG_DIR
-#   LOG_FILE_OLD
+#   I3_RESTORE_LOG_FILE_OLD
 #   LOG_FILE_SIZE
 #####################################
 rotate_log() {
     local current_log_size
     current_log_size="$(wc <"$I3_RESTORE_LOG_FILE" --lines)"
     if [[ $current_log_size -gt $LOG_FILE_SIZE ]]; then
-        cp "$I3_RESTORE_LOG_FILE" "$LOG_DIR/$LOG_FILE_OLD"
+        cp "$I3_RESTORE_LOG_FILE" "$I3_RESTORE_LOG_FILE_OLD"
         rm "$I3_RESTORE_LOG_FILE"
     fi
 }
@@ -49,7 +48,10 @@ log() {
     time="$(date +"%F %T")"
 
     echo -e "$time: $1" >>"$I3_RESTORE_LOG_FILE"
-    # Only log the message to stdout (not the time), if running in verbose mode
+
+    # Only log the message to stderr (not the time), if running in verbose mode
+    # We need to log to stderr and not stdout, so that it isn't the output of this function, but
+    # rather printed to the terminal
     [[ $I3_RESTORE_VERBOSE -ge 1 ]] && echo -e "$1" >&2 || return 0
 }
 

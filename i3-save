@@ -5,21 +5,21 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-CURR_DIR="$(dirname "$0")"
-I3_RESTORE_SAVE_SCRIPT="$CURR_DIR/programs/i3_save.py"
-readonly CURR_DIR I3_RESTORE_SAVE_SCRIPT
+ROOT_DIR="$(dirname "$0")"
+I3_RESTORE_SAVE_SCRIPT="$ROOT_DIR/programs/i3_save.py"
+readonly ROOT_DIR I3_RESTORE_SAVE_SCRIPT
 
 # Import common variables and functions
-source "$CURR_DIR/utils/common.bash"
+source "$ROOT_DIR/utils/common.bash"
 
 # Handle errors
-source "$CURR_DIR/utils/error_handling.bash"
+source "$ROOT_DIR/utils/error_handling.bash"
 
 parse_flags "$@"
 check_dependencies
 
 # Start logger
-source "$CURR_DIR/utils/logs.bash"
+source "$ROOT_DIR/utils/logs.bash"
 rotate_log
 
 #####################################
@@ -41,7 +41,7 @@ rotate_log
 #####################################
 get_workspaces() {
     # Match only the workspace name and the output it is on
-    i3-msg --type get_workspaces | jq -r '.[] | .name, .output'
+    i3-msg --type get_workspaces | jq --raw-output '.[] | .name, .output'
 }
 
 #####################################

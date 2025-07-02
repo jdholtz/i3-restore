@@ -40,11 +40,14 @@ get_sleep_time() {
 # is still running. Otherwise, i3-msg
 # will fail to connect even when a new
 # i3 process is started.
+#
+# If the original i3 process is not alive,
+# the script will exit.
 # Arguments:
 #   Original i3 PID
 #####################################
 check_i3_alive() {
-    if ! ps -p "$1" | grep "i3" >/dev/null; then
+    if ! ps --pid "$1" | grep --quiet "i3"; then
         local message="Original i3 process is not alive anymore. "
         message+="Exiting automatic scheduling"
         log "$message"
