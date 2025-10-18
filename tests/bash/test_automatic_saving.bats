@@ -12,7 +12,7 @@ setup() {
     source "$AUTO_SAVING_FILE"
 
     # Don't log output by default
-    # shellcheck disable=SC2317
+    # shellcheck disable=SC2329
     log() { :; }
 }
 
@@ -35,7 +35,7 @@ setup() {
 }
 
 @test "check_i3_alive: i3 process alive" {
-    # shellcheck disable=SC2317
+    # shellcheck disable=SC2329
     ps() {
         # Only override the parameters we are using in check_dependencies
         if [[ $1 == "--pid" ]] && [[ $2 == 123 ]]; then
@@ -47,7 +47,7 @@ setup() {
     }
 
     # We need to inspect log output to see if the function behaves correctly
-    # shellcheck disable=SC2317
+    # shellcheck disable=SC2329
     log() {
         echo "LOG: $*"
     }
@@ -60,7 +60,6 @@ setup() {
 }
 
 @test "check_i3_alive: i3 process dead exits with 0" {
-    # shellcheck disable=SC2317
     ps() {
         if [[ $1 == "--pid" ]] && [[ $2 == 123 ]]; then
             echo "PID TTY          TIME CMD"
@@ -70,7 +69,6 @@ setup() {
     }
 
     # We need to inspect log output to see if the function behaves correctly
-    # shellcheck disable=SC2317
     log() {
         echo "LOG: $*"
     }

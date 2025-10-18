@@ -12,7 +12,7 @@ setup() {
     ROOT_DIR="$(temp_make)"
     echo "$VERSION" >"$ROOT_DIR/VERSION"
 
-    # Now, load the functions that will be tested
+    # Load the functions that will be tested
     # shellcheck disable=SC1090
     source "$COMMON_FILE"
 }
@@ -34,7 +34,7 @@ check_dependencies_mocks() {
         builtin command "$@"
     }
 
-    # shellcheck disable=SC2317
+    # shellcheck disable=SC2329
     i3-save-tree() { echo "valid tree"; }
 }
 
@@ -59,7 +59,7 @@ check_dependencies_mocks() {
 }
 
 @test "parse_flags: help flags trigger usage" {
-    # shellcheck disable=SC2317
+    # shellcheck disable=SC2329
     usage() { echo "USAGE_CALLED"; }
 
     run parse_flags --help
@@ -121,7 +121,7 @@ check_dependencies_mocks() {
 @test "check_dependencies: missing jq triggers error" {
     check_dependencies_mocks
 
-    # shellcheck disable=SC2317
+    # shellcheck disable=SC2329
     command() {
         # Only override the parameters we are using in check_dependencies
         if [[ $1 == "-v" ]]; then
@@ -144,7 +144,7 @@ check_dependencies_mocks() {
 @test "check_dependencies: missing xdotool triggers error" {
     check_dependencies_mocks
 
-    # shellcheck disable=SC2317
+    # shellcheck disable=SC2329
     command() {
         # Only override the parameters we are using in check_dependencies
         if [[ $1 == "-v" ]]; then

@@ -13,8 +13,8 @@ setup() {
     export I3_RESTORE_LOG_FILE_OLD="$LOG_DIR/test_i3_restore_old.log"
     export LOG_FILE_SIZE=5
 
+    # shellcheck disable=SC2329
     version() {
-        # shellcheck disable=SC2317
         echo "$VERSION"
     }
 
@@ -24,7 +24,7 @@ setup() {
 }
 
 teardown() {
-    rm -rf "$TEST_DIR"
+    temp_del "$TEST_DIR"
 }
 
 @test "init_log: sets up logs correctly" {
