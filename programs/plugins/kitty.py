@@ -131,7 +131,7 @@ def get_window_launch_command(container: Container, window: JSON, plugin_config:
     running in it, and its scrollback (if configured to do so). The scrollback will be restored
     as a subprocess.
     """
-    launch_command = f"launch --cwd={window['cwd']}"
+    launch_command = f'launch --cwd="{window["cwd"]}"'
     subprocess_command = get_window_subprocess_command(container, window, plugin_config)
     if subprocess_command:
         launch_command += " " + subprocess_command

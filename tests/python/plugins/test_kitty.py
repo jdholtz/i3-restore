@@ -59,11 +59,11 @@ KITTY_CONTAINER_TREE = [
 KITTY_CONTAINER_SESSION = """new_tab
 layout fat
 focus
-launch --cwd=/home/test /bin/bash -c 'subprocess'
+launch --cwd="/home/test" /bin/bash -c 'subprocess'
 new_tab
 layout tall
-launch --cwd=/home bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-2" && bash'
-launch --cwd=/ bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-3" && bash'
+launch --cwd="/home" bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-2" && bash'
+launch --cwd="/" bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-3" && bash'
 """
 
 

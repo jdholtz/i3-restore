@@ -18,6 +18,9 @@ information
 ### Improvements
 - [Development] [Ruff](https://docs.astral.sh/ruff/) is now used to lint and format the project
 
+### Bug Fixes
+- Fix restoring Kitty sessions when the working directory contains spaces
+
 ### Upgrading
 - Python 3.9+ is now needed (previously Python 3.7+)
 - The `args` keyword in the subprocess configuration has been renamed to `include_args`. You should
