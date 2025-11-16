@@ -169,6 +169,34 @@ mock_i3_msg_restore_layout() {
     }
 }
 
+# Create an i3-msg script mock for kill_empty_containers tests. The deleted container IDs
+# are logged to the provided file. The PATH is modified to use this mock for i3-msg calls.
+create_i3_msg_script_mock() {
+    local deleted_containers_log="$1"
+
+    # Save the original i3-msg function (the global mock) so we can call it in our mock
+    eval "$(declare -f i3-msg | sed 's/^i3-msg/original_i3-msg/')"
+
+    local test_bin="$TEST_DIR/bin"
+    mkdir -p "$test_bin"
+    PATH="$test_bin:$PATH"
+
+    cat >"$test_bin/i3-msg" <<EOF
+#!/bin/bash
+if [[ \$2 == "kill" ]]; then
+    container_id="\$1"
+    container_id="\${container_id#*=}"  # Remove [id= prefix
+    container_id="\${container_id%]}"   # Remove trailing ]
+    echo "\$container_id" >> "$deleted_containers_log"
+    exit 0
+fi
+
+# Call the original i3-msg mock
+original_i3-msg "$@"
+EOF
+    chmod +x "$test_bin/i3-msg"
+}
+
 # Mock i3-msg for restore_browsers tests. The arguments are the expected browsers file and a variable name
 # to track if i3-msg was called to execute the browsers file.
 mock_i3_msg_exec_browsers() {
@@ -351,27 +379,7 @@ mock_i3_msg_exec_browsers() {
 
 @test "kill_empty_containers: recursively kills empty containers" {
     local deleted_containers_log="$TEST_DIR/deleted_containers.log"
-
-    # Save the original i3-msg function (the global mock) so we can call it in our mock
-    eval "$(declare -f i3-msg | sed 's/^i3-msg/original_i3-msg/')"
-
-    # Create an i3-msg mock in the path as xargs calls files, not functions we define
-    local test_bin="$TEST_DIR/bin"
-    mkdir -p "$test_bin"
-    PATH="$test_bin:$PATH"
-    cat >"$test_bin/i3-msg" <<EOF
-if [[ \$2 == "kill" ]]; then
-    container_id="\$1"
-    container_id="\${container_id#*=}"  # Remove [id= prefix
-    container_id="\${container_id%]}"   # Remove trailing ]
-    echo "\$container_id" >> "$deleted_containers_log"
-    exit 0
-fi
-
-# Call the original i3-msg mock
-original_i3-msg "$@"
-EOF
-    chmod +x "$test_bin/i3-msg"
+    create_i3_msg_script_mock "$deleted_containers_log"
 
     run kill_empty_containers
 
@@ -408,7 +416,7 @@ EOF
     assert_equal "$i3_msg_called" 1
 }
 
-@test "restore_workspaces: restores workspace layouts, programs and browsers" {
+@test "restore_workspaces: restores workspace layouts, programs, and browsers and cleans up" {
     local workspace_names=("Workspace 1" "Workspace 2")
     local display="HDMI-1"
     local programs_files=()
@@ -421,6 +429,9 @@ EOF
 
     local browsers_file="$i3_PATH/web_browsers.sh"
     touch "$browsers_file"
+
+    local deleted_containers_log="$TEST_DIR/deleted_containers.log"
+    create_i3_msg_script_mock "$deleted_containers_log"
 
     # Mock the underlying xdotool calls to unmap and map the windows
     local xdotool_unmap_calls=0
@@ -470,6 +481,9 @@ EOF
 
     # Ensure the browsers were restored
     assert_equal "$i3_msg_called" 1
+
+    # Ensure the empty containers were killed
+    assert_equal "$(cat "$deleted_containers_log")" $'203\n201\n202'
 }
 
 @test "start_automatic_saving: does nothing when interval disabled" {
