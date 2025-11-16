@@ -12,10 +12,10 @@ terminal has a plugin to restore tabs, windows, and scrollback. Pull Requests ar
     * [Dependencies](#dependencies)
 - [Upgrading](#upgrading)
 - [Configuring](#configuring)
-- [Automating The Script](#automating-the-script)
+- [Automating the Script](#automating-the-script)
     * [Saving](#saving)
     * [Restoring](#restoring)
-    * [Restoring Programs In Assigned Workspaces](#restoring-programs-in-assigned-workspaces)
+    * [Restoring Programs in Assigned Workspaces](#restoring-programs-in-assigned-workspaces)
 - [Limitations](#limitations)
 - [Similar Software](#similar-software)
     * [i3-resurrect](#i3-resurrect)
@@ -95,7 +95,7 @@ To use the default configuration file, copy `config.example.json` to `config.jso
 
 For information on how to set up the configuration for your needs, see [Configuration.md](CONFIGURATION.md)
 
-## Automating The Script
+## Automating the Script
 i3-restore can be automatically triggered every time i3 stops and starts. This is useful if you want to automatically restore
 your session after a restart or logging out. You can also configure the script to save your session on an interval to ensure
 you don't lose your current session layout if `i3-save` wasn't triggered.
@@ -129,7 +129,7 @@ exec /path/to/i3-restore/i3-restore --save-interval <minutes>
 ```
 **Note**: To restore web browsers correctly, you need to have their "Restore previous session" feature enabled
 
-### Restoring Programs In Assigned Workspaces
+### Restoring Programs in Assigned Workspaces
 Some programs that take a few seconds to start (such as Discord) might not restore on the correct workspace. To mitigate this issue, simply use
 the [assign][assign workspace] function in i3 and add it to your i3 configuration file.
 

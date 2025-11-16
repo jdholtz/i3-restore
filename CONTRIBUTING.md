@@ -6,9 +6,16 @@ Please submit all changes to the `develop` branch. This allows for separation be
 pull request, make sure to add the change/feature to the [Upcoming](CHANGELOG.md#upcoming) section of the changelog with a reference to the
 pull request (this can be done after submitting the PR or separately by me).
 
-## Adding To The Configuration
+## Adding to the Configuration
 Adding/modifying the configuration file is highly encouraged to increase i3-restore's compatibility with common software. Simply add
 your desired programs to the [config.example.json](config.example.json), test it, and submit a PR!
+
+## Testing
+This project uses [Pytest] for Python unit testing and [Bats] for Bash unit testing. When
+adding/modifying the code, you may need to add a new test or modify an existing test.
+
+The goal of these tests is to provide 100% code coverage (only measured for the Python tests) to increase the reliability of existing
+features and smoothly integrate new ones into the project. To learn about running tests for **i3-restore**, visit the [Testing README](tests/README.md).
 
 ## Coding Conventions
 This project follows [Google's Shell Style Guide]. Please use your best judgement when
@@ -26,6 +33,8 @@ ensures that the code looks the same throughout the project.
 
 It is also highly recommended to use an [EditorConfig] plugin for your code editor to maintain a consistent coding style for all project files.
 
+[Pytest]: https://docs.pytest.org
+[Bats]: https://github.com/bats-core/bats-core
 [Google's Shell Style Guide]: https://google.github.io/styleguide/shellguide.html
 [pre-commit]: https://pre-commit.com
 [Shellcheck]: https://www.shellcheck.net
