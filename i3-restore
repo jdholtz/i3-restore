@@ -75,10 +75,6 @@ restore_programs() {
 
     log "Restoring programs for Workspace $workspace_name"
 
-    # Focus on the workspace. It should already be foucsed
-    # from appending the layout, but this is here as a safety
-    i3-msg --quiet "workspace --no-auto-back-and-forth $workspace_name"
-
     # Make the file executable and all subprocess programs in the same workspace
     chmod +x "$file"
     chmod +x "$i3_PATH"/workspace_"$sanitized_ws_name"_subprocess_*.sh 2>/dev/null
@@ -91,8 +87,10 @@ restore_programs() {
     # Execute one container at a time to ensure each one is reliably
     # restored in the correct order
     for ((i = 0; i < "$num_containers"; i++)); do
-        # Execute the i-th line in the script
-        i3-msg --quiet exec "$file" "$i"
+        # Execute the i-th line in the script. Focus on the workspace name before to make sure the
+        # program opens in the correct workspace (it is less reliable to do a single focus before
+        # executing each container)
+        i3-msg --quiet "workspace --no-auto-back-and-forth $workspace_name; exec $file $i"
         sleep "$SLEEP_BETWEEN_CONTAINERS"
     done
 

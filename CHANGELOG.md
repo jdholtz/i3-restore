@@ -3,6 +3,12 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
+## Upcoming
+### Improvements
+- Improve restoring more. Specifically, even when programs don't get swallowed correctly, they will
+still be restored to their correct workspace
+
+
 ## 5.0 (2025-11-16)
 ### New Features
 - Official support for Python 3.13 and 3.14

@@ -112,11 +112,16 @@ mock_i3_msg_restore_programs() {
 
     # shellcheck disable=SC2329
     i3-msg() {
-        if [[ $1 == "--quiet" && $2 == "exec" ]]; then
-            local container_num file num_program_calls workspace_name
+        if [[ $1 == "--quiet" && $2 == *" exec "* ]]; then
+            local after_exec container_num file num_program_calls workspace_name
 
-            file="$3"
-            container_num="$4"
+            # Extract the program file and container number from the exec command
+            after_exec="${2#*exec }"
+            # The last part is the container number
+            container_num="${after_exec##* }"
+            # Everything before the container number is the file
+            file="${after_exec% "$container_num"}"
+
             # Match any of the programs files we expect
             if ! grep -Fxq -- "$file" <<<"$programs_files"; then
                 echo "Unexpected i3-msg exec call: $*"
