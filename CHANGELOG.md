@@ -3,7 +3,7 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
-## Upcoming
+## 5.0 (2025-11-16)
 ### New Features
 - Official support for Python 3.13 and 3.14
     - Support for Python 3.9 and below has been dropped
@@ -17,8 +17,8 @@ information
 
 ### Improvements
 - [Development] [Ruff](https://docs.astral.sh/ruff/) is now used to lint and format the project
-- Unit tests for the Bash scripts have been added using [Bats](https://github.com/bats-core/bats-core)
-[#29](https://github.com/jdholtz/i3-restore/pull/29)
+- [Development] Unit tests for the Bash scripts have been added using [Bats](https://github.com/bats-core/bats-core)
+([#29](https://github.com/jdholtz/i3-restore/pull/29))
 
 ### Bug Fixes
 - Fix restoring Kitty sessions when the working directory contains spaces
