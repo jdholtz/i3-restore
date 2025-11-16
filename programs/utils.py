@@ -5,7 +5,7 @@ import subprocess
 import sys
 from typing import Any, ClassVar
 
-DEFAULT_LOG_FILE = "logs/i3-restore.log"
+import constants
 
 # Get path where layouts were saved. Sets a default if the environment variable isn't set
 HOME = os.getenv("HOME")
@@ -56,7 +56,7 @@ class Formatter(logging.Formatter):  # pragma: no cover
 
 def get_logger() -> logging.RootLogger:
     project_dir = os.path.dirname(os.path.dirname(__file__))
-    log_file = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/{DEFAULT_LOG_FILE}")
+    log_file = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/{constants.DEFAULT_LOG_FILE}")
 
     logger = logging.getLogger("i3-restore")
     logger.handlers = []  # Ensure there are no handlers before adding our own

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import psutil
 
+import constants
 import utils
 
 if TYPE_CHECKING:
@@ -14,8 +15,6 @@ if TYPE_CHECKING:
 
 
 logger = utils.get_logger()
-
-KITTY_SCROLLBACK_ACTION_OPTIONS = ["all", "screen"]
 
 
 def get_listen_socket(listen_socket: str, pid: int) -> None:
@@ -57,7 +56,7 @@ def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> P
     scrollback_file = Path(utils.i3_PATH) / f"kitty-scrollback-{os_window_id}-{window_id}"
 
     scrollback_extent = plugin_config["scrollback"]
-    if scrollback_extent not in KITTY_SCROLLBACK_ACTION_OPTIONS:
+    if scrollback_extent not in constants.KITTY_SCROLLBACK_ACTION_OPTIONS:
         logger.debug("Skipping saving scrollback due to value being '%s'", scrollback_extent)
         return None
 

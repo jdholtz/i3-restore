@@ -5,14 +5,10 @@ import sys
 import constants
 import utils
 
-CONFIG_FILE_NAME = "config.json"
-
 # Type alias for JSON
 JSON = utils.JSON
 
 logger = utils.get_logger()
-
-KITTY_PLUGIN_SCROLLBACK_OPTIONS = ["all", "screen", "none"]
 
 
 class Config:
@@ -35,7 +31,7 @@ class Config:
 
     def _read_config(self) -> JSON:
         project_dir = os.path.dirname(os.path.dirname(__file__))
-        config_file = project_dir + "/" + CONFIG_FILE_NAME
+        config_file = project_dir + "/" + constants.CONFIG_FILE_NAME
 
         try:
             with open(config_file) as file:
@@ -109,9 +105,10 @@ def parse_kitty_plugin(plugin: JSON) -> JSON:
         "scrollback": plugin.get("scrollback", "none"),
     }
 
-    if plugin_config["scrollback"] not in KITTY_PLUGIN_SCROLLBACK_OPTIONS:
+    if plugin_config["scrollback"] not in constants.KITTY_PLUGIN_SCROLLBACK_OPTIONS:
         raise TypeError(
-            f"kitty plugin: 'scrollback' must be one of: {KITTY_PLUGIN_SCROLLBACK_OPTIONS}"
+            "kitty plugin: 'scrollback' must be one of: "
+            f"{constants.KITTY_PLUGIN_SCROLLBACK_OPTIONS}"
         )
 
     return plugin_config
