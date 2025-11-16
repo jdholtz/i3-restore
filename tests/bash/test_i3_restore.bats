@@ -132,7 +132,7 @@ mock_i3_msg_restore_programs() {
 
             # Correlate the container number only with the workspace name (to handle multiple workspaces)
             num_program_calls=$(grep -c "^$workspace_name" "$program_calls_file")
-            if [[ "$container_num" != "$num_program_calls" ]]; then
+            if [[ $container_num != "$num_program_calls" ]]; then
                 echo "Expected container number $num_program_calls, got $container_num"
                 return 1
             fi
@@ -250,7 +250,7 @@ mock_i3_msg_exec_browsers() {
     unmap_windows "$window_ids"
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     # Convert the IDs collected back to a newline-separated string for comparison
     assert_equal "$(printf '%s\n' "${xdotool_unmap_ids[@]}")" "$window_ids"
@@ -274,7 +274,7 @@ mock_i3_msg_exec_browsers() {
     map_windows "$window_ids"
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     # Convert the IDs collected back to a newline-separated string for comparison
     assert_equal "$(printf '%s\n' "${xdotool_map_ids[@]}")" "$window_ids"
@@ -293,7 +293,7 @@ mock_i3_msg_exec_browsers() {
     restore_layout "$layout_file" "$workspace_name" "$display"
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     assert_equal "$move_workspace_calls" 1
     assert_equal "$append_layout_calls" 1
@@ -336,7 +336,7 @@ mock_i3_msg_exec_browsers() {
     restore_workspace "$layout_file"
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     check_restore_programs_files "$workspace_name"
     # Ensure the programs were started
@@ -388,7 +388,7 @@ EOF
     restore_browsers
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     assert_equal "$i3_msg_called" 0
 }
@@ -403,7 +403,7 @@ EOF
     restore_browsers
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     assert_equal "$i3_msg_called" 1
 }
@@ -454,7 +454,7 @@ EOF
     restore_workspaces "$display"
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     for workspace_name in "${workspace_names[@]}"; do
         check_restore_programs_files "$workspace_name"
@@ -485,7 +485,7 @@ EOF
     start_automatic_saving
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     assert_equal "$start_save_interval_calls" 0
 }
@@ -504,7 +504,7 @@ EOF
     start_automatic_saving
 
     local status=$?
-    [[ "$status" -eq 0 ]] || fail "Expected success, got $status"
+    [[ $status -eq 0 ]] || fail "Expected success, got $status"
 
     assert_equal "$start_save_interval_calls" 1
 }
