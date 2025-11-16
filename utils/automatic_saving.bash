@@ -9,8 +9,8 @@ readonly I3_RESTORE_SAVE_FILE DEFAULT_INTERVAL_TIME
 #####################################
 # Get the sleep time (in seconds) from the
 # argument. If the argument is not a number,
-# 0, or not provided, the default time will be
-# returned
+# is 0, or is not provided, the default time
+# will be returned
 # Globals:
 #   DEFAULT_INTERVAL_TIME
 # Arguments:
@@ -22,7 +22,8 @@ get_sleep_time() {
     local sleep_time message
     sleep_time="$1"
 
-    if ! [[ $sleep_time =~ ^[0-9]+$ ]] || [[ $sleep_time == 0 ]]; then
+    if ! [[ $sleep_time =~ ^[1-9][0-9]*$ ]]; then
+        # sleep_time is not a positive integer
         message="Sleep time not passed in (or is invalid). Using "
         message+="default time of $DEFAULT_INTERVAL_TIME minutes"
         log "$message"
