@@ -5,22 +5,26 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-CURR_DIR="$(dirname "$0")"
-I3_RESTORE_SAVE_SCRIPT="$CURR_DIR/programs/i3_save.py"
-readonly CURR_DIR I3_RESTORE_SAVE_SCRIPT
+# A custom root directory should only be set for testing purposes
+ROOT_DIR="${ROOT_DIR:-$(dirname "$0")}"
+I3_RESTORE_SAVE_SCRIPT="$ROOT_DIR/programs/i3_save.py"
+readonly ROOT_DIR I3_RESTORE_SAVE_SCRIPT
 
 # Import common variables and functions
-source "$CURR_DIR/utils/common.bash"
+source "$ROOT_DIR/utils/common.bash"
 
 # Handle errors
-source "$CURR_DIR/utils/error_handling.bash"
+source "$ROOT_DIR/utils/error_handling.bash"
 
-parse_flags "$@"
-check_dependencies
+# Don't run if the script is sourced (such as for testing)
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
+    parse_flags "$@"
+    check_dependencies
+fi
 
 # Start logger
-source "$CURR_DIR/utils/logs.bash"
-rotate_log
+source "$ROOT_DIR/utils/logs.bash"
+[[ ${BASH_SOURCE[0]} == "${0}" ]] && rotate_log
 
 #####################################
 # Get the names of all workspaces currently used and
@@ -41,7 +45,7 @@ rotate_log
 #####################################
 get_workspaces() {
     # Match only the workspace name and the output it is on
-    i3-msg --type get_workspaces | jq -r '.[] | .name, .output'
+    i3-msg --type get_workspaces | jq --raw-output '.[] | .name, .output'
 }
 
 #####################################
@@ -137,7 +141,10 @@ save_workspace_programs() {
         error "An error occurred saving the session's programs. View the logs for more details" 1
 }
 
-log "Saving current i3wm session"
-save_workspace_layouts
-save_workspace_programs
-log "Finished saving current i3wm session"
+# Don't run if the script is sourced (such as for testing)
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
+    log "Saving current i3wm session"
+    save_workspace_layouts
+    save_workspace_programs
+    log "Finished saving current i3wm session"
+fi

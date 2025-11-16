@@ -1,0 +1,106 @@
+{
+  "type": "root",
+  "name": "root",
+  "window": null,
+  "nodes": [
+    {
+      "type": "output",
+      "name": "HDMI-1",
+      "window": null,
+      "nodes": [
+        {
+          "type": "con",
+          "name": "content",
+          "window": null,
+          "nodes": [
+            {
+              "type": "workspace",
+              "name": "Workspace 1",
+              "window": null,
+              "nodes": [
+                {
+                  "type": "con",
+                  "name": null,
+                  "window": null,
+                  "nodes": [
+                    {
+                      "type": "con",
+                      "name": "Terminal 1",
+                      "window": 101,
+                      "nodes": [],
+                      "swallows": []
+                    },
+                    {
+                      "type": "con",
+                      "name": "Terminal 2",
+                      "window": 102,
+                      "nodes": [],
+                      "swallows": []
+                    },
+                    {
+                      "type": "con",
+                      "name": null,
+                      "window": null,
+                      "nodes": [
+                        {
+                          "type": "con",
+                          "name": "Empty 1",
+                          "window": 201,
+                          "nodes": [],
+                          "swallows": [
+                            {
+                                "class": "Empty"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "con",
+                          "name": "Empty 2",
+                          "window": 202,
+                          "nodes": [],
+                          "swallows": [
+                            {
+                                "class": "Empty"
+                            }
+                          ]
+                        }
+                      ],
+                      "swallows": []
+                    }
+                  ],
+                  "swallows": []
+                }
+              ]
+            },
+            {
+              "type": "workspace",
+              "name": "Workspace 2",
+              "window": null,
+              "nodes": [
+                {
+                  "type": "con",
+                  "name": "Browser",
+                  "window": 33554435,
+                  "nodes": [],
+                  "swallows": []
+                },
+                {
+                  "type": "con",
+                  "name": "Empty 3",
+                  "window": 203,
+                  "nodes": [],
+                  "swallows": [
+                    {
+                        "class": "Empty"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "swallows": []
+        }
+      ]
+    }
+  ]
+}

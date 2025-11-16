@@ -8,7 +8,7 @@ trap 'error "An unknown error occurred. Run ${0##*/} manually to see the error" 
 # Displays an error using i3-nagbar
 # Arguments:
 #   Error message
-#   Boolean to add button to view logs (Optional)
+#   Add button to view logs (Optional, specify any non-empty value)
 #####################################
 error() {
     local args=("-m" "i3-restore: $1" "-t error")
