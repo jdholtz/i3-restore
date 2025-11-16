@@ -1,0 +1,30 @@
+name: Run unit tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - "i3-restore"
+      - "i3-save"
+      - "**.bash"
+      - "tests/bash/**"
+      - ".github/workflows/bash-tests.yml"
+  pull_request:
+    paths:
+      - "i3-restore"
+      - "i3-save"
+      - "**.bash"
+      - "tests/bash/**"
+      - ".github/workflows/bash-tests.yml"
+
+jobs:
+  bash-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run Bats unit tests
+        run: ./tests/bash/bats-core/bin/bats tests/bash
