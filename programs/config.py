@@ -82,6 +82,8 @@ class Config:
     def _parse_plugins(self, plugins: JSON) -> JSON:
         # Available plugin parsers. The key is the plugin name and the value is the
         # function used to parse the plugin.
+        # The plugin name is the same as the program's class name in i3 which is how the script
+        # knows which plugin to use for which program.
         plugin_parsers = {constants.KITTY_CLASS: parse_kitty_plugin}
 
         parsed_plugins = {}

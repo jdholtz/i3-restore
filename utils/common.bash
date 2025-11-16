@@ -15,6 +15,7 @@ readonly LOG_DIR I3_RESTORE_LOG_FILE I3_RESTORE_LOG_FILE_OLD LOG_FILE_SIZE
 # Set default if not configured
 i3_PATH="${i3_PATH:=$HOME/.config/i3}"
 readonly i3_PATH
+mkdir --parents "$i3_PATH"
 
 #####################################
 # Display the script's version

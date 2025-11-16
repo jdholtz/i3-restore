@@ -127,7 +127,6 @@ mock_i3_msg_restore_programs() {
             workspace_name="$(basename "$file")"
             workspace_name="${workspace_name#*_}"
             workspace_name="${workspace_name%_*}"
-            workspace_name="${workspace_name%_*}"
             workspace_name="${workspace_name//\{space\}/ }"
 
             # Correlate the container number only with the workspace name (to handle multiple workspaces)
@@ -224,7 +223,7 @@ mock_i3_msg_exec_browsers() {
 }
 
 @test "get_window_ids_on_workspace: gets window IDs on workspace" {
-    run get_window_ids_on_workspace "Workspace 1"
+    run get_window_ids_on_workspace "Workspace_1"
     assert_success
     assert_output $'101\n102\n201\n202'
 }
@@ -240,8 +239,8 @@ mock_i3_msg_exec_browsers() {
     # are executable (the subprocess scripts are called in the programs file, so we don't test
     # their restoration here)
 
-    local workspace_name="Workspace 1"
-    local programs_file="$i3_PATH/workspace_Workspace{space}1_programs.sh"
+    local workspace_name="Workspace_1"
+    local programs_file="$i3_PATH/workspace_Workspace_1_programs.sh"
 
     create_restore_programs_files "$workspace_name"
 
@@ -256,7 +255,8 @@ mock_i3_msg_exec_browsers() {
     # Ensure both programs were started
     assert_equal "$(wc --lines <"$program_calls_file")" 2
 
-    # Ensure the correct window IDs were returned (the 2 newly started programs)
+    # Ensure the correct window IDs were returned (the 2 newly started programs and the 2 windows
+    # with no programs)
     assert_output $'101\n102\n201\n202'
 }
 
@@ -328,10 +328,10 @@ mock_i3_msg_exec_browsers() {
 }
 
 @test "restore_workspace: restores programs, layout, and remaps windows" {
-    local workspace_name="Workspace 1"
+    local workspace_name="Workspace_1"
     local display="HDMI-1"
-    local layout_file="$i3_PATH/workspace_Workspace 1_${display}_layout.json"
-    local programs_file="$i3_PATH/workspace_Workspace{space}1_programs.sh"
+    local layout_file="$i3_PATH/workspace_Workspace_1_${display}_layout.json"
+    local programs_file="$i3_PATH/workspace_Workspace_1_programs.sh"
 
     create_restore_programs_files "$workspace_name"
 
@@ -417,7 +417,7 @@ mock_i3_msg_exec_browsers() {
 }
 
 @test "restore_workspaces: restores workspace layouts, programs, and browsers and cleans up" {
-    local workspace_names=("Workspace 1" "Workspace 2")
+    local workspace_names=("Workspace_1" "Workspace 2")
     local display="HDMI-1"
     local programs_files=()
 
@@ -474,8 +474,8 @@ mock_i3_msg_exec_browsers() {
 
     # Ensure the expected underlying calls were made to restore the layouts and programs on each
     # workspace
-    assert_equal "$xdotool_unmap_calls" 6 # 4 windows on Workspace 1, 2 on Workspace 2
-    assert_equal "$xdotool_map_calls" 6   # 4 windows on Workspace 1, 2 on Workspace 2
+    assert_equal "$xdotool_unmap_calls" 6 # 4 windows on Workspace_1, 2 on Workspace 2
+    assert_equal "$xdotool_map_calls" 6   # 4 windows on Workspace_1, 2 on Workspace 2
     assert_equal "$move_workspace_calls" 2
     assert_equal "$append_layout_calls" 2
 

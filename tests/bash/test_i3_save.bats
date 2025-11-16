@@ -25,7 +25,8 @@ I3_SAVE_TREE_LAYOUT='{
 I3_MSG_WORKSPACES='[
     {"name":"1: ws1","output":"HDMI-1"},
     {"name":"2 - ws2","output":"DP-1"},
-    {"name":"3","output":"DP-1"}
+    {"name":"3_ws3","output":"DP-1"},
+    {"name":"4","output":"HDMI-1"}
 ]'
 
 setup() {
@@ -110,7 +111,7 @@ assert_previous_session_removed() {
     run get_workspaces
 
     assert_success
-    assert_output $'1: ws1\nHDMI-1\n2 - ws2\nDP-1\n3\nDP-1'
+    assert_output $'1: ws1\nHDMI-1\n2 - ws2\nDP-1\n3_ws3\nDP-1\n4\nHDMI-1'
 }
 
 @test "remove_previous_session: deletes the previous session files" {
@@ -172,7 +173,8 @@ assert_previous_session_removed() {
 
     local expected_layout_1="$i3_PATH/workspace_1: ws1_HDMI-1_layout.json"
     local expected_layout_2="$i3_PATH/workspace_2 - ws2_DP-1_layout.json"
-    local expected_layout_3="$i3_PATH/workspace_3_DP-1_layout.json"
+    local expected_layout_3="$i3_PATH/workspace_3_ws3_DP-1_layout.json"
+    local expected_layout_4="$i3_PATH/workspace_4_HDMI-1_layout.json"
 
     run save_workspace_layouts
     assert_success
@@ -181,6 +183,7 @@ assert_previous_session_removed() {
     assert_file_exists "$expected_layout_1"
     assert_file_exists "$expected_layout_2"
     assert_file_exists "$expected_layout_3"
+    assert_file_exists "$expected_layout_4"
 }
 
 @test "save_workspace_programs: runs python save script" {
