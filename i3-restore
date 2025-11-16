@@ -3,8 +3,10 @@
 # Restore the layout + programs from the previous saved i3 session
 
 set -euo pipefail
-readonly IFS=$'\n\t'
-ROOT_DIR="$(dirname "$0")"
+IFS=$'\n\t'
+
+# A custom root directory should only be set for testing purposes
+ROOT_DIR="${ROOT_DIR:-$(dirname "$0")}"
 readonly ROOT_DIR
 
 # Variables to control how quick restores are
@@ -17,7 +19,8 @@ source "$ROOT_DIR/utils/common.bash"
 # Handle errors
 source "$ROOT_DIR/utils/error_handling.bash"
 
-parse_flags "$@"
+# Don't run if the script is sourced (such as for testing)
+[[ ${BASH_SOURCE[0]} == "${0}" ]] && parse_flags "$@"
 
 # Start logger
 source "$ROOT_DIR/utils/logs.bash"
@@ -171,7 +174,8 @@ restore_workspace() {
     file="$1"
 
     # Get the workspace and display name from the file name
-    workspace_and_display_name="${file#*_}"
+    workspace_and_display_name="$(basename "$file")"
+    workspace_and_display_name="${workspace_and_display_name#*_}"
     workspace_and_display_name="${workspace_and_display_name%_*}"
     # The display name is between the last and second-to-last underscore
     display_name="${workspace_and_display_name##*_}"
@@ -299,8 +303,11 @@ start_automatic_saving() {
     fi
 }
 
-log "Restoring current i3wm session"
-restore_workspaces
-log "Finished restoring current i3wm session\n"
+# Don't run if the script is sourced (such as for testing)
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
+    log "Restoring current i3wm session"
+    restore_workspaces
+    log "Finished restoring current i3wm session\n"
 
-start_automatic_saving
+    start_automatic_saving
+fi

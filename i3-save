@@ -6,7 +6,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # A custom root directory should only be set for testing purposes
-ROOT_DIR="${ROOT_DIR:-(dirname "$0")}"
+ROOT_DIR="${ROOT_DIR:-$(dirname "$0")}"
 I3_RESTORE_SAVE_SCRIPT="$ROOT_DIR/programs/i3_save.py"
 readonly ROOT_DIR I3_RESTORE_SAVE_SCRIPT
 
@@ -16,7 +16,7 @@ source "$ROOT_DIR/utils/common.bash"
 # Handle errors
 source "$ROOT_DIR/utils/error_handling.bash"
 
-# Only run if the script is not sourced (used for testing)
+# Don't run if the script is sourced (such as for testing)
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     parse_flags "$@"
     check_dependencies
@@ -141,7 +141,7 @@ save_workspace_programs() {
         error "An error occurred saving the session's programs. View the logs for more details" 1
 }
 
-# Only run if the script is not sourced (used for testing)
+# Don't run if the script is sourced (such as for testing)
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     log "Saving current i3wm session"
     save_workspace_layouts

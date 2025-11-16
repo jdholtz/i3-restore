@@ -60,9 +60,14 @@ teardown() {
 # shellcheck disable=SC2329
 create_mocks() {
     i3-msg() {
+        while [[ $1 == "--quiet" ]]; do
+            # Ignore the --quiet flag for easier parsing
+            shift
+        done
+
         if [[ $1 == "--type" && $2 == "get_workspaces" ]]; then
             echo "$I3_MSG_WORKSPACES"
-        elif [[ $1 == "--quiet" ]] && { [[ $2 =~ ^mark || $2 =~ ^unmark ]]; }; then
+        elif [[ $1 =~ ^mark || $1 =~ ^unmark ]]; then
             # Ignore mark/unmark calls
             return 0
         else
