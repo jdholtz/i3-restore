@@ -5,8 +5,8 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 
 ## Upcoming
 ### New Features
-- Official support for Python 3.13
-    - Support for Python 3.8 and below has been dropped
+- Official support for Python 3.13 and 3.14
+    - Support for Python 3.9 and below has been dropped
 - The new `exclude_args` keyword is added to the subprocess configuration, allowing you to specify arguments that cannot be included
 in the subprocess command for it to be restored. See the [subprocess configuration](CONFIGURATION.md#subprocesses) for more
 information
@@ -24,7 +24,7 @@ information
 - Fix restoring Kitty sessions when the working directory contains spaces
 
 ### Upgrading
-- Python 3.9+ is now needed (previously Python 3.7+)
+- Python 3.10+ is now needed (previously Python 3.7+)
 - The `args` keyword in the subprocess configuration has been renamed to `include_args`. You should
 rename this, as it will be removed in the next version
 

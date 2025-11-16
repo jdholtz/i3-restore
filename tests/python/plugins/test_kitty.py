@@ -125,6 +125,7 @@ def test_get_window_subprocess_command_returns_subprocess_command(
 ) -> None:
     container.subprocess_command = "subprocess"
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0]
 
@@ -141,6 +142,7 @@ def test_get_window_subprocess_command_returns_subprocess_with_scrollback(
     container.subprocess_command = None
 
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
     mocker.patch("subprocess.check_call")
     mocker.patch("pathlib.Path.open")
 
@@ -160,6 +162,7 @@ def test_get_window_subprocess_command_returns_no_subprocess_when_none_is_presen
 ) -> None:
     container.subprocess_command = None
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][1]["windows"][0]
     plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
@@ -172,6 +175,7 @@ def test_get_window_launch_command_returns_launch_command_without_subprocess(
 ) -> None:
     container.subprocess_command = None
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0]
     plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
@@ -188,6 +192,7 @@ def test_parse_tree_to_session_parses_tree_into_session_correctly(
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
     mocker.patch("subprocess.check_call")
     mocker.patch("pathlib.Path.open")
 
@@ -203,6 +208,7 @@ def test_create_session_file_gets_session_output_and_writes_to_file(
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
     mocker.patch("subprocess.check_call")
     mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
 
@@ -221,6 +227,7 @@ def test_main_saves_a_kitty_container(mocker: MockerFixture, container: Containe
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
     mocker.patch("pathlib.Path.open")
 
     kitty_tree_command_output = json.dumps(KITTY_CONTAINER_TREE).encode("utf-8")

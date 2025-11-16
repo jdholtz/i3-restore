@@ -15,7 +15,7 @@ import constants
 # mocks can still be overridden in each test
 @pytest.fixture(autouse=True)
 def mock_open(mocker: MockerFixture) -> None:
-    mocker.patch("builtins.open")
+    mocker.patch.object(config, "open")
     mocker.patch("json.load")
 
 
@@ -38,7 +38,7 @@ def test_read_config_reads_the_config_file_correctly(mocker: MockerFixture) -> N
 
 
 def test_read_config_returns_empty_config_when_file_is_not_found(mocker: MockerFixture) -> None:
-    mocker.patch("builtins.open", side_effect=FileNotFoundError())
+    mocker.patch.object(config, "open", side_effect=FileNotFoundError())
 
     test_config = config.Config()
     config_content = test_config._read_config()

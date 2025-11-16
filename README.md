@@ -32,7 +32,7 @@ i3-restore has the following features (fill out a feature request for more to be
 ## Getting Started
 
 ### Dependencies
-- [Python 3.9+]
+- [Python 3.10+]
 - [Pip]
 - [Jq]
 - [Perl-anyevent-i3]
@@ -177,7 +177,7 @@ If you have any questions or discussion topics, start a [GitHub Discussion].
 Contributions are always welcome. Please read [Contributing.md](CONTRIBUTING.md) if you are considering making contributions.
 
 [i3]: https://github.com/i3/i3
-[Python 3.9+]: https://www.python.org/downloads/
+[Python 3.10+]: https://www.python.org/downloads/
 [Pip]: https://pip.pypa.io/en/stable/installation/
 [Jq]: https://stedolan.github.io/jq/download/
 [Perl-anyevent-i3]: https://github.com/i3/i3/blob/next/AnyEvent-I3/README
