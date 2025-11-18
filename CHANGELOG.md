@@ -4,6 +4,11 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 
 
 ## Upcoming
+### New Features
+- Natively support restoring `codex` in the configuration
+    - Restoring the specific Codex session is not supported yet (due to limitations in Codex
+    itself). However, if you used `codex resume <id>`, the session will be restored correctly
+
 ### Improvements
 - Improve restoring more. Specifically, even when programs don't get swallowed correctly, they will
 still be restored to their correct workspace
