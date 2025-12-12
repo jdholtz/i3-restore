@@ -2,7 +2,7 @@
 The following guide covers how to run all unit tests for i3-restore. They are grouped by
 implementation language:
 
-- `python/` contains unit tests to validate Python helpers and plugins using [Pytest].
+- `python/` contains unit tests to validate Python helpers and plugins using [pytest].
 - `bash/` contains unit tests to validate Bash functionality using [Bats].
 
 The unit test naming and formatting conventions can be replicated from the tests that already
@@ -62,5 +62,5 @@ Or multiple
 tests/bash/bats-core/bin/bats tests/bash/test_<script1>.bats tests/bash/test_<script2>.bats
 ```
 
-[Pytest]: https://docs.pytest.org
+[pytest]: https://docs.pytest.org
 [Bats]: https://github.com/bats-core/bats-core

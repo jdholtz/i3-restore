@@ -11,7 +11,7 @@ repos:
       # Run the linter.
       - id: ruff-check
         args: [ --fix ]
-        # Run the formatter.
+      # Run the formatter.
       - id: ruff-format
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.12.0-2

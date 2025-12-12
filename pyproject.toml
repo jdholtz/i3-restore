@@ -20,6 +20,7 @@ testpaths = "tests/python"
 
 [tool.ruff]
 line-length = 100
+target-version = "py310"
 src = [".", "programs"]
 
 [tool.ruff.lint]

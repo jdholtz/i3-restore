@@ -9,7 +9,7 @@ Adding/modifying the configuration file is highly encouraged to increase i3-rest
 your desired programs to the [config.example.json](config.example.json), test it, and submit a PR!
 
 ## Testing
-This project uses [Pytest] for Python unit testing and [Bats] for Bash unit testing. When
+This project uses [pytest] for Python unit testing and [Bats] for Bash unit testing. When
 adding/modifying the code, you may need to add a new test or modify an existing test.
 
 The goal of these tests is to provide 100% code coverage (only measured for the Python tests) to increase the reliability of existing
@@ -31,7 +31,7 @@ ensures that the code looks the same throughout the project.
 
 It is also highly recommended to use an [EditorConfig] plugin for your code editor to maintain a consistent coding style for all project files.
 
-[Pytest]: https://docs.pytest.org
+[pytest]: https://docs.pytest.org
 [Bats]: https://github.com/bats-core/bats-core
 [Google's Shell Style Guide]: https://google.github.io/styleguide/shellguide.html
 [pre-commit]: https://pre-commit.com
