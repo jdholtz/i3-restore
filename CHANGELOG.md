@@ -10,11 +10,21 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
     itself). However, if you used `codex resume <id>`, the session will be restored correctly
 
 ### Improvements
+- Restore Kitty layouts perfectly in Kitty 0.43.0 and above
+    - [Kitty 0.43.0](https://sw.kovidgoyal.net/kitty/changelog/#sessions-0-43) introduces much
+    better support for retrieving the session of each window which allows i3-restore to restore the
+    exact layout of Kitty windows
+    - Versions below 0.43.0 are still supported using the old method of restoring Kitty layouts,
+    which restores Kitty layouts well only in common cases (not complex layouts though)
 - Improve restoring more. Specifically, even when programs don't get swallowed correctly, they will
 still be restored to their correct workspace
 
 ### Bug Fixes
 - Fix restoring not working with spaces in `i3_Path`
+
+### Upgrading
+- If you use the Kitty plugin and can update to Kitty 0.43.0 or above, it is recommended to do so in
+order to get better restoring of your Kitty windows
 
 
 ## 5.0 (2025-11-16)

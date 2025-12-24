@@ -16,6 +16,31 @@ if TYPE_CHECKING:
 
 logger = utils.get_logger()
 
+KITTY_LAUNCH_PREFIX = "launch "
+KITTY_UNSERIALIZE_DATA_KEY = "kitty-unserialize-data="
+
+USE_OLD_SESSION_SAVING = None
+KITTY_NEW_SESSION_VERSION = (0, 43, 0)
+
+
+def should_use_old_session_saving() -> None:
+    """
+    Determine whether to use the old session saving method (parsing the container tree) or the new
+    method (using Kitty's session output format). The old method is used for Kitty versions below
+    0.43.0, while the new method is used for Kitty 0.43.0 and above.
+    """
+    try:
+        output = subprocess.check_output(["kitty", "--version"]).decode("utf-8")
+        # The version is the second word in the output
+        version_str = output.strip().split()[1]
+        version_parts = version_str.split(".")
+        version_tuple = tuple(int(part) for part in version_parts)
+        return version_tuple < KITTY_NEW_SESSION_VERSION
+    except (subprocess.CalledProcessError, IndexError, ValueError) as err:
+        logger.error("Failed determining Kitty version: %s", err)
+        # Default to using the old session saving method if the version cannot be determined
+        return True
+
 
 def get_listen_socket(listen_socket: str, pid: int) -> None:
     # Handle the custom placeholder that could appear in Kitty's listen_socket
@@ -138,28 +163,109 @@ def get_window_launch_command(container: Container, window: JSON, plugin_config:
     return launch_command + "\n"
 
 
-def parse_tree_to_session(container: Container, tree: JSON, plugin_config: JSON) -> str:
+def parse_tree_to_session(container: Container, os_window_tree: JSON, plugin_config: JSON) -> str:
     """
-    Parse a Kitty container tree into a session that can be used to restore the exact layout and
-    programs that this container is running.
+    Parse a Kitty container tree into a session that can be used to restore the layout and programs
+    that this container is running.
+
+    This function is only used for Kitty versions below 0.43.0, as Kitty 0.43.0+ provides a way to
+    retrieve this session directly, allowing for fully accurate restores.
     """
     logger.info("Parsing container tree into session")
 
     output = ""
-    for tab in tree["tabs"]:
+    for tab in os_window_tree["tabs"]:
         output += "new_tab\n"
         output += f"layout {tab['layout']}\n"
 
         if tab["is_active"]:
             output += "focus\n"
 
-        # The window layouts won't be restored perfectly as the Kitty tree doesn't provide enough
-        # information to do so.
+        # In Kitty versions below 0.43.0, the window layouts won't be restored perfectly as the
+        # Kitty tree doesn't provide enough information to do so.
         for window in tab["windows"]:
             output += get_window_launch_command(container, window, plugin_config)
 
     logger.debug("Kitty session output:\n%s", output)
     return output
+
+
+def get_session_contents(listen_socket: str) -> str:
+    """
+    Get the Kitty container's session contents using the session output format in kitty @ ls (only
+    in Kitty 0.43.0+)
+    """
+    logger.info("Retrieving Kitty session contents")
+    try:
+        output = subprocess.check_output(
+            ["kitty", "@", "--to", listen_socket, "ls", "--all-env-vars", "--output-format=session"]
+        ).decode("utf-8")
+    except subprocess.CalledProcessError as err:
+        logger.error("Failed retrieving Kitty session")
+        raise utils.PluginSaveError from err
+
+    return output
+
+
+def get_new_launch_command(
+    container: Container, plugin_config: JSON, old_launch_command: str, window_objs: dict[int, JSON]
+) -> str:
+    """
+    The default Kitty launch command (in the conditions this script calls it) is in the format:
+    launch 'kitty-unserialize-data={"id": <id>}' <flags> <command>
+
+    We need to extract the window ID to create the new launch command. This function parses the old
+    launch command to do so. It relies on Kitty's behavior for the launch command format to stay
+    consistent, so this may break in future versions of Kitty. It currently works from Kitty 0.43.0
+    to 0.45.0.
+    """
+
+    # First, get the start of the unserialize data JSON
+    kitty_key_start = old_launch_command.find(KITTY_UNSERIALIZE_DATA_KEY, len(KITTY_LAUNCH_PREFIX))
+    data_start = kitty_key_start + len(KITTY_UNSERIALIZE_DATA_KEY)
+
+    # Next, retrieve the full JSON to extract the window ID
+    data_json, _ = json.JSONDecoder().raw_decode(old_launch_command[data_start:])
+    window_id = data_json["id"]
+
+    launch_command = get_window_launch_command(container, window_objs[window_id], plugin_config)
+
+    # Use all the data present in the old unserialize data. Only ID should be present, but in case
+    # any more data is added in future Kitty versions, preserve it.
+    new_unserialize_data = "'kitty-unserialize-data=" + json.dumps(data_json) + "'"
+
+    # Construct the new launch command with the updated unserialize data
+    return (
+        f"{KITTY_LAUNCH_PREFIX}{new_unserialize_data} {launch_command[len(KITTY_LAUNCH_PREFIX) :]}"
+    )
+
+
+def replace_launch_commands(
+    container: Container, os_window_tree: JSON, plugin_config: JSON, session_contents: str
+) -> str:
+    """
+    Replace the launch commands Kitty creates in the session contents to restore subprocesses and
+    scrollback for each window.
+    """
+    # First, map window IDs to their window objects for easy access
+    window_objs = {}
+    for tab in os_window_tree["tabs"]:
+        for window in tab["windows"]:
+            window_objs[window["id"]] = window
+
+    session_lines = session_contents.splitlines(keepends=True)
+    updated_session_lines = []
+
+    # Keep all lines the same except for launch commands, which need to be updated
+    for line in session_lines:
+        if line.startswith(KITTY_LAUNCH_PREFIX):
+            launch_command = get_new_launch_command(container, plugin_config, line, window_objs)
+            logger.debug("Updated launch command:\nOld: %sNew: %s", line, launch_command)
+            updated_session_lines.append(launch_command)
+        else:
+            updated_session_lines.append(line)
+
+    return "".join(updated_session_lines)
 
 
 def create_session_file(container: Container, tree: JSON, plugin_config: JSON) -> Path:
@@ -172,7 +278,15 @@ def create_session_file(container: Container, tree: JSON, plugin_config: JSON) -
     os_window = [window for window in tree if container.window_id == window["platform_window_id"]]
     os_window = os_window[0]
 
-    session_contents = parse_tree_to_session(container, os_window, plugin_config)
+    if USE_OLD_SESSION_SAVING:
+        # Use the old method of parsing the container tree into a session when using Kitty versions
+        # below 0.43.0
+        session_contents = parse_tree_to_session(container, os_window, plugin_config)
+    else:
+        session_contents = get_session_contents(plugin_config["listen_socket"])
+        session_contents = replace_launch_commands(
+            container, os_window, plugin_config, session_contents
+        )
 
     session_file = Path(utils.i3_PATH) / f"kitty-session-{container.window_id}"
     with session_file.open("w") as f:
@@ -183,6 +297,12 @@ def create_session_file(container: Container, tree: JSON, plugin_config: JSON) -
 
 def main(container: Container, config: JSON) -> None:
     logger.info("Saving Kitty container")
+
+    global USE_OLD_SESSION_SAVING
+    if USE_OLD_SESSION_SAVING is None:
+        # Determine which session saving method to use (on first run only)
+        USE_OLD_SESSION_SAVING = should_use_old_session_saving()
+        logger.info("Using old Kitty session saving method: %s", USE_OLD_SESSION_SAVING)
 
     # Copy to not overwrite the original config
     plugin_config = config.copy()

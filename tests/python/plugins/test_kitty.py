@@ -56,7 +56,8 @@ KITTY_CONTAINER_TREE = [
     }
 ]
 
-KITTY_CONTAINER_SESSION = """new_tab
+# The expected saved session for Kitty versions before 0.43.0
+KITTY_CONTAINER_SESSION_OLD = """new_tab
 layout fat
 focus
 launch --cwd="/home/test" /bin/bash -c 'subprocess'
@@ -66,12 +67,94 @@ launch --cwd="/home" bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-2"
 launch --cwd="/" bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-3" && bash'
 """
 
+# The saved session returned directly by Kitty's @ ls (for versions 0.43.0 and newer)
+KITTY_CONTAINER_SESSION_NEW_ORIGINAL = """
+new_tab
+layout fat
+launch 'kitty-unserialize-data={"id": 1}' subprocess
+focus
+
+new_tab
+layout tall
+launch 'kitty-unserialize-data={"id": 2}'
+launch 'kitty-unserialize-data={"id": 3}' --env SHELL=/bin/bash
+focus
+
+focus_tab 0
+"""
+
+# The expected saved session for Kitty versions 0.43.0 and newer
+KITTY_CONTAINER_SESSION_NEW = """
+new_tab
+layout fat
+launch 'kitty-unserialize-data={"id": 1}' --cwd="/home/test" /bin/bash -c 'subprocess'
+focus
+
+new_tab
+layout tall
+launch 'kitty-unserialize-data={"id": 2}' --cwd="/home" bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-2" && bash'
+launch 'kitty-unserialize-data={"id": 3}' --cwd="/" bash -c 'cat "/tmp/i3-restore-test/kitty-scrollback-9999-3" && bash'
+focus
+
+focus_tab 0
+"""  # noqa: E501
+
 
 @pytest.fixture(autouse=True)
 def container(mocker: MockerFixture) -> Container:
     mocker.patch.object(Container, "_get_pid")
     mocker.patch.object(Container, "_get_cmdline_options")
     return Container({"window_properties": {}, "window": 9999})
+
+
+@pytest.mark.parametrize(
+    "version_line",
+    [
+        "kitty 0.43.0 created by Kovid Goyal",
+        "kitty 0.43.1 created by Kovid Goyal",
+        "kitty 0.44.0 created by Kovid Goyal",
+    ],
+)
+def test_should_use_old_session_saving_returns_false_for_kitty_0_43_0_or_newer(
+    version_line: str, mocker: MockerFixture
+) -> None:
+    mocker.patch("subprocess.check_output", return_value=version_line.encode("utf-8"))
+    assert kitty.should_use_old_session_saving() is False
+
+
+@pytest.mark.parametrize(
+    "version_line",
+    [
+        "kitty 0.42.2 created by Kovid Goyal",
+        "kitty 0.42.0 created by Kovid Goyal",
+        "kitty 0.41.0 created by Kovid Goyal",
+    ],
+)
+def test_should_use_old_session_saving_returns_true_for_kitty_versions_before_0_43_0(
+    version_line: str, mocker: MockerFixture
+) -> None:
+    mocker.patch("subprocess.check_output", return_value=version_line.encode("utf-8"))
+    assert kitty.should_use_old_session_saving() is True
+
+
+def test_should_use_old_session_saving_returns_true_on_error(mocker: MockerFixture) -> None:
+    mocker.patch("subprocess.check_output", side_effect=subprocess.CalledProcessError(None, None))
+    assert kitty.should_use_old_session_saving() is True
+
+
+@pytest.mark.parametrize(
+    "version_line",
+    [
+        "kitty abc created by Kovid Goyal",
+        "0.43.0",
+        "kitty a.b.c created by Kovid Goyal",
+    ],
+)
+def test_should_use_old_session_saving_returns_true_on_bad_version(
+    version_line: str, mocker: MockerFixture
+) -> None:
+    mocker.patch("subprocess.check_output", return_value=version_line.encode("utf-8"))
+    assert kitty.should_use_old_session_saving() is True
 
 
 def test_get_listen_socket_default_format() -> None:
@@ -199,13 +282,105 @@ def test_parse_tree_to_session_parses_tree_into_session_correctly(
     plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
     session_output = kitty.parse_tree_to_session(container, KITTY_CONTAINER_TREE[0], plugin_config)
 
-    assert session_output == KITTY_CONTAINER_SESSION
+    assert session_output == KITTY_CONTAINER_SESSION_OLD
+
+
+def test_get_session_contents_retrieves_session_contents(mocker: MockerFixture) -> None:
+    mocker.patch(
+        "subprocess.check_output", return_value=KITTY_CONTAINER_SESSION_NEW_ORIGINAL.encode("utf-8")
+    )
+    assert kitty.get_session_contents("test-socket") == KITTY_CONTAINER_SESSION_NEW_ORIGINAL
+
+
+def test_get_session_contents_raises_plugin_save_error_when_command_fails(
+    mocker: MockerFixture,
+) -> None:
+    mocker.patch("subprocess.check_output", side_effect=subprocess.CalledProcessError(None, None))
+    with pytest.raises(kitty.utils.PluginSaveError):
+        kitty.get_session_contents("test-socket")
+
+
+def test_get_new_launch_command_gets_command_from_correct_window(
+    mocker: MockerFixture, container: Container
+) -> None:
+    container.subprocess_command = "subprocess"
+    unserialize_data = f'{kitty.KITTY_UNSERIALIZE_DATA_KEY}{{"id": 1}}'
+    old_launch_command = (
+        f"{kitty.KITTY_LAUNCH_PREFIX}'{unserialize_data}' --env SHELL=/bin/bash vim"
+    )
+    window_objs = {
+        1: KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0],
+        2: KITTY_CONTAINER_TREE[0]["tabs"][1]["windows"][0],
+        3: KITTY_CONTAINER_TREE[0]["tabs"][1]["windows"][1],
+    }
+
+    mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
+    mocker.patch("subprocess.check_call")
+    mocker.patch("pathlib.Path.open")
+
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
+    launch_cmd = kitty.get_new_launch_command(
+        container, plugin_config, old_launch_command, window_objs
+    )
+
+    assert "launch" in launch_cmd
+    assert unserialize_data in launch_cmd
+    assert window_objs[1]["cwd"] in launch_cmd
+
+
+def test_replace_launch_commands_replaces_all_launch_commands(
+    mocker: MockerFixture, container: Container
+) -> None:
+    container.subprocess_command = "subprocess"
+
+    mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
+    mocker.patch("subprocess.check_call")
+    mocker.patch("pathlib.Path.open")
+
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
+    new_session_contents = kitty.replace_launch_commands(
+        container, KITTY_CONTAINER_TREE[0], plugin_config, KITTY_CONTAINER_SESSION_NEW_ORIGINAL
+    )
+
+    assert new_session_contents == KITTY_CONTAINER_SESSION_NEW
 
 
 def test_create_session_file_gets_session_output_and_writes_to_file(
     mocker: MockerFixture, container: Container
 ) -> None:
     container.subprocess_command = "subprocess"
+
+    # Test new session saving by default
+    mocker.patch.object(kitty, "USE_OLD_SESSION_SAVING", False)
+
+    mocker.patch.object(container, "check_if_subprocess")
+    mocker.patch("psutil.Process")
+    mocker.patch("subprocess.check_call")
+    mocker.patch(
+        "subprocess.check_output", return_value=KITTY_CONTAINER_SESSION_NEW_ORIGINAL.encode("utf-8")
+    )
+    mock_open = mocker.patch("pathlib.Path.open", new_callable=mock.mock_open)
+
+    plugin_config = {"listen_socket": "test-socket", "scrollback": "all"}
+    session_file = kitty.create_session_file(container, KITTY_CONTAINER_TREE, plugin_config)
+
+    handle = mock_open()
+    assert handle.write.call_args[0][0] == KITTY_CONTAINER_SESSION_NEW, (
+        "Kitty container session was not saved correctly"
+    )
+
+    assert session_file.name == "kitty-session-9999"
+
+
+def test_create_session_file_gets_session_output_and_writes_to_file_old_session_saving(
+    mocker: MockerFixture, container: Container
+) -> None:
+    container.subprocess_command = "subprocess"
+
+    # Test old session saving
+    mocker.patch.object(kitty, "USE_OLD_SESSION_SAVING", True)
 
     mocker.patch.object(container, "check_if_subprocess")
     mocker.patch("psutil.Process")
@@ -216,14 +391,15 @@ def test_create_session_file_gets_session_output_and_writes_to_file(
     session_file = kitty.create_session_file(container, KITTY_CONTAINER_TREE, plugin_config)
 
     handle = mock_open()
-    assert handle.write.call_args[0][0] == KITTY_CONTAINER_SESSION, (
-        "Kitty container session was not saved correctly"
+    assert handle.write.call_args[0][0] == KITTY_CONTAINER_SESSION_OLD, (
+        "Kitty container session was not saved correctly with old session saving"
     )
 
     assert session_file.name == "kitty-session-9999"
 
 
 def test_main_saves_a_kitty_container(mocker: MockerFixture, container: Container) -> None:
+    version_output = b"kitty 0.44.0 created by Kovid Goyal"
     container.subprocess_command = "subprocess"
 
     mocker.patch.object(container, "check_if_subprocess")
@@ -231,7 +407,17 @@ def test_main_saves_a_kitty_container(mocker: MockerFixture, container: Containe
     mocker.patch("pathlib.Path.open")
 
     kitty_tree_command_output = json.dumps(KITTY_CONTAINER_TREE).encode("utf-8")
-    mocker.patch("subprocess.check_output", return_value=kitty_tree_command_output)
+    kitty_session_output = KITTY_CONTAINER_SESSION_NEW_ORIGINAL.encode("utf-8")
+    mocker.patch(
+        "subprocess.check_output",
+        side_effect=[
+            version_output,
+            kitty_tree_command_output,
+            kitty_session_output,
+            kitty_tree_command_output,
+            kitty_session_output,
+        ],
+    )
 
     plugin_config = {"listen_socket": "test-socket", "scrollback": "none"}
     kitty.main(container, plugin_config)
@@ -241,3 +427,9 @@ def test_main_saves_a_kitty_container(mocker: MockerFixture, container: Containe
     session_file = container.command.split(" ")[-1]
     assert session_file.startswith("'")
     assert session_file.endswith("'")
+
+    # Second call to make sure the old session saving cached value is used instead of re-checking
+    # the version each invocation
+    container.subprocess_command = "subprocess"
+    kitty.main(container, plugin_config)
+    assert "kitty-session-9999" in container.command
