@@ -68,7 +68,7 @@ restore_programs() {
     sanitized_ws_name="${sanitized_ws_name//\//\{slash\}}"
     file="$i3_PATH/workspace_${sanitized_ws_name}_programs.sh"
 
-    if [[ ! -f "$file" ]]; then
+    if [[ ! -f $file ]]; then
         log "No programs file found for Workspace $workspace_name"
         return 0
     fi

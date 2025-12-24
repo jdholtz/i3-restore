@@ -10,7 +10,7 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[{*.{bash,bats}, i3-save, i3-restore}]
+[{*.{bash,bats},i3-save,i3-restore}]
 simplify = true
 
 [*.{yml,yaml}]
