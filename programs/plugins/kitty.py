@@ -86,7 +86,7 @@ def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> P
         )
         return None
 
-    logger.info("Scrollback output saved at %s", scrollback_file)
+    logger.info("Scrollback output saved at '%s'", scrollback_file)
     return scrollback_file
 
 
@@ -197,7 +197,7 @@ def main(container: Container, config: JSON) -> None:
     logger.info("Kitty session file created at %s", session_file)
 
     # Update the container's attributes so the Kitty session will be restored correctly
-    container.command = f"kitty --session {session_file}"
+    container.command = f"kitty --session '{session_file}'"
     # The working directory is already set in the Kitty session, so this value can be any valid
     # directory. / is used as it is guaranteed to exist.
     container.working_directory = "/"

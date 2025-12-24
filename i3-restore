@@ -68,7 +68,7 @@ restore_programs() {
     sanitized_ws_name="${sanitized_ws_name//\//\{slash\}}"
     file="$i3_PATH/workspace_${sanitized_ws_name}_programs.sh"
 
-    if [[ ! -f $file ]]; then
+    if [[ ! -f "$file" ]]; then
         log "No programs file found for Workspace $workspace_name"
         return 0
     fi
@@ -90,7 +90,7 @@ restore_programs() {
         # Execute the i-th line in the script. Focus on the workspace name before to make sure the
         # program opens in the correct workspace (it is less reliable to do a single focus before
         # executing each container)
-        i3-msg --quiet "workspace --no-auto-back-and-forth $workspace_name; exec $file $i"
+        i3-msg --quiet "workspace --no-auto-back-and-forth $workspace_name; exec '$file' $i"
         sleep "$SLEEP_BETWEEN_CONTAINERS"
     done
 
@@ -251,7 +251,7 @@ restore_browsers() {
     # Make the file executable
     chmod +x "$browser_file"
 
-    i3-msg exec "$browser_file"
+    i3-msg exec "'$browser_file'"
 }
 
 #####################################

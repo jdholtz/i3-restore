@@ -122,6 +122,17 @@ mock_i3_msg_restore_programs() {
             # Everything before the container number is the file
             file="${after_exec% "$container_num"}"
 
+            # Ensure the file is surrounded by quotes (prevents issues with spaces in paths during
+            # restore)
+            if [[ $file != \'*\' ]]; then
+                echo "Program file not quoted properly: $file"
+                return 1
+            fi
+
+            # Now that we've verified, strip the quotes
+            file="${file#\'}"
+            file="${file%\'}"
+
             # Match any of the programs files we expect
             if ! grep -Fxq -- "$file" <<<"$programs_files"; then
                 echo "Unexpected i3-msg exec call: $*"
@@ -211,9 +222,16 @@ mock_i3_msg_exec_browsers() {
 
     # shellcheck disable=SC2329
     i3-msg() {
-        if [[ $1 == "exec" && $2 == "$browsers_file" ]]; then
+        if [[ $1 == "exec" && $2 == "'$browsers_file'" ]]; then
             i3_msg_called=1
             return 0
+        fi
+
+        # Catch unquoted browsers file. During a restore, the path may contain spaces and must be
+        # quoted.
+        if [[ $1 == "exec" && $2 == "$browsers_file" ]]; then
+            echo "Browsers file not properly quoted: $2"
+            return 1
         fi
 
         # Call the original i3-msg mock

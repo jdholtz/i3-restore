@@ -237,3 +237,7 @@ def test_main_saves_a_kitty_container(mocker: MockerFixture, container: Containe
     kitty.main(container, plugin_config)
 
     assert "kitty-session-9999" in container.command
+    # Ensure the session file is wrapped in quotes
+    session_file = container.command.split(" ")[-1]
+    assert session_file.startswith("'")
+    assert session_file.endswith("'")

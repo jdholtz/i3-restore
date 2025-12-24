@@ -13,6 +13,9 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 - Improve restoring more. Specifically, even when programs don't get swallowed correctly, they will
 still be restored to their correct workspace
 
+### Bug Fixes
+- Fix restoring not working with spaces in `i3_Path`
+
 
 ## 5.0 (2025-11-16)
 ### New Features

@@ -23,7 +23,8 @@ jobs:
   bash-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
           submodules: true
       - name: Run Bats unit tests
