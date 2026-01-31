@@ -144,6 +144,7 @@ save_workspace_programs() {
 # Don't run if the script is sourced (such as for testing)
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     log "Saving current i3wm session"
+    mkdir -p "$i3_PATH"
     save_workspace_layouts
     save_workspace_programs
     log "Finished saving current i3wm session"
