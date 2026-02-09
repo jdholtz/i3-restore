@@ -3,7 +3,7 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
-## Upcoming
+## 5.1 (2026-02-09)
 ### New Features
 - Natively support restoring `codex` in the configuration
     - Restoring the specific Codex session is not supported yet (due to limitations in Codex
@@ -20,7 +20,7 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 still be restored to their correct workspace
 
 ### Bug Fixes
-- Fix restoring not working with spaces in `i3_Path`
+- Fix restoring not working with spaces in `i3_Path` or a non-existent `i3_Path`
 
 ### Upgrading
 - If you use the Kitty plugin and can update to Kitty 0.43.0 or above, it is recommended to do so in
