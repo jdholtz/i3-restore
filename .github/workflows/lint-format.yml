@@ -41,4 +41,3 @@ jobs:
         uses: luizm/action-sh-checker@v0.10.0
         env:
           SHELLCHECK_OPTS: -x --severity=warning
-          SHFMT_OPTS: -s
