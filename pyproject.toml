@@ -22,6 +22,7 @@ testpaths = "tests/python"
 line-length = 100
 target-version = "py310"
 src = [".", "programs"]
+extend-exclude = ["tests/bash/bats-*"]
 
 [tool.ruff.lint]
 extend-select = [

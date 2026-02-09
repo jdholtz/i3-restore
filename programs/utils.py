@@ -54,7 +54,7 @@ class Formatter(logging.Formatter):  # pragma: no cover
         return formatter.format(record)
 
 
-def get_logger() -> logging.RootLogger:
+def get_logger() -> logging.Logger:
     project_dir = os.path.dirname(os.path.dirname(__file__))
     log_file = os.getenv("I3_RESTORE_LOG_FILE", f"{project_dir}/{constants.DEFAULT_LOG_FILE}")
 

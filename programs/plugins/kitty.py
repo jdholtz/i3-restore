@@ -23,7 +23,7 @@ USE_OLD_SESSION_SAVING = None
 KITTY_NEW_SESSION_VERSION = (0, 43, 0)
 
 
-def should_use_old_session_saving() -> None:
+def should_use_old_session_saving() -> bool:
     """
     Determine whether to use the old session saving method (parsing the container tree) or the new
     method (using Kitty's session output format). The old method is used for Kitty versions below
@@ -42,7 +42,7 @@ def should_use_old_session_saving() -> None:
         return True
 
 
-def get_listen_socket(listen_socket: str, pid: int) -> None:
+def get_listen_socket(listen_socket: str, pid: int) -> str:
     # Handle the custom placeholder that could appear in Kitty's listen_socket
     if "{kitty_pid}" in listen_socket:
         return listen_socket.replace("{kitty_pid}", str(pid))
