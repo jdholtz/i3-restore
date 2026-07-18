@@ -256,6 +256,84 @@ class TestContainer:
 
         assert container.subprocess_command == r"test_command and more!"
 
+    def test_check_if_subprocess_uses_enabled_plugin(self, mocker: MockerFixture) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+        mock_process = mocker.patch("psutil.Process")
+        mock_process.name.return_value = constants.CODEX_PROCESS_NAME
+        mock_process.cmdline.return_value = ["codex"]
+        mock_process.children.return_value = []
+
+        i3_save.CONFIG.subprocesses = [{"name": constants.CODEX_PROCESS_NAME}]
+        i3_save.CONFIG.enabled_plugins = {constants.CODEX_PROCESS_NAME: {}}
+        mock_saver = mocker.patch.object(
+            i3_save.SUPPORTED_SUBPROCESS_PLUGINS[constants.CODEX_PROCESS_NAME], "main"
+        )
+
+        container = i3_save.Container(
+            {"name": "Codex title", "window": 9999, "window_properties": {"class": "terminal"}}
+        )
+        container.check_if_subprocess(mock_process)
+
+        mock_saver.assert_called_once_with(container, mock_process, "Codex title", "{command}")
+
+    def test_check_if_subprocess_saves_normally_when_plugin_fails(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+        mock_process = mocker.patch("psutil.Process")
+        mock_process.name.return_value = constants.CODEX_PROCESS_NAME
+        mock_process.cmdline.return_value = ["codex", "--model", "test"]
+        mock_process.children.return_value = []
+
+        i3_save.CONFIG.subprocesses = [{"name": constants.CODEX_PROCESS_NAME}]
+        i3_save.CONFIG.enabled_plugins = {constants.CODEX_PROCESS_NAME: {}}
+        mocker.patch.object(
+            i3_save.SUPPORTED_SUBPROCESS_PLUGINS[constants.CODEX_PROCESS_NAME],
+            "main",
+            side_effect=i3_save.utils.PluginSaveError,
+        )
+
+        container = i3_save.Container(
+            {"name": "invalid", "window": 9999, "window_properties": {"class": "terminal"}}
+        )
+        container.check_if_subprocess(mock_process)
+
+        assert container.subprocess_command == "codex --model test"
+
+    def test_check_if_subprocess_saves_normally_when_plugin_is_disabled(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+        mock_process = mocker.patch("psutil.Process")
+        mock_process.name.return_value = constants.CODEX_PROCESS_NAME
+        mock_process.cmdline.return_value = ["codex"]
+        mock_process.children.return_value = []
+
+        i3_save.CONFIG.subprocesses = [{"name": constants.CODEX_PROCESS_NAME}]
+        i3_save.CONFIG.enabled_plugins = {}
+        mock_saver = mocker.patch.object(
+            i3_save.SUPPORTED_SUBPROCESS_PLUGINS[constants.CODEX_PROCESS_NAME], "main"
+        )
+
+        container = i3_save.Container(
+            {"name": "Codex title", "window": 9999, "window_properties": {"class": "terminal"}}
+        )
+        container.check_if_subprocess(mock_process)
+
+        assert container.subprocess_command == "codex"
+        mock_saver.assert_not_called()
+
+    def test_save_subprocess_with_plugin_rejects_unsupported_process(
+        self, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("subprocess.check_output", return_value=b"1")
+        mocker.patch("psutil.Process")
+        process = mocker.Mock()
+        process.name.return_value = "unsupported"
+        container = i3_save.Container({"window": 9999, "window_properties": {}})
+
+        assert not container._save_subprocess_with_plugin(process, "title", "{command}")
+
     def test_check_if_subprocess_does_not_save_subprocess_without_include_args(
         self, mocker: MockerFixture
     ) -> None:

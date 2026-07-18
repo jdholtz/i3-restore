@@ -82,9 +82,11 @@ class Config:
     def _parse_plugins(self, plugins: JSON) -> JSON:
         # Available plugin parsers. The key is the plugin name and the value is the
         # function used to parse the plugin.
-        # The plugin name is the same as the program's class name in i3 which is how the script
-        # knows which plugin to use for which program.
-        plugin_parsers = {constants.KITTY_CLASS: parse_kitty_plugin}
+        # Plugin names identify either a program's i3 window class or a configured subprocess.
+        plugin_parsers = {
+            constants.CODEX_PROCESS_NAME: parse_codex_plugin,
+            constants.KITTY_CLASS: parse_kitty_plugin,
+        }
 
         parsed_plugins = {}
 
@@ -93,6 +95,13 @@ class Config:
                 parsed_plugins[name] = parser(plugins[name])
 
         return parsed_plugins
+
+
+def parse_codex_plugin(plugin: JSON) -> JSON:
+    if not isinstance(plugin, dict):
+        raise TypeError(f"'{constants.CODEX_PROCESS_NAME}' plugin must be a dictionary")
+
+    return {}
 
 
 def parse_kitty_plugin(plugin: JSON) -> JSON:

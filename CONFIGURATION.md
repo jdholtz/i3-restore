@@ -10,6 +10,7 @@ for more information.
 - [Subprocesses](#subprocesses)
 - [Web Browsers](#web-browsers)
 - [Enabled Plugins](#enabled-plugins)
+    - [Codex](#codex)
     - [Kitty](#kitty)
 - [Setting A Custom Save Path](#setting-a-custom-save-path)
 - [Restoring Vim And Neovim Sessions](#restoring-vim-and-neovim-sessions)
@@ -101,7 +102,36 @@ contains the configured web browsers
 
 ## Enabled Plugins
 i3-restore has built-in plugins that allow you to save and restore specific programs much more
-extensively. The only plugin currently implemented is the `Kitty` plugin.
+extensively.
+
+### Codex
+The Codex plugin restores the exact Codex session that was running in a configured terminal using
+Codex's `thread-id` item in the terminal title to resolve the full session ID.
+
+First, configure Codex to include the thread ID in terminal titles using either `/title` or Codex's
+config:
+
+**~/.codex/config.toml**:
+```toml
+[tui]
+terminal_title = [<other-options>, "thread-id"]
+```
+
+The order of the items doesn't matter, but `thread-id` must be present.
+
+Next, configure `codex` as a subprocess and enable its plugin:
+
+**config.json**:
+```json
+{
+    "subprocesses": [
+        {"name": "codex"}
+    ],
+    "enabled_plugins": {
+        "codex": {}
+    }
+}
+```
 
 ### Kitty
 The Kitty plugin allows i3-restore to save and restore Kitty much better than the general terminal

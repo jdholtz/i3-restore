@@ -8,12 +8,17 @@ import psutil
 
 import config
 import constants
+import plugins.codex
 import plugins.kitty
 import utils
 
 # Plugins that are supported to have custom save algorithms. The key is the window class and the
 # value is the module to use to save the container (the module's 'main' function will be called).
 SUPPORTED_PLUGINS = {constants.KITTY_CLASS: plugins.kitty}
+
+# Plugins that customize how terminal subprocesses are saved. The key is the process name and the
+# value is the module to use to save the subprocess (the module's 'main' function will be called).
+SUPPORTED_SUBPROCESS_PLUGINS = {constants.CODEX_PROCESS_NAME: plugins.codex}
 
 # Type alias for JSON
 JSON = utils.JSON
@@ -129,6 +134,7 @@ class Container:
         self.command = None
         self.subprocess_command = None
         self.working_directory = None
+        self.window_title = properties.get("name", "")
         self.window_class = properties["window_properties"].get("class")
         self.window_id = properties["window"]
 
@@ -219,7 +225,10 @@ class Container:
             return False
 
     def check_if_subprocess(
-        self, process: psutil.Process, default_launch_command: str = "{command}"
+        self,
+        process: psutil.Process,
+        default_launch_command: str = "{command}",
+        window_title: str | None = None,
     ) -> None:
         """
         Checks whether or not the process has any subprocesses that should be
@@ -268,13 +277,41 @@ class Container:
                     logger.info("Skipping saving subprocess as it includes excluded arguments")
                     continue
 
-                # Last, build the command
+                launch_command = program.get("launch_command", default_launch_command)
+
+                # If configured, save the subprocess with a plugin. If it fails, continue with the
+                # normal subprocess saving behavior.
+                if child_name in CONFIG.enabled_plugins and self._save_subprocess_with_plugin(
+                    child,
+                    window_title if window_title is not None else self.window_title,
+                    launch_command,
+                ):
+                    return
+
+                # Last, build the command normally
                 for arg in cmd_args:
                     command += " " + arg.replace(" ", r"\ ")
 
-                launch_command = program.get("launch_command", default_launch_command)
                 self.subprocess_command = launch_command.replace("{command}", command)
                 return
+
+    def _save_subprocess_with_plugin(
+        self, process: psutil.Process, window_title: str, launch_command: str
+    ) -> bool:
+        """Save a subprocess with an enabled plugin, falling back when the plugin fails."""
+        process_name = process.name()
+        if process_name not in SUPPORTED_SUBPROCESS_PLUGINS:
+            logger.error("Subprocess plugin not supported: %s", process_name)
+            return False
+
+        logger.info("Saving subprocess with plugin: %s", process_name)
+        try:
+            SUPPORTED_SUBPROCESS_PLUGINS[process_name].main(
+                self, process, window_title, launch_command
+            )
+            return True
+        except utils.PluginSaveError:
+            return False
 
     def _handle_web_browser(self) -> None:
         """Checks whether the container's program is a web browser"""

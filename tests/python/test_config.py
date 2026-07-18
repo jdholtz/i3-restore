@@ -123,6 +123,15 @@ def test_parse_plugins_parses_empty_plugin_config() -> None:
     assert not test_config._parse_plugins({})
 
 
+def test_parse_codex_config_parses_config_correctly() -> None:
+    assert config.parse_codex_plugin({"extra": "value"}) == {}
+
+
+def test_parse_codex_config_raises_error_on_invalid_config() -> None:
+    with pytest.raises(TypeError):
+        config.parse_codex_plugin("invalid")
+
+
 @pytest.mark.parametrize(
     "plugin_config", ["", {}, {"listen_socket": "test-socket", "scrollback": "invalid"}]
 )

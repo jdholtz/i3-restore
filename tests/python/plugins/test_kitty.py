@@ -31,6 +31,7 @@ KITTY_CONTAINER_TREE = [
                         "cwd": "/home/test",
                         "id": 1,
                         "pid": 1,
+                        "title": "Codex | 123e4567-e89b-12d3-a456-42661...",
                     }
                 ],
             },
@@ -207,8 +208,8 @@ def test_get_window_subprocess_command_returns_subprocess_command(
     mocker: MockerFixture, container: Container
 ) -> None:
     container.subprocess_command = "subprocess"
-    mocker.patch.object(container, "check_if_subprocess")
-    mocker.patch("psutil.Process")
+    mock_check = mocker.patch.object(container, "check_if_subprocess")
+    mock_process = mocker.patch("psutil.Process")
 
     window_tree = KITTY_CONTAINER_TREE[0]["tabs"][0]["windows"][0]
 
@@ -217,6 +218,11 @@ def test_get_window_subprocess_command_returns_subprocess_command(
         == "/bin/bash -c 'subprocess'"
     )
     assert container.subprocess_command is None
+    mock_check.assert_called_once_with(
+        mock_process.return_value,
+        "{command} && /bin/bash",
+        "Codex | 123e4567-e89b-12d3-a456-42661...",
+    )
 
 
 def test_get_window_subprocess_command_returns_subprocess_with_scrollback(

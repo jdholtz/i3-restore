@@ -132,7 +132,7 @@ def get_window_subprocess_command(
     shell = window["env"].get("SHELL", "bash")
     # The default launch command needs to change as a subprocess in Kitty should return back to
     # the shell after the subprocess exits
-    container.check_if_subprocess(process, f"{{command}} && {shell}")
+    container.check_if_subprocess(process, f"{{command}} && {shell}", window.get("title", ""))
 
     subprocess_command = None
     if container.subprocess_command:

@@ -3,6 +3,13 @@ When upgrading to a new version, make sure to follow the directions under the "U
 If there is no "Upgrading" header for that version, no post-upgrade actions need to be performed.
 
 
+## Upcoming
+### New Features
+- Add an optional Codex plugin to restore the exact Codex session.
+    - Refer to the [Codex plugin configuration](CONFIGURATION.md#codex) for information on how to
+    enable this feature.
+
+
 ## 5.1 (2026-02-09)
 ### New Features
 - Natively support restoring `codex` in the configuration
@@ -57,7 +64,7 @@ rename this, as it will be removed in the next version
 ### New Features
 - Add scrollback, tab, and window restoring for the Kitty terminal
 ([#24](https://github.com/jdholtz/i3-restore/pull/24))
-    - Refer to the [Kitty Configuration](CONFIGURATION.md#kitty) for information on how to enable this feature
+    - Refer to the [Kitty plugin configuration](CONFIGURATION.md#kitty) for information on how to enable this feature
 
 ### Improvements
 - Fix an issue where a window not being swallowed could cause the restore process to exit early
