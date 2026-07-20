@@ -231,10 +231,11 @@ class TestContainer:
             {"name": "subprocess2", "args": ["--test-arg", "-t"]},
         ]
         container = i3_save.Container({"window": 9999, "window_properties": {"class": "terminal"}})
-        container.check_if_subprocess(mock_process)
+        subprocess_name = container.check_if_subprocess(mock_process)
 
         # The space should be escaped
         assert container.subprocess_command == r"test_command --test-arg file\ name"
+        assert subprocess_name == "subprocess2"
 
     def test_check_if_subprocess_saves_subprocess_with_custom_launch_command(
         self, mocker: MockerFixture

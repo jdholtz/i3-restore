@@ -114,12 +114,21 @@ def parse_kitty_plugin(plugin: JSON) -> JSON:
     plugin_config = {
         "listen_socket": plugin["listen_socket"],
         "scrollback": plugin.get("scrollback", "none"),
+        "alternate_scrollback_subprocesses": plugin.get("alternate_scrollback_subprocesses", []),
     }
 
     if plugin_config["scrollback"] not in constants.KITTY_PLUGIN_SCROLLBACK_OPTIONS:
         raise TypeError(
             "kitty plugin: 'scrollback' must be one of: "
             f"{constants.KITTY_PLUGIN_SCROLLBACK_OPTIONS}"
+        )
+
+    alternate_scrollback_subprocesses = plugin_config["alternate_scrollback_subprocesses"]
+    if not isinstance(alternate_scrollback_subprocesses, list) or not all(
+        isinstance(name, str) for name in alternate_scrollback_subprocesses
+    ):
+        raise TypeError(
+            "kitty plugin: 'alternate_scrollback_subprocesses' must be a list of strings"
         )
 
     return plugin_config

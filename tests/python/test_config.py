@@ -68,7 +68,11 @@ def test_parse_config_sets_the_correct_config_values() -> None:
         "terminals": ["terminal1", "terminal2"],
         "web_browsers": ["browser1", "browser2"],
         "enabled_plugins": {
-            constants.KITTY_CLASS: {"listen_socket": "test-socket", "scrollback": "all"}
+            constants.KITTY_CLASS: {
+                "listen_socket": "test-socket",
+                "scrollback": "all",
+                "alternate_scrollback_subprocesses": [],
+            }
         },
     }
 
@@ -133,7 +137,14 @@ def test_parse_codex_config_raises_error_on_invalid_config() -> None:
 
 
 @pytest.mark.parametrize(
-    "plugin_config", ["", {}, {"listen_socket": "test-socket", "scrollback": "invalid"}]
+    "plugin_config",
+    [
+        "",
+        {},
+        {"listen_socket": "test-socket", "scrollback": "invalid"},
+        {"listen_socket": "test-socket", "alternate_scrollback_subprocesses": "vim"},
+        {"listen_socket": "test-socket", "alternate_scrollback_subprocesses": ["vim", 1]},
+    ],
 )
 def test_parse_kitty_config_raises_error_on_invalid_config(plugin_config: Any) -> None:
     with pytest.raises(TypeError):
@@ -141,8 +152,14 @@ def test_parse_kitty_config_raises_error_on_invalid_config(plugin_config: Any) -
 
 
 def test_parse_kitty_config_parses_config_correctly() -> None:
-    plugin_config = {"listen_socket": "my_socket", "scrollback": "all", "extra": "value"}
+    plugin_config = {
+        "listen_socket": "my_socket",
+        "scrollback": "all",
+        "alternate_scrollback_subprocesses": ["vim", "nvim"],
+        "extra": "value",
+    }
     assert config.parse_kitty_plugin(plugin_config) == {
         "listen_socket": "my_socket",
         "scrollback": "all",
+        "alternate_scrollback_subprocesses": ["vim", "nvim"],
     }

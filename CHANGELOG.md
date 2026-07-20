@@ -8,6 +8,13 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
 - Add an optional Codex plugin to restore the exact Codex session.
     - Refer to the [Codex plugin configuration](CONFIGURATION.md#codex) for information on how to
     enable this feature.
+- Restore Kitty scrollback for subprocesses.
+    - Some subprocesses need their alternate screen to be restored (e.g. Vim, Emacs, etc.). For
+    i3-restore to restore the alternate screen, you need to configure
+    `alternate_scrollback_subprocesses` in the Kitty plugin configuration. Refer to the [Kitty
+    plugin configuration](CONFIGURATION.md#kitty) for information on how to specify this.
+    - This is best supported in Kitty 0.48.0 and above but is still compatible with older Kitty
+    versions.
 
 
 ## 5.1 (2026-02-09)

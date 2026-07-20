@@ -19,27 +19,29 @@ logger = utils.get_logger()
 KITTY_LAUNCH_PREFIX = "launch "
 KITTY_UNSERIALIZE_DATA_KEY = "kitty-unserialize-data="
 
-USE_OLD_SESSION_SAVING = None
+KITTY_VERSION = None
+# The version we can use the new session format to restore sessions fully.
 KITTY_NEW_SESSION_VERSION = (0, 43, 0)
+# The version we can use the launch kitten synchronously to retrieve alternate scrollback.
+KITTY_SYNCHRONOUS_LAUNCH_VERSION = (0, 44, 0)
+# The version we can use the get-text kitten for alternate scrollback retrieval.
+KITTY_GET_TEXT_ALTERNATE_SCROLLBACK_VERSION = (0, 48, 0)
 
 
-def should_use_old_session_saving() -> bool:
+def get_kitty_version() -> tuple[int, int, int]:
     """
-    Determine whether to use the old session saving method (parsing the container tree) or the new
-    method (using Kitty's session output format). The old method is used for Kitty versions below
-    0.43.0, while the new method is used for Kitty 0.43.0 and above.
+    Get the installed Kitty version. Fallback to an old version when retrieval fails to use the
+    legacy save methods.
     """
     try:
         output = subprocess.check_output(["kitty", "--version"]).decode("utf-8")
         # The version is the second word in the output
         version_str = output.strip().split()[1]
-        version_parts = version_str.split(".")
-        version_tuple = tuple(int(part) for part in version_parts)
-        return version_tuple < KITTY_NEW_SESSION_VERSION
+        major, minor, patch = (int(part) for part in version_str.split(".")[:3])
+        return major, minor, patch
     except (subprocess.CalledProcessError, IndexError, ValueError) as err:
         logger.error("Failed determining Kitty version: %s", err)
-        # Default to using the old session saving method if the version cannot be determined
-        return True
+        return (0, 0, 0)
 
 
 def get_listen_socket(listen_socket: str, pid: int) -> str:
@@ -68,7 +70,9 @@ def get_container_tree(listen_socket: str) -> JSON:
     return json.loads(output)
 
 
-def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> Path | None:
+def save_scrollback(
+    window_id: int, os_window_id: int, plugin_config: JSON, *, alternate_screen: bool = False
+) -> Path | None:
     """
     Save the scrollback for a Kitty window.
 
@@ -85,23 +89,52 @@ def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> P
         logger.debug("Skipping saving scrollback due to value being '%s'", scrollback_extent)
         return None
 
+    if alternate_screen:
+        # "alternate" saves the scrollback only in view from the alternate screen and
+        # "alternate_scrollback" saves the scrollback from the alternate screen.
+        scrollback_extent = "alternate" if scrollback_extent == "screen" else "alternate_scrollback"
+
     logger.info("Saving scrollback for Kitty window")
     try:
-        subprocess.check_call(
-            [
+        if not alternate_screen or KITTY_VERSION >= KITTY_GET_TEXT_ALTERNATE_SCROLLBACK_VERSION:
+            command = [
                 "kitty",
                 "@",
                 "--to",
                 plugin_config["listen_socket"],
                 "get-text",
                 "--ansi",  # Save colors in the scrollback
-                "--add-cursor",  # This is so the cursor will be in the same position on restore
-                "--match",
-                f"id:{window_id}",  # Only match the current window
-                f"--extent={scrollback_extent}",
-            ],
-            stdout=scrollback_file.open("w"),
-        )
+            ]
+            if not alternate_screen:
+                command.append("--add-cursor")
+            command.extend(
+                [
+                    "--match",
+                    f"id:{window_id}",  # Only match the current window
+                    f"--extent={scrollback_extent}",
+                ]
+            )
+            subprocess.check_call(command, stdout=scrollback_file.open("w"))
+        else:
+            # get-text does not support alternate screens before Kitty 0.48.0. Get the alternate
+            # screen scrollback from the launch kitten instead.
+            command = [
+                "kitten",
+                "@",
+                "--to",
+                plugin_config["listen_socket"],
+                "launch",
+                "--source-window",
+                f"id:{window_id}",
+                "--type=background",
+                f"--stdin-source=@{scrollback_extent}",
+                "--stdin-add-formatting",
+            ]
+            if KITTY_VERSION >= KITTY_SYNCHRONOUS_LAUNCH_VERSION:
+                # Kitty 0.44.0+ supports running the launch kitten synchronously.
+                command.append("--wait-for-child-to-exit")
+            command.extend(["sh", "-c", 'cat > "$1"', "sh", str(scrollback_file)])
+            subprocess.check_call(command, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as err:
         logger.error(
             "Failed retrieving Kitty scrollback for OS window ID %s and window ID %s: %s",
@@ -115,7 +148,7 @@ def save_scrollback(window_id: int, os_window_id: int, plugin_config: JSON) -> P
     return scrollback_file
 
 
-def get_window_subprocess_command(
+def get_window_restore_command(
     container: Container, window: JSON, plugin_config: JSON
 ) -> str | None:
     """
@@ -131,15 +164,26 @@ def get_window_subprocess_command(
 
     shell = window["env"].get("SHELL", "bash")
     # The default launch command needs to change as a subprocess in Kitty should return back to
-    # the shell after the subprocess exits
-    container.check_if_subprocess(process, f"{{command}} && {shell}", window.get("title", ""))
+    # the shell after the subprocess exits.
+    subprocess_name = container.check_if_subprocess(
+        process, f"{{command}} && {shell}", window.get("title", "")
+    )
 
     subprocess_command = None
     if container.subprocess_command:
+        restore_command = container.subprocess_command
+        scrollback_file = save_scrollback(
+            window["id"],
+            container.window_id,
+            plugin_config,
+            alternate_screen=subprocess_name in plugin_config["alternate_scrollback_subprocesses"],
+        )
+        if scrollback_file is not None:
+            restore_command = f'cat "{scrollback_file}" && {restore_command}'
         # Wrap the subprocess command in a shell so it launches correctly with Kitty's launch
-        # command
-        subprocess_command = f"{shell} -c '{container.subprocess_command}'"
-        # Overwrite this so the main script doesn't save the container's subprocess too
+        # command.
+        subprocess_command = f"{shell} -c '{restore_command}'"
+        # Overwrite this so the main script doesn't save the container's subprocess too.
         container.subprocess_command = None
     else:
         scrollback_file = save_scrollback(window["id"], container.window_id, plugin_config)
@@ -156,7 +200,7 @@ def get_window_launch_command(container: Container, window: JSON, plugin_config:
     as a subprocess.
     """
     launch_command = f'launch --cwd="{window["cwd"]}"'
-    subprocess_command = get_window_subprocess_command(container, window, plugin_config)
+    subprocess_command = get_window_restore_command(container, window, plugin_config)
     if subprocess_command:
         launch_command += " " + subprocess_command
 
@@ -220,11 +264,11 @@ def get_new_launch_command(
     to 0.45.0.
     """
 
-    # First, get the start of the unserialize data JSON
+    # First, get the start of the unserialize data JSON.
     kitty_key_start = old_launch_command.find(KITTY_UNSERIALIZE_DATA_KEY, len(KITTY_LAUNCH_PREFIX))
     data_start = kitty_key_start + len(KITTY_UNSERIALIZE_DATA_KEY)
 
-    # Next, retrieve the full JSON to extract the window ID
+    # Next, retrieve the full JSON to extract the window ID.
     data_json, _ = json.JSONDecoder().raw_decode(old_launch_command[data_start:])
     window_id = data_json["id"]
 
@@ -234,7 +278,7 @@ def get_new_launch_command(
     # any more data is added in future Kitty versions, preserve it.
     new_unserialize_data = "'kitty-unserialize-data=" + json.dumps(data_json) + "'"
 
-    # Construct the new launch command with the updated unserialize data
+    # Construct the new launch command with the updated unserialize data.
     return (
         f"{KITTY_LAUNCH_PREFIX}{new_unserialize_data} {launch_command[len(KITTY_LAUNCH_PREFIX) :]}"
     )
@@ -247,7 +291,7 @@ def replace_launch_commands(
     Replace the launch commands Kitty creates in the session contents to restore subprocesses and
     scrollback for each window.
     """
-    # First, map window IDs to their window objects for easy access
+    # First, map window IDs to their window objects for easy access.
     window_objs = {}
     for tab in os_window_tree["tabs"]:
         for window in tab["windows"]:
@@ -256,7 +300,7 @@ def replace_launch_commands(
     session_lines = session_contents.splitlines(keepends=True)
     updated_session_lines = []
 
-    # Keep all lines the same except for launch commands, which need to be updated
+    # Keep all lines the same except for launch commands, which need to be updated.
     for line in session_lines:
         if line.startswith(KITTY_LAUNCH_PREFIX):
             launch_command = get_new_launch_command(container, plugin_config, line, window_objs)
@@ -278,9 +322,9 @@ def create_session_file(container: Container, tree: JSON, plugin_config: JSON) -
     os_window = [window for window in tree if container.window_id == window["platform_window_id"]]
     os_window = os_window[0]
 
-    if USE_OLD_SESSION_SAVING:
+    if KITTY_VERSION < KITTY_NEW_SESSION_VERSION:
         # Use the old method of parsing the container tree into a session when using Kitty versions
-        # below 0.43.0
+        # below 0.43.0.
         session_contents = parse_tree_to_session(container, os_window, plugin_config)
     else:
         session_contents = get_session_contents(plugin_config["listen_socket"])
@@ -298,13 +342,13 @@ def create_session_file(container: Container, tree: JSON, plugin_config: JSON) -
 def main(container: Container, config: JSON) -> None:
     logger.info("Saving Kitty container")
 
-    global USE_OLD_SESSION_SAVING
-    if USE_OLD_SESSION_SAVING is None:
-        # Determine which session saving method to use (on first run only)
-        USE_OLD_SESSION_SAVING = should_use_old_session_saving()
-        logger.info("Using old Kitty session saving method: %s", USE_OLD_SESSION_SAVING)
+    global KITTY_VERSION
+    if KITTY_VERSION is None:
+        # Determine the Kitty version on first run only.
+        KITTY_VERSION = get_kitty_version()
+        logger.info("Kitty version: %s", ".".join(str(part) for part in KITTY_VERSION))
 
-    # Copy to not overwrite the original config
+    # Copy to not overwrite the original config.
     plugin_config = config.copy()
 
     plugin_config["listen_socket"] = get_listen_socket(config["listen_socket"], container.pid)

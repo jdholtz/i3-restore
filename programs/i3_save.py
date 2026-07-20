@@ -229,11 +229,11 @@ class Container:
         process: psutil.Process,
         default_launch_command: str = "{command}",
         window_title: str | None = None,
-    ) -> None:
+    ) -> str | None:
         """
         Checks whether or not the process has any subprocesses that should be
         saved. Examples of subprocesses that run in the terminal include Vim,
-        Emacs, and cmus.
+        Emacs, and cmus. Returns the subprocess name if found.
 
         Since the subprocesses are retrieved recursively, the newest subprocess
         will be saved and restored.
@@ -286,14 +286,16 @@ class Container:
                     window_title if window_title is not None else self.window_title,
                     launch_command,
                 ):
-                    return
+                    return child_name
 
                 # Last, build the command normally
                 for arg in cmd_args:
                     command += " " + arg.replace(" ", r"\ ")
 
                 self.subprocess_command = launch_command.replace("{command}", command)
-                return
+                return child_name
+
+        return None
 
     def _save_subprocess_with_plugin(
         self, process: psutil.Process, window_title: str, launch_command: str

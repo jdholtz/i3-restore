@@ -173,12 +173,17 @@ scrollback can be restored.
 - `screen`: Only restore the scrollback that is visible on each window's screen
 - `all`: Restore all the scrollback for each window
 
+Subprocesses such as Vim and Neovim use Kitty's alternate screen. To save the shell scrollback
+hidden behind these programs, list their configured subprocess names in
+`alternate_scrollback_subprocesses`. Subprocesses not in this list use the normal screen.
+
 ```json
 {
     "enabled_plugins": {
         "kitty": {
             "listen_socket": "<listen_on value>",
-            "scrollback": "<scrollback>"
+            "scrollback": "<scrollback>",
+            "alternate_scrollback_subprocesses": ["vim", "nvim"]
         }
     }
 }
