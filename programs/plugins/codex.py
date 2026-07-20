@@ -56,7 +56,10 @@ def find_session_id(thread_id_prefix: str) -> str:
         raise utils.PluginSaveError from err
 
     if not matches:
-        logger.error("No Codex session matching thread ID prefix '%s'", thread_id_prefix)
+        # This can also happen when a user starts a Codex session and types no messages in it, so
+        # the rollout file is never created. In that case, we just want to restore a default
+        # session.
+        logger.debug("No Codex session matching thread ID prefix '%s'", thread_id_prefix)
         raise utils.PluginSaveError
 
     # Match the first file found as it is negligible that a collision will occur between two
