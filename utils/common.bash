@@ -8,13 +8,15 @@ LOG_FILE_SIZE=1000
 
 I3_RESTORE_VERBOSE=0
 I3_RESTORE_INTERVAL=0
+I3_RESTORE_SNAPSHOT_HISTORY=0
+I3_RESTORE_SNAPSHOT_NAME=""
 
 # shellcheck disable=SC2034
 readonly LOG_DIR I3_RESTORE_LOG_FILE I3_RESTORE_LOG_FILE_OLD LOG_FILE_SIZE
 
-# Set default if not configured
+# Set default if not configured. i3-restore may later replace this with a
+# selected immutable snapshot directory.
 i3_PATH="${i3_PATH:=$HOME/.config/i3}"
-readonly i3_PATH
 mkdir --parents "$i3_PATH"
 
 #####################################
@@ -48,7 +50,9 @@ usage() {
 
     if [[ "$(basename "$cmd")" == "i3-restore" ]]; then
         echo "    --save-interval <minutes>   Automatically save your session on an interval (default is 10 minutes)"
+        echo "    --snapshot <name|latest>    Restore a saved timestamped snapshot"
     fi
+    echo "    --snapshot-history <count>  Save timestamped snapshots and retain the newest count"
 
     echo "    -v, -vv            $spaces Increase the verbosity of the script. One v prints debug messages and"
     echo "                       $spaces two v's print all commands executed too"
@@ -95,6 +99,22 @@ parse_flags() {
                 I3_RESTORE_INTERVAL_MINUTES=$2
                 shift
             fi
+            ;;
+        --snapshot-history)
+            if [[ $# -lt 2 || ! $2 =~ ^[1-9][0-9]*$ ]]; then
+                echo "Error: --snapshot-history requires a positive integer"
+                exit 2
+            fi
+            I3_RESTORE_SNAPSHOT_HISTORY=$2
+            shift
+            ;;
+        --snapshot)
+            if [[ $# -lt 2 || ! $2 =~ ^[A-Za-z0-9._-]+$ ]]; then
+                echo "Error: --snapshot requires a snapshot name or latest"
+                exit 2
+            fi
+            I3_RESTORE_SNAPSHOT_NAME=$2
+            shift
             ;;
         -*)
             echo "Error: Unrecognized flag: $1"

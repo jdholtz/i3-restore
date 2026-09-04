@@ -290,6 +290,35 @@ restore_workspaces() {
 }
 
 #####################################
+# Select a timestamped snapshot as this restore's session directory.
+# Globals:
+#   i3_PATH
+#   I3_RESTORE_SNAPSHOT_NAME
+#####################################
+select_snapshot() {
+    [[ -n $I3_RESTORE_SNAPSHOT_NAME ]] || return 0
+
+    local snapshot_root snapshot_name snapshot_path
+    snapshot_root="$i3_PATH/snapshots"
+    snapshot_name="$I3_RESTORE_SNAPSHOT_NAME"
+    if [[ $snapshot_name == latest ]]; then
+        if [[ -d $snapshot_root ]]; then
+            snapshot_name="$(find "$snapshot_root" -mindepth 1 -maxdepth 1 -type d ! -name '.*' \
+                -printf '%f\n' | sort -r | sed -n '1p')"
+        else
+            snapshot_name=""
+        fi
+    fi
+    snapshot_path="$snapshot_root/$snapshot_name"
+    if [[ -z $snapshot_name || ! -d $snapshot_path ]]; then
+        error "Snapshot not found: $I3_RESTORE_SNAPSHOT_NAME" 1
+        return 1
+    fi
+    i3_PATH="$snapshot_path"
+    log "Selected snapshot: $i3_PATH"
+}
+
+#####################################
 # If the restore script is invoked with
 # --save-interval, initialize automatic saving.
 # Globals:
@@ -303,6 +332,7 @@ start_automatic_saving() {
 
 # Don't run if the script is sourced (such as for testing)
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
+    select_snapshot
     log "Restoring current i3wm session"
     restore_workspaces
     log "Finished restoring current i3wm session\n"
