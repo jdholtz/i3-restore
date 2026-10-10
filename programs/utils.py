@@ -32,8 +32,7 @@ def get_workspaces() -> list[JSON]:
         for dockarea in dockareas:
             if dockarea["type"] == "con":
                 workspaces = dockarea["nodes"]
-                for workspace in workspaces:
-                    all_workspaces.append(workspace)
+                all_workspaces.extend(workspaces)
 
     return all_workspaces
 

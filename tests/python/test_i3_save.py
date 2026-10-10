@@ -6,10 +6,12 @@ import psutil
 import pytest
 from pytest_mock import MockerFixture
 
-with mock.patch("utils.get_logger"):
-    with mock.patch("config.Config._read_config", return_value={}):
-        # Don't log messages or read the config file
-        from programs import i3_save
+with (
+    mock.patch("utils.get_logger"),
+    mock.patch("config.Config._read_config", return_value={}),
+):
+    # Don't log messages or read the config file
+    from programs import i3_save
 
 from programs import constants
 from programs.utils import JSON

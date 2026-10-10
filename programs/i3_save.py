@@ -349,6 +349,6 @@ class Container:
 if __name__ == "__main__":
     try:
         main()
-    except Exception as err:
-        logger.exception(err)
+    except Exception:
+        logger.exception("Failed to save i3 session")
         sys.exit(1)
