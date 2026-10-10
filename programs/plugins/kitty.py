@@ -251,6 +251,53 @@ def get_session_contents(listen_socket: str) -> str:
     return output
 
 
+def get_launch_unserialize_data(launch_command: str) -> JSON:
+    """Extract the Kitty unserialize data from a serialized session launch command."""
+    kitty_key_start = launch_command.find(KITTY_UNSERIALIZE_DATA_KEY, len(KITTY_LAUNCH_PREFIX))
+    if kitty_key_start == -1:
+        raise ValueError("Kitty launch command does not contain unserialize data")
+
+    data_start = kitty_key_start + len(KITTY_UNSERIALIZE_DATA_KEY)
+    data_json, _ = json.JSONDecoder().raw_decode(launch_command[data_start:])
+    return data_json
+
+
+def filter_session_contents_for_os_window(session_contents: str, os_window_tree: JSON) -> str:
+    """
+    Keep only the session block for the OS window currently being saved.
+
+    Kitty's session output can include multiple OS windows for one Kitty process, separated by
+    new_os_window. i3-restore saves each OS window separately, so each generated session file should
+    only contain the block matching the selected i3 container.
+    """
+    selected_window_ids = {
+        window["id"] for tab in os_window_tree["tabs"] for window in tab["windows"]
+    }
+    session_blocks = []
+    current_block = []
+
+    for line in session_contents.splitlines(keepends=True):
+        if line == "new_os_window\n":
+            session_blocks.append(current_block)
+            current_block = []
+        else:
+            current_block.append(line)
+
+    session_blocks.append(current_block)
+
+    for block in session_blocks:
+        block_window_ids = {
+            get_launch_unserialize_data(line)["id"]
+            for line in block
+            if line.startswith(KITTY_LAUNCH_PREFIX)
+        }
+        if block_window_ids and block_window_ids <= selected_window_ids:
+            return "".join(block)
+
+    logger.error("Failed matching Kitty session output to OS window")
+    raise utils.PluginSaveError
+
+
 def get_new_launch_command(
     container: Container, plugin_config: JSON, old_launch_command: str, window_objs: dict[int, JSON]
 ) -> str:
@@ -261,15 +308,10 @@ def get_new_launch_command(
     We need to extract the window ID to create the new launch command. This function parses the old
     launch command to do so. It relies on Kitty's behavior for the launch command format to stay
     consistent, so this may break in future versions of Kitty. It currently works from Kitty 0.43.0
-    to 0.45.0.
+    to 0.49.2.
     """
 
-    # First, get the start of the unserialize data JSON.
-    kitty_key_start = old_launch_command.find(KITTY_UNSERIALIZE_DATA_KEY, len(KITTY_LAUNCH_PREFIX))
-    data_start = kitty_key_start + len(KITTY_UNSERIALIZE_DATA_KEY)
-
-    # Next, retrieve the full JSON to extract the window ID.
-    data_json, _ = json.JSONDecoder().raw_decode(old_launch_command[data_start:])
+    data_json = get_launch_unserialize_data(old_launch_command)
     window_id = data_json["id"]
 
     launch_command = get_window_launch_command(container, window_objs[window_id], plugin_config)
@@ -328,6 +370,7 @@ def create_session_file(container: Container, tree: JSON, plugin_config: JSON) -
         session_contents = parse_tree_to_session(container, os_window, plugin_config)
     else:
         session_contents = get_session_contents(plugin_config["listen_socket"])
+        session_contents = filter_session_contents_for_os_window(session_contents, os_window)
         session_contents = replace_launch_commands(
             container, os_window, plugin_config, session_contents
         )

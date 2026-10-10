@@ -106,6 +106,25 @@ focus
 focus_tab 0
 """  # noqa: E501
 
+KITTY_CONTAINER_SESSION_MULTIPLE_OS_WINDOWS = """
+new_tab
+layout fat
+launch 'kitty-unserialize-data={"id": 3}'
+focus
+
+focus_tab 0
+
+
+new_os_window
+
+new_tab
+layout fat
+launch 'kitty-unserialize-data={"id": 1}'
+focus
+
+focus_tab 0
+"""
+
 
 @pytest.fixture(autouse=True)
 def container(mocker: MockerFixture) -> Container:
@@ -371,6 +390,11 @@ def test_get_session_contents_raises_plugin_save_error_when_command_fails(
         kitty.get_session_contents("test-socket")
 
 
+def test_get_launch_unserialize_data_raises_when_data_is_missing() -> None:
+    with pytest.raises(ValueError, match="does not contain unserialize data"):
+        kitty.get_launch_unserialize_data("launch --cwd=/home")
+
+
 def test_get_new_launch_command_gets_command_from_correct_window(
     mocker: MockerFixture, container: Container
 ) -> None:
@@ -397,6 +421,51 @@ def test_get_new_launch_command_gets_command_from_correct_window(
     assert "launch" in launch_cmd
     assert unserialize_data in launch_cmd
     assert window_objs[1]["cwd"] in launch_cmd
+
+
+def test_filter_session_contents_for_os_window_keeps_matching_os_window() -> None:
+    os_window = {
+        "tabs": [
+            {
+                "windows": [
+                    {
+                        "id": 3,
+                    }
+                ]
+            }
+        ]
+    }
+
+    session_contents = kitty.filter_session_contents_for_os_window(
+        KITTY_CONTAINER_SESSION_MULTIPLE_OS_WINDOWS, os_window
+    )
+
+    assert 'kitty-unserialize-data={"id": 3}' in session_contents
+    assert 'kitty-unserialize-data={"id": 1}' not in session_contents
+    assert "new_os_window" not in session_contents
+
+
+def test_filter_session_contents_for_os_window_raises_when_no_window_matches() -> None:
+    os_window = {
+        "tabs": [
+            {
+                "windows": [
+                    {
+                        "id": 1,
+                    }
+                ]
+            }
+        ]
+    }
+    session_contents = """new_tab
+launch 'kitty-unserialize-data={\"id\": 2}'
+new_os_window
+new_tab
+launch 'kitty-unserialize-data={\"id\": 3}'
+"""
+
+    with pytest.raises(kitty.utils.PluginSaveError):
+        kitty.filter_session_contents_for_os_window(session_contents, os_window)
 
 
 def test_replace_launch_commands_replaces_all_launch_commands(

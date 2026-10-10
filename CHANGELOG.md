@@ -16,6 +16,9 @@ If there is no "Upgrading" header for that version, no post-upgrade actions need
     - This is best supported in Kitty 0.48.0 and above but is still compatible with older Kitty
     versions.
 
+### Bug Fixes
+- Fix a crash when saving multiple Kitty OS windows from the same Kitty process
+
 
 ## 5.1 (2026-02-09)
 ### New Features
