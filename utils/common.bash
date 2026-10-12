@@ -50,7 +50,7 @@ usage() {
 
     if [[ "$(basename "$cmd")" == "i3-restore" ]]; then
         echo "    --save-interval <minutes>   Automatically save your session on an interval (default is 10 minutes)"
-        echo "    --snapshot <name|latest>    Restore a saved timestamped snapshot"
+        echo "    --snapshot <timestamp|latest>  Restore a saved timestamped snapshot"
     fi
     echo "    --snapshot-history <count>  Save timestamped snapshots and retain the newest count"
 
@@ -105,14 +105,16 @@ parse_flags() {
                 echo "Error: --snapshot-history requires a positive integer"
                 exit 2
             fi
+            # shellcheck disable=SC2034 # Used by i3-save
             I3_RESTORE_SNAPSHOT_HISTORY=$2
             shift
             ;;
         --snapshot)
-            if [[ $# -lt 2 || ! $2 =~ ^[A-Za-z0-9._-]+$ ]]; then
-                echo "Error: --snapshot requires a snapshot name or latest"
+            if [[ $# -lt 2 || ($2 != latest && ! $2 =~ ^[0-9]{8}-[0-9]{6}$) ]]; then
+                echo "Error: --snapshot requires latest or a timestamp (YYYYMMDD-HHMMSS)"
                 exit 2
             fi
+            # shellcheck disable=SC2034 # Used by i3-restore
             I3_RESTORE_SNAPSHOT_NAME=$2
             shift
             ;;

@@ -93,13 +93,59 @@ ROOT_DIR="$(dirname "$restore_script")"
 source "$restore_script"
 trap - ERR
 log() { :; }
-I3_RESTORE_SNAPSHOT_NAME=latest
+parse_flags --snapshot latest
 select_snapshot
 printf '%s\n' "$i3_PATH"
 EOF
 
     assert_success
     assert_output "$session_path/snapshots/20260903-221000"
+}
+
+@test "select_snapshot: selects a specific timestamped snapshot" {
+    local restore_script="$PROJECT_ROOT/i3-restore"
+    local session_path="$TEST_DIR/session-state"
+    mkdir -p "$session_path/snapshots/20260903-220000"
+    mkdir -p "$session_path/snapshots/20260903-221000"
+
+    run bash -s -- "$restore_script" "$session_path" <<'EOF'
+set -euo pipefail
+restore_script="$1"
+i3_PATH="$2"
+ROOT_DIR="$(dirname "$restore_script")"
+source "$restore_script"
+trap - ERR
+log() { :; }
+parse_flags --snapshot 20260903-220000
+select_snapshot
+printf '%s\n' "$i3_PATH"
+EOF
+
+    assert_success
+    assert_output "$session_path/snapshots/20260903-220000"
+}
+
+@test "parse_flags: rejects parent directory selection before restoring a session" {
+    local restore_script="$PROJECT_ROOT/i3-restore"
+    local session_path="$TEST_DIR/session-state"
+    mkdir -p "$session_path/snapshots"
+    touch "$session_path/workspace_1_display_layout.json"
+
+    run bash -s -- "$restore_script" "$session_path" <<'EOF'
+set -euo pipefail
+restore_script="$1"
+i3_PATH="$2"
+ROOT_DIR="$(dirname "$restore_script")"
+source "$restore_script"
+trap - ERR
+log() { :; }
+parse_flags --snapshot ..
+select_snapshot
+printf 'Selected snapshot: %s\n' "$i3_PATH"
+EOF
+
+    assert_failure 2
+    assert_output "Error: --snapshot requires latest or a timestamp (YYYYMMDD-HHMMSS)"
 }
 
 @test "select_snapshot: fails clearly for a missing snapshot" {
@@ -113,10 +159,10 @@ ROOT_DIR="$(dirname "$restore_script")"
 source "$restore_script"
 trap - ERR
 error() { echo "$1"; return 1; }
-I3_RESTORE_SNAPSHOT_NAME=missing
+parse_flags --snapshot 20260903-220000
 select_snapshot
 EOF
 
     assert_failure
-    assert_output --partial "Snapshot not found: missing"
+    assert_output --partial "Snapshot not found: 20260903-220000"
 }

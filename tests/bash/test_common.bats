@@ -101,6 +101,53 @@ check_dependencies_mocks() {
     assert_equal "$I3_RESTORE_INTERVAL_MINUTES" 10
 }
 
+@test "parse_flags: snapshot accepts latest" {
+    parse_flags --snapshot latest -v
+    assert_equal "$I3_RESTORE_SNAPSHOT_NAME" latest
+    assert_equal "$I3_RESTORE_VERBOSE" 1
+}
+
+@test "parse_flags: snapshot accepts a timestamp" {
+    parse_flags --snapshot 20260903-221000 -v
+    assert_equal "$I3_RESTORE_SNAPSHOT_NAME" 20260903-221000
+    assert_equal "$I3_RESTORE_VERBOSE" 1
+}
+
+@test "parse_flags: snapshot rejects directory traversal and arbitrary names" {
+    local snapshot
+    for snapshot in . .. ../20260903-221000 /tmp latest/.. missing Latest; do
+        run parse_flags --snapshot "$snapshot"
+        assert_failure 2
+        assert_output "Error: --snapshot requires latest or a timestamp (YYYYMMDD-HHMMSS)"
+    done
+}
+
+@test "parse_flags: snapshot rejects malformed timestamps" {
+    local snapshot
+    for snapshot in 2026093-221000 202609033-221000 20260903-22100 20260903-2210000 \
+        20260903221000 20260903_221000 2026090a-221000 prefix20260903-221000 \
+        20260903-221000suffix '20260903-221000 ' $'20260903-221000\n'; do
+        run parse_flags --snapshot "$snapshot"
+        assert_failure 2
+        assert_output "Error: --snapshot requires latest or a timestamp (YYYYMMDD-HHMMSS)"
+    done
+}
+
+@test "parse_flags: snapshot rejects a missing argument" {
+    run parse_flags --snapshot
+    assert_failure 2
+    assert_output "Error: --snapshot requires latest or a timestamp (YYYYMMDD-HHMMSS)"
+}
+
+@test "parse_flags: snapshot rejects an empty argument or another flag" {
+    local snapshot
+    for snapshot in '' --save-interval; do
+        run parse_flags --snapshot "$snapshot"
+        assert_failure 2
+        assert_output "Error: --snapshot requires latest or a timestamp (YYYYMMDD-HHMMSS)"
+    done
+}
+
 @test "parse_flags: unknown flag triggers error" {
     usage() { echo "USAGE_CALLED"; }
 
