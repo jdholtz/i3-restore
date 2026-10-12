@@ -9,9 +9,12 @@ IFS=$'\n\t'
 ROOT_DIR="${ROOT_DIR:-$(dirname "$0")}"
 I3_RESTORE_SAVE_SCRIPT="$ROOT_DIR/programs/i3_save.py"
 readonly ROOT_DIR I3_RESTORE_SAVE_SCRIPT
+I3_RESTORE_SAVE_PATH=""
+I3_RESTORE_SNAPSHOT_FINAL_PATH=""
 
 # Import common variables and functions
 source "$ROOT_DIR/utils/common.bash"
+I3_RESTORE_SAVE_PATH="$i3_PATH"
 
 # Handle errors
 source "$ROOT_DIR/utils/error_handling.bash"
@@ -57,12 +60,12 @@ get_workspaces() {
 #####################################
 remove_previous_session() {
     # --force is used so it doesn't exit if a file isn't found
-    rm --force "$i3_PATH"/*_layout.json
-    rm --force "$i3_PATH"/*_programs.sh
-    rm --force "$i3_PATH"/*_subprocess_*.sh
-    rm --force "$i3_PATH"/web_browsers.sh
-    rm --force "$i3_PATH"/kitty-session-*
-    rm --force "$i3_PATH"/kitty-scrollback-*
+    rm --force "$I3_RESTORE_SAVE_PATH"/*_layout.json
+    rm --force "$I3_RESTORE_SAVE_PATH"/*_programs.sh
+    rm --force "$I3_RESTORE_SAVE_PATH"/*_subprocess_*.sh
+    rm --force "$I3_RESTORE_SAVE_PATH"/web_browsers.sh
+    rm --force "$I3_RESTORE_SAVE_PATH"/kitty-session-*
+    rm --force "$I3_RESTORE_SAVE_PATH"/kitty-scrollback-*
 }
 
 #####################################
@@ -93,7 +96,7 @@ save_workspace_layout() {
         return 0
     fi
 
-    file_name="$i3_PATH/workspace_${sanitized_ws_name}_${display}_layout.json"
+    file_name="$I3_RESTORE_SAVE_PATH/workspace_${sanitized_ws_name}_${display}_layout.json"
     echo "$workspace_tree" >"$file_name"
 
     # Automatically edit the file
@@ -137,14 +140,77 @@ save_workspace_layouts() {
 #   None
 #####################################
 save_workspace_programs() {
-    I3_RESTORE_VERBOSE="$I3_RESTORE_VERBOSE" python3 "$I3_RESTORE_SAVE_SCRIPT" ||
+    i3_PATH="$I3_RESTORE_SAVE_PATH" I3_RESTORE_VERBOSE="$I3_RESTORE_VERBOSE" \
+        python3 "$I3_RESTORE_SAVE_SCRIPT" ||
         error "An error occurred saving the session's programs. View the logs for more details" 1
+}
+
+#####################################
+# Configure an optional timestamped snapshot destination.
+# Globals:
+#  i3_PATH
+#  I3_RESTORE_SAVE_PATH
+#  I3_RESTORE_SNAPSHOT_FINAL_PATH
+#####################################
+configure_save_path() {
+    I3_RESTORE_SAVE_PATH="$i3_PATH"
+    if [[ $I3_RESTORE_SNAPSHOT_HISTORY == 0 ]]; then
+        return 0
+    fi
+
+    local snapshot_root snapshot_name staging_path
+    snapshot_root="$i3_PATH/snapshots"
+    mkdir --parents "$snapshot_root"
+    snapshot_name="$(date '+%Y%m%d-%H%M%S')"
+    I3_RESTORE_SNAPSHOT_FINAL_PATH="$snapshot_root/$snapshot_name"
+    staging_path="$snapshot_root/.${snapshot_name}.$$"
+
+    if [[ -e $I3_RESTORE_SNAPSHOT_FINAL_PATH || -e $staging_path ]]; then
+        error "Snapshot path already exists: $I3_RESTORE_SNAPSHOT_FINAL_PATH" 1
+    fi
+    mkdir "$staging_path"
+    I3_RESTORE_SAVE_PATH="$staging_path"
+}
+
+#####################################
+# Publish a staged snapshot and retain the configured newest generations.
+# Globals:
+#  I3_RESTORE_SAVE_PATH
+#  I3_RESTORE_SNAPSHOT_FINAL_PATH
+#####################################
+finalize_snapshot() {
+    [[ $I3_RESTORE_SNAPSHOT_HISTORY != 0 ]] || return 0
+
+    mv "$I3_RESTORE_SAVE_PATH" "$I3_RESTORE_SNAPSHOT_FINAL_PATH"
+    log "Saved snapshot: $I3_RESTORE_SNAPSHOT_FINAL_PATH"
+
+    local snapshots_to_delete
+    snapshots_to_delete="$(find "$(dirname "$I3_RESTORE_SNAPSHOT_FINAL_PATH")" -mindepth 1 -maxdepth 1 \
+        -type d ! -name '.*' -printf '%f\n' | sort -r | tail -n +$((I3_RESTORE_SNAPSHOT_HISTORY + 1)))"
+    if [[ -n $snapshots_to_delete ]]; then
+        while IFS= read -r snapshot; do
+            rm --recursive -- "$(dirname "$I3_RESTORE_SNAPSHOT_FINAL_PATH")/$snapshot"
+        done <<<"$snapshots_to_delete"
+    fi
+}
+
+save_session() {
+    configure_save_path
+    if [[ $I3_RESTORE_SNAPSHOT_HISTORY != 0 ]]; then
+        trap 'rm --recursive --force "$I3_RESTORE_SAVE_PATH"' EXIT
+    fi
+    save_workspace_layouts
+    save_workspace_programs
+    finalize_snapshot
+    trap - EXIT
 }
 
 # Don't run if the script is sourced (such as for testing)
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
+    if [[ -n $I3_RESTORE_SNAPSHOT_NAME ]]; then
+        error "--snapshot is only supported by i3-restore" 2
+    fi
     log "Saving current i3wm session"
-    save_workspace_layouts
-    save_workspace_programs
+    save_session
     log "Finished saving current i3wm session"
 fi

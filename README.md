@@ -129,7 +129,26 @@ the save is triggered (it defaults to 10 minutes if no argument is passed in).
 ```
 exec /path/to/i3-restore/i3-restore --save-interval <minutes>
 ```
+
 **Note**: To restore web browsers correctly, you need to have their "Restore previous session" feature enabled
+
+### Snapshot history
+
+By default, i3-restore replaces the previous saved session. To retain timestamped snapshots instead,
+pass `--snapshot-history <count>` to `i3-save`, or combine it with automatic saving:
+
+```
+exec /path/to/i3-restore/i3-restore --save-interval 10 --snapshot-history 1008
+```
+
+Snapshots are staged and atomically published under `$i3_PATH/snapshots/`; the oldest snapshots
+beyond `<count>` are removed only after a successful save. Restore the newest archived snapshot or a
+specific timestamp with:
+
+```
+i3-restore --snapshot latest
+i3-restore --snapshot 20260903-221000
+```
 
 ### Restoring Programs in Assigned Workspaces
 Some programs that take a few seconds to start (such as Discord) might not restore on the correct workspace. To mitigate this issue, simply use

@@ -62,18 +62,24 @@ check_i3_alive() {
 # Globals:
 #   I3_RESTORE_SAVE_FILE
 #   I3_RESTORE_INTERVAL_MINUTES
+#   I3_RESTORE_SNAPSHOT_HISTORY
 #####################################
 start_save_interval() {
     local sleep_time i3_pid
+    local -a save_args=()
 
     sleep_time="$(get_sleep_time "$I3_RESTORE_INTERVAL_MINUTES")"
     i3_pid="$(pidof i3)"
+
+    if [[ $I3_RESTORE_SNAPSHOT_HISTORY != 0 ]]; then
+        save_args=(--snapshot-history "$I3_RESTORE_SNAPSHOT_HISTORY")
+    fi
 
     log "Starting automatic saving on an interval of $sleep_time seconds"
     while true; do
         sleep "$sleep_time"
         check_i3_alive "$i3_pid"
         echo "Automatically saving current i3wm session"
-        "$I3_RESTORE_SAVE_FILE"
+        "$I3_RESTORE_SAVE_FILE" "${save_args[@]}"
     done
 }
